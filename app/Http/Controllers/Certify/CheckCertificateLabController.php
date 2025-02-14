@@ -433,6 +433,8 @@ class CheckCertificateLabController extends Controller
                        
 
                         $api = json_decode($content,false);
+
+                        dd($content,"$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo",$api);
                         
                         
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
