@@ -232,7 +232,9 @@
         <!-- Header Section -->
         <div class="header">
             <div>
-                <img src="https://www.thailibrary.in.th/wp-content/uploads/2013/04/krut.jpg" alt="Logo">
+                <!-- <img src="https://www.thailibrary.in.th/wp-content/uploads/2013/04/krut.jpg" alt="Logo"> -->
+                <img src="{{ public_path('images/krut.jpg') }}" alt="Logo">
+
             </div>
             <div class="header-title">
               <span>บันทึกข้อความ</span>  
