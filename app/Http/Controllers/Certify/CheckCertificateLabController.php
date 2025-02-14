@@ -454,7 +454,7 @@ class CheckCertificateLabController extends Controller
                         $find_cost_assessment->save();
 
                         $transacion = HP::TransactionPayIn1($find_cost_assessment->id,$ao->getTable(),'1','1',$api,$app_no.'-'.$find_cost_assessment->app_certi_assessment_id,$timestamp);
-                        dd($transacion);
+                        // dd($transacion);
                         
                      }
 
