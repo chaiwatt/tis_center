@@ -685,7 +685,7 @@ class CheckCertificateCBController extends Controller
                     
 
                     // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                    if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {    
+                    if (filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {    
                             
                         $certi_cb_attach_more->file  =  $this->storeFilePayin($setting_payment,$certi_cb->app_no,$PayIn->auditors_id);
                     }else{//ถ้าเป็น 127.0.0 (การทดสอบ)
@@ -1237,7 +1237,7 @@ class CheckCertificateCBController extends Controller
 
 
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {    
+                        if (filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {    
                             $certi_cb_attach_more->file                 =  $this->storeFilePayin($setting_payment,$certi_cb->app_no);
                         }else{//ถ้าเป็น 127.0.0 (การทดสอบ)
                             

@@ -438,22 +438,23 @@ class CheckCertificateLabController extends Controller
                         
                         
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
+                        if (filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             // dd("here");
-                            dd($content,"$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo",$api);
+                            // dd($content,"$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo",$api);
                             $find_cost_assessment->amount_invoice =   $this->storeFilePayin($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
                         }else{
                             
                             $find_cost_assessment->amount_invoice =   $this->storeFilePayinDemo($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
                         }
-                        dd('break');
+                        // dd('break');
                         // $find_cost_assessment->amount_invoice =   $this->storeFilePayin($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
 
                         $find_cost_assessment->file_client_name =   isset($find_cost_assessment->amount_invoice) ? basename($find_cost_assessment->amount_invoice)  : null;
                         
                         $find_cost_assessment->save();
 
-                        HP::TransactionPayIn1($find_cost_assessment->id,$ao->getTable(),'1','1',$api,$app_no.'-'.$find_cost_assessment->app_certi_assessment_id,$timestamp);
+                        $transacion = HP::TransactionPayIn1($find_cost_assessment->id,$ao->getTable(),'1','1',$api,$app_no.'-'.$find_cost_assessment->app_certi_assessment_id,$timestamp);
+                        dd($transacion);
                         
                      }
 
@@ -1114,7 +1115,7 @@ class CheckCertificateLabController extends Controller
 
 
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
+                        if (filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             
                             $costcerti->attach              =   $this->storeFilePayin($setting_payment,$CertiLab->app_no);
                         }else{//ถ้าเป็น 127.0.0 (การทดสอบ)
