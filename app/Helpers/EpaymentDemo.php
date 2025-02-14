@@ -455,7 +455,7 @@ class EpaymentDemo
                             "verify_peer_name"=>false,
                             ),
                            );
-            $content_pdf =  file_get_contents( url('images/PayIn2.pdf') , false, stream_context_create($arrContextOptions));
+            $content_pdf =  file_get_contents( url('images/Payin2.pdf') , false, stream_context_create($arrContextOptions));
           //Specify that the content has PDF Mime Type
           header("Content-Type: application/pdf");
           //Display it

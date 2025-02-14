@@ -48,7 +48,7 @@ class CheckLabPayInOne extends Command
             })
             ->get();
         
-        // dd($transactionPayIns);
+
         foreach ($transactionPayIns as $transactionPayIn) {
             $ref1 = $transactionPayIn->ref1;
             $result = $this->callCheckBill($ref1); // เรียกฟังก์ชัน
