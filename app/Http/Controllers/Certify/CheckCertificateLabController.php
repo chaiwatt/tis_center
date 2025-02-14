@@ -435,7 +435,8 @@ class CheckCertificateLabController extends Controller
                         $api = json_decode($content,false);
                         
                         
-                        if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        // if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             
                             $find_cost_assessment->amount_invoice =   $this->storeFilePayin($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
                         }else{
@@ -1109,7 +1110,8 @@ class CheckCertificateLabController extends Controller
                         // $costcerti->attach              =   $this->storeFilePayin($setting_payment,$CertiLab->app_no);
 
 
-                        if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        // if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             
                             $costcerti->attach              =   $this->storeFilePayin($setting_payment,$CertiLab->app_no);
                         }else{//ถ้าเป็น 127.0.0 (การทดสอบ)

@@ -728,7 +728,8 @@ class TrackingLabsController extends Controller
                   
                     // $file_payin  = self::storeFilePayin($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
 
-                    if(strpos($setting_payment->data, '127.0.0.1')===0){
+                    // if(strpos($setting_payment->data, '127.0.0.1')===0){
+                    if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             
                         $file_payin  = $this->storeFilePayin($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
                     }else{

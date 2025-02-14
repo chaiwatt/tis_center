@@ -576,7 +576,8 @@ class CheckCertificateCBController extends Controller
 
                         $invoiceFile = null;
                         $invoiceileName = null;
-                        if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        // if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             
                             $invoiceFile =    $this->storeFilePayin($setting_payment,$certi_cb->app_no,$PayIn->auditors_id);
                         }else{
