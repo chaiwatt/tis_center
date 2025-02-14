@@ -434,18 +434,18 @@ class CheckCertificateLabController extends Controller
 
                         $api = json_decode($content,false);
 
-                        dd($content,"$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo",$api);
+                    
                         
                         
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
                         if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
-                            
+                            dd("here");
                             $find_cost_assessment->amount_invoice =   $this->storeFilePayin($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
                         }else{
                             
                             $find_cost_assessment->amount_invoice =   $this->storeFilePayinDemo($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
                         }
-
+                        dd($content,"$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo",$api);
                         // $find_cost_assessment->amount_invoice =   $this->storeFilePayin($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
 
                         $find_cost_assessment->file_client_name =   isset($find_cost_assessment->amount_invoice) ? basename($find_cost_assessment->amount_invoice)  : null;
