@@ -7,7 +7,7 @@
     </div>
     <div style="display:inline-block;width:60%; float:right; padding-top:40px; padding-right: 130px;">
         <div style="margin-left: 150px; font-weight:bold; font-size: 40px">
-            บันทึกข้อความ {{public_path('images/certificate-header.jpg')}}
+            บันทึกข้อความ
         </div>
     </div>
 </div>
