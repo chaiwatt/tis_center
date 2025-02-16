@@ -77,7 +77,7 @@ class Checkbill2Controller extends Controller
             ) 
         );
 
-        
+        // dd($request->ref1);
 
         $message    = false;
         $response   =   new TransactionPayIn;
@@ -114,7 +114,6 @@ class Checkbill2Controller extends Controller
                     $setting_payment = CertiSettingPayment::where('certify',6)->where('payin',2)->where('type',2)->first();
                 }
 
-                
             
 
                 if(!is_null($setting_payment)){
@@ -128,8 +127,6 @@ class Checkbill2Controller extends Controller
                         }
                         
                     }
-
-                    dd($setting_payment,"$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$refNo");
 
                     // $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$transaction->ref1", false, $context);
                     $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$refNo", false, $context);

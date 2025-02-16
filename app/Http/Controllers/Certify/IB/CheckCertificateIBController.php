@@ -539,7 +539,7 @@ try {
                     
 
                     // if(strpos($setting_payment->data, '127.0.0.1')===0){ฃ
-                    if (filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
+                    if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
                             
                         $certi_ib_attach_more->file                 =  $this->storeFilePayin($setting_payment,$certi_ib->app_no,$PayIn->auditors_id);
                     }else{//ถ้าเป็น 127.0.0 (การทดสอบ)
@@ -1033,7 +1033,7 @@ try {
 
 
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                        if (filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {    
+                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {    
                             
                             $certi_ib_attach_more->file                 =  $this->storeFilePayin($setting_payment,$certi_ib->app_no);
                         }else{//ถ้าเป็น 127.0.0 (การทดสอบ)
