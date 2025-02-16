@@ -817,7 +817,7 @@ class MyTestController extends Controller
     })
     ->get();
 
-    
+    dd($transactionPayIns);
 
     foreach ($transactionPayIns as $transactionPayIn) {
         $ref1 = $transactionPayIn->ref1;
