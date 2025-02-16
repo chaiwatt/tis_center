@@ -806,14 +806,17 @@ class MyTestController extends Controller
     //                     ->orWhere('ref1', 'like', 'CAL%');
     //             })
     //             ->get();
-    $transactionPayIns = TransactionPayIn::where('created_at', '<=', $today->copy()->addDays(30))
-    ->where('created_at', '>=', $today->copy()->subDay())
+    $transactionPayIns = TransactionPayIn::where('invoiceStartDate', '<=', $today)
+    ->where('invoiceEndDate', '>=', $today)
     ->whereNull('status_confirmed')
+    ->where('state',1)
+    ->where('count','<=',3)
     ->where(function ($query) {
         $query->where('ref1', 'like', 'TEST%')
-            ->orWhere('ref1', 'like', 'CAL%');
+              ->orWhere('ref1', 'like', 'CAL%');
     })
     ->get();
+    
     dd($transactionPayIns);
 
     foreach ($transactionPayIns as $transactionPayIn) {
