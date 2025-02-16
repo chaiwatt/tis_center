@@ -128,10 +128,12 @@ class Checkbill2Controller extends Controller
                         
                     }
 
-                    dd("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$refNo");
+                    
                     // $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$transaction->ref1", false, $context);
                     $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$refNo", false, $context);
-                    $api = json_decode($content,true);      
+                    $api = json_decode($content,true);     
+                    
+                    dd($api);
                     
                     if(!empty($api[0]['error'])){
                         // echo 'ยังไม่มีข้อมูลการชำระ'   ;
