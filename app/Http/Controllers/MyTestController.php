@@ -817,7 +817,7 @@ class MyTestController extends Controller
     })
     ->get();
 
-    // dd($transactionPayIns);
+    dd($transactionPayIns);
 
     foreach ($transactionPayIns as $transactionPayIn) {
         $ref1 = $transactionPayIn->ref1;
@@ -829,7 +829,7 @@ class MyTestController extends Controller
             // แปลง JsonResponse เป็น array
             $resultArray = $result->getData(true);
 
-            dd($resultArray);
+            // dd($resultArray);
             
             // ตรวจสอบค่า message
             if (!empty($resultArray['message']) && $resultArray['message'] === true) {
