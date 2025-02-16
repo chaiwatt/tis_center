@@ -816,8 +816,8 @@ class MyTestController extends Controller
               ->orWhere('ref1', 'like', 'CAL%');
     })
     ->get();
+
     
-    dd($transactionPayIns);
 
     foreach ($transactionPayIns as $transactionPayIn) {
         $ref1 = $transactionPayIn->ref1;
@@ -828,6 +828,8 @@ class MyTestController extends Controller
         if ($result instanceof \Illuminate\Http\JsonResponse) {
             // แปลง JsonResponse เป็น array
             $resultArray = $result->getData(true);
+
+            dd($resultArray);
             
             // ตรวจสอบค่า message
             if (!empty($resultArray['message']) && $resultArray['message'] === true) {
