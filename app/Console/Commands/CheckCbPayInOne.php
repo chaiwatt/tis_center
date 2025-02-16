@@ -70,7 +70,7 @@ class CheckCbPayInOne extends Command
                         $validRef1 = array_filter($ref1List);
         
                         // แสดงผล ref1 ทั้งหมด
-                        $this->info("Valid ref1: " . implode(", ", $validRef1));
+                        // $this->info("Valid ref1: " . implode(", ", $validRef1));
 
                         $payInOneId = $transactionPayIn->ref_id;
                         $certiCBPayInOne = CertiCBPayInOne::find($payInOneId);

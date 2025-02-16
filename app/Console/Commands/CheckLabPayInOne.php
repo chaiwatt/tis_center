@@ -75,7 +75,7 @@ class CheckLabPayInOne extends Command
                         $validRef1 = array_filter($ref1List);
         
                         // แสดงผล ref1 ทั้งหมด
-                        $this->info("Valid ref1: " . implode(", ", $validRef1));
+                        // $this->info("Valid ref1: " . implode(", ", $validRef1));
 
                         $appCertiLabCostAssessmentId = $transactionPayIn->ref_id;
                         $costAssessment = CostAssessment::find($appCertiLabCostAssessmentId);
