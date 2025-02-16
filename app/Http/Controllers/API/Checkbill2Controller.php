@@ -85,7 +85,7 @@ class Checkbill2Controller extends Controller
         if(!empty($request->ref1)){  // เฉพาะตามคำขอ
             $ref1  = $request->ref1;
             $transaction =  TransactionPayIn::Where(DB::raw("REPLACE(ref1,'-','')"),str_replace('-', '', $ref1))->orderby('id','desc')->first();
-            dd($transaction);
+            
             if(!is_null($transaction)){
 
                 if($transaction->certify == 1 && $transaction->state == 1){ //  pay in ครั้งที่ 1 lab
@@ -114,6 +114,7 @@ class Checkbill2Controller extends Controller
                     $setting_payment = CertiSettingPayment::where('certify',6)->where('payin',2)->where('type',2)->first();
                 }
 
+                dd($setting_payment,$transaction);
             
 
                 if(!is_null($setting_payment)){
