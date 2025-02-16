@@ -935,6 +935,22 @@
 <script src="<?php echo e(asset('plugins/components/bootstrap-datepicker-thai/js/locales/bootstrap-datepicker.th.js')); ?>"></script>
 
 <script src="<?php echo e(asset('plugins/components/toastr/js/toastr.min.js')); ?>"></script>
+
+
+<script>
+    var baseUrl = $('meta[name="base-url"]').attr('content') + '/';
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            // ป้องกัน baseUrl ซ้ำซ้อน
+            if (!settings.url.startsWith('http') && !settings.url.startsWith(baseUrl)) {
+                settings.url = baseUrl + settings.url;
+            }
+        }
+    });
+</script>
+
+
 <script type="text/javascript">
 
     $(document).ready(function() {

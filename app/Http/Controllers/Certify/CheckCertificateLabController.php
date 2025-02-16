@@ -381,7 +381,7 @@ class CheckCertificateLabController extends Controller
 
     public function DataPayIn(Request $request,$id)
     {
-            // dd($request->all);
+            // dd($request->all(),$id);
             $arrContextOptions=array();
             $attach_path            =  $this->attach_path ;
             $find_cost_assessment   =  CostAssessment::findOrFail($id);  //  ตารางธรรรมเนียม
@@ -411,7 +411,7 @@ class CheckCertificateLabController extends Controller
                         $find_cost_assessment->report_date =  isset($request->report_date)?  HP::convertDate($request->report_date,true) :null;
                         $find_cost_assessment->reporter_id = auth()->user()->runrecno;
 
-                        $find_cost_assessment->save();
+                        // $find_cost_assessment->save();
 
                         $setting_payment = CertiSettingPayment::where('certify',1)->where('payin',1)->where('type',1)->first();
 
@@ -434,11 +434,19 @@ class CheckCertificateLabController extends Controller
 
                         $api = json_decode($content,false);
 
-                    
-                        
+                    //    dd($setting_payment->data);
+
+                    //    $host = parse_url($setting_payment->data, PHP_URL_HOST);
+
+                    //    if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
+                    //        dd('No Contains IP');
+                    //    } else {
+                    //        dd('Contain IP');
+                    //    }
+                            
                         
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
+                        if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
                             // dd("here");
                             // dd($content,"$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo",$api);
                             $find_cost_assessment->amount_invoice =   $this->storeFilePayin($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
@@ -1115,7 +1123,7 @@ class CheckCertificateLabController extends Controller
 
 
                         // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                        if (!filter_var($setting_payment->data, FILTER_VALIDATE_IP)) {
+                        if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
                             
                             $costcerti->attach              =   $this->storeFilePayin($setting_payment,$CertiLab->app_no);
                         }else{//ถ้าเป็น 127.0.0 (การทดสอบ)

@@ -6,50 +6,51 @@ use DB;
 use HP;
 use App\CertificateExport;
 use Illuminate\Http\Request;
+use App\Helpers\EpaymentDemo;
 use App\Mail\CB\CBInformPayInOne;
-use App\Mail\IB\IBInformPayInOne;
 
+use App\Mail\IB\IBInformPayInOne;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate\Tracking;
 use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Tracking\InformPayInOne; 
-use App\Models\Law\Cases\LawCasesForm; 
 
+use App\Models\Law\Cases\LawCasesForm; 
 use App\Models\Law\Offense\LawOffender;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Mail\Lab\CertifyConfirmedPayIn1;
 use App\Mail\Lab\CertifyCostCertificate;
 use App\Models\Certify\EpaymentBillTest;
+
+
 use App\Models\Certify\TransactionPayIn;
-
-
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Certify\CertificateHistory;
-use PhpOffice\PhpSpreadsheet\Style\Border;
 
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use App\Models\Certificate\TrackingReport; 
 use App\Models\Certify\ApplicantCB\CertiCb;
 use App\Models\Certify\ApplicantIB\CertiIb;
 use App\Models\Certify\CertiSettingPayment;
 use App\Models\Law\Cases\LawCasesPayments; 
 use App\Models\Certificate\TrackingHistory; 
-use App\Models\Certificate\TrackingPayInOne;
 
+use App\Models\Certificate\TrackingPayInOne;
 use App\Models\Certificate\TrackingPayInTwo;
 use App\Models\Certificate\TrackingAuditors; 
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use App\Models\Certificate\TrackingAssessment;
 use App\Models\Law\Offense\LawOffenderProduct;
+
 use App\Models\Certify\Applicant\CostAssessment;
-
 use App\Models\Certify\Applicant\CostCertificate;
+
+
 use App\Models\Certify\ApplicantCB\CertiCBExport; 
-
-
 use App\Models\Certify\ApplicantCB\CertiCbHistory;
 use App\Models\Certify\ApplicantIB\CertiIBExport; 
 use App\Models\Certify\ApplicantIB\CertiIbHistory;
@@ -128,13 +129,13 @@ class Checkbill2Controller extends Controller
                         
                     }
 
-                    
+                    // $epaymentDemoController = new EpaymentDemo();
+                    // $epaymentDemoController->pmt2($refNo,null);
+
                     // $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$transaction->ref1", false, $context);
                     $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$refNo", false, $context);
-                    $api = json_decode($content,true);     
-                    
-                    dd($api);
-                    
+                    $api = json_decode($content,true);      
+                    // dd("$setting_payment->data?pid=$setting_payment->pid&out=json&ref1=$refNo",$api);
                     if(!empty($api[0]['error'])){
                         // echo 'ยังไม่มีข้อมูลการชำระ'   ;
                     }elseif(!empty($api[0]['PayList']) && count((array)$api[0]['PayList']) > 0){

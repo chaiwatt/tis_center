@@ -56,6 +56,8 @@ class CheckLabPayInOne extends Command
             if ($result instanceof \Illuminate\Http\JsonResponse) {
                 // แปลง JsonResponse เป็น array
                 $resultArray = $result->getData(true);
+
+                // dd($resultArray);
         
                 // ตรวจสอบค่า message
                 if (!empty($resultArray['message']) && $resultArray['message'] === true) {

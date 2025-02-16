@@ -468,12 +468,17 @@ class EpaymentDemo
     $response = [];
 
     if(!empty($ref1)){
+          EpaymentBillTest::where('Ref1',$ref1)->update([
+            'Status' => 1
+          ]);
           $epays =  EpaymentBillTest::where('Ref1',$ref1)->get();
-    } else      if(!empty($paydate)){
+    } else if(!empty($paydate)){
           $epays =  EpaymentBillTest::whereDate('PaymentDate',$paydate)->where('Status',1)->get();
    } else{
          $epays =  EpaymentBillTest::whereDate('PaymentDate',date('Y-m-d'))->where('Status',1)->get();
     }
+
+    // dd( $epays->count(),$ref1);
 
    if(count($epays) > 0){
        $data = [];
