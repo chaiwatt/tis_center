@@ -77,7 +77,7 @@ class Checkbill2Controller extends Controller
             ) 
         );
 
-        // dd($request->ref1);
+        dd($request->ref1);
 
         $message    = false;
         $response   =   new TransactionPayIn;
