@@ -814,7 +814,7 @@ class MyTestController extends Controller
             ->orWhere('ref1', 'like', 'CAL%');
     })
     ->get();
-    // dd($transactionPayIns);
+    dd($transactionPayIns);
 
     foreach ($transactionPayIns as $transactionPayIn) {
         $ref1 = $transactionPayIn->ref1;
