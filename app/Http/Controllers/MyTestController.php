@@ -102,9 +102,6 @@ class MyTestController extends Controller
         return $epaymentDemoController->pmt1($ref1, $pid, $out);
     }
 
-
-    
-
     public function index()
     {
 

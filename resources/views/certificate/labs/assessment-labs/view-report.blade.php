@@ -724,16 +724,39 @@
                 </div>
             </div>
 
+            {{-- {{$assessment->bug_report}} --}}
 
+
+            @php
+                $totalPendingTransactions = 0;
+                $pendingLabReportInfos = 0;
             
-            <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
-
-                <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
-                @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
-                    <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
-                @endif
+                foreach ($tracking->tracking_assessment_many as $assessment) {
+                    $labReportInfoStatus = $assessment->trackingLabReportInfo->status;
+                    if($labReportInfoStatus == 1)
+                    {
+                        $pendingLabReportInfos ++;
+                    }
+                    // dd($labReportInfo);
+                    $totalPendingTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->where('approval',0)->count();
                 
-            </div>
+                    
+                }
+            @endphp
+            {{-- {{$totalPendingTransactions}} --}}
+            @if ($totalPendingTransactions != 0)
+                <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
+
+                    <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
+                    @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
+                        <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
+                    @endif
+                    
+                </div>
+            @endif
+
+
+
 
         </div>
 
@@ -756,6 +779,7 @@
         let labReportInfo;
         let data;
         let signAssessmentReportTransactions;
+        let totalPendingTransactions;
         const defectBlock = [
             { id: "2_5_1", defect_info: [] },
             { id: "2_5_2", defect_info: [] },
@@ -798,28 +822,27 @@
             labRequest = @json($labRequest ?? []);
             signAssessmentReportTransactions = @json($signAssessmentReportTransactions ?? []);
 
-            console.log('labReportInfo',labReportInfo);
+            totalPendingTransactions = @json($totalPendingTransactions ?? null);
+
+            // console.log('totalPendingTransactions',totalPendingTransactions);
 
         //    if(labReportInfo.status !=="1"){
         //          $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
         //          $('.wrapper').css('pointer-events', 'none'); // ปิดการคลิกและโต้ตอบทุกอย่างใน div.wrapper
         //          $('.wrapper').css('opacity', '0.7'); // เพิ่มความโปร่งใสเพื่อแสดงว่าถูกปิดใช้งาน (ไม่บังคับ)
         //    }
-
-        if (labReportInfo.status !== "1") {
+        if(totalPendingTransactions != null)
+        {
+            if (totalPendingTransactions == 0) {
             $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
-
-            // ปิดการคลิกและโต้ตอบทุกอย่างใน div.wrapper ยกเว้น #files_wrapper
             $('.wrapper').css({
                 'pointer-events': 'none', // ปิดการคลิกทั้งหมด
                 'opacity': '0.7' // เพิ่มความโปร่งใส
             });
-
-            // เปิดการคลิกสำหรับ #files_wrapper และเนื้อหาภายใน
             $('#files_wrapper').css('pointer-events', 'auto');
-
-            // ซ่อนทุกปุ่มใน .wrapper ยกเว้นปุ่มที่อยู่ใน #files_wrapper
             $('.wrapper button').not('#files_wrapper button').hide();
+        }
+
         }
 
 
@@ -1074,7 +1097,6 @@
                 contentType: 'application/json', // ระบุว่าเป็น JSON
                 success: function(response) {
                     console.log('สำเร็จ:', response);
-                    // window.location.href = "{{ route('save_assessment.index') }}";
                     const baseUrl = "{{ url('/certificate/assessment-labs') }}";
                     const assessmentId = assessment.id;
                     window.location.href = `${baseUrl}/${assessmentId}/edit`;

@@ -54,6 +54,7 @@ class EpaymentDemo
           $app_no =  $ref1;
         }  
 
+        // dd($app_no);
         
         $pid    =  $pid;
         $certi_cb = CertiCb::where('app_no',$app_no)->first();
@@ -390,7 +391,7 @@ class EpaymentDemo
      }
      else if(Str::contains($ref1, 'SurLab') && $out == 'json')
      {
-       
+      
        $tracking = Tracking::where('reference_refno',$app_no)->first();
        $export_lab = CertificateExport::find($tracking->ref_id);
 
@@ -443,6 +444,8 @@ class EpaymentDemo
        $epay->ReceiptCreateDate  = date('Y-m-d H:i:s'); 
        $epay->Amount             =  "36000.00";
        $epay->save();
+
+      //  dd($response);
 
       return response()->json($response);
      }

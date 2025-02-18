@@ -47,7 +47,7 @@ class TrackingSignAssessmentReportController extends Controller
         // ดึงข้อมูล signer โดยใช้ user_register_id
         $signer = Signer::where('user_register_id', $userId)->first();
 
-        // dd($signer);
+    
 
         // ตรวจสอบว่าพบข้อมูลหรือไม่
         if ($signer) {
@@ -63,11 +63,14 @@ class TrackingSignAssessmentReportController extends Controller
                     });
                 });
 
+         
+
+
    
             if ($filter_approval) {
                 $query->where('approval', $filter_approval);
             }else{
-                $query->where('approval', 0);
+                $query->whereNull('approval');
             }
             
             if ($filter_certificate_type !== null) {
@@ -75,6 +78,9 @@ class TrackingSignAssessmentReportController extends Controller
                 $query->where('certificate_type', $filter_certificate_type);
             }
         
+            // $aa= $query->get();
+            // dd($aa,$filter_certificate_type);
+
             // dd($filter_approval,$query->get());
             $data = $query->get();
             $data = $data->map(function($item, $index) {
@@ -102,7 +108,7 @@ class TrackingSignAssessmentReportController extends Controller
             });
 
          
-                
+            // dd($query->get());
             return DataTables::of($query)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {

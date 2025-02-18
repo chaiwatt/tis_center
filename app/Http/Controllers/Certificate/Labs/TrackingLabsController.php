@@ -690,62 +690,68 @@ class TrackingLabsController extends Controller
          $url  =   !empty($config->url_acc) ? $config->url_acc : url('');
          $PayIn = TrackingPayInOne::findOrFail($id);
 
-      
+       if($request->conditional_type == null){
+        return redirect()->back();
+       }
     
       if($PayIn->state == null){
+       
+            $PayIn->conditional_type    = $request->conditional_type;
+            $PayIn->created_by          =  auth()->user()->runrecno;
+            $PayIn->state = 1;  // ส่งให้ ผปก.
+            $PayIn->start_date =   isset($request->start_date)?  HP::convertDate($request->start_date,true) : @$PayIn->start_date;
+            $PayIn->amount_bill =  !empty(str_replace(",","",$request->amount))?str_replace(",","",$request->amount):@$PayIn->amount_bill;
+            $PayIn->save();
+            $tax_number = (!empty(auth()->user()->reg_13ID) ?  str_replace("-","", auth()->user()->reg_13ID )  : '0000000000000');
 
-                    $PayIn->conditional_type    = $request->conditional_type;
-                    $PayIn->created_by          =  auth()->user()->runrecno;
-                    $PayIn->state = 1;  // ส่งให้ ผปก.
-                    $PayIn->start_date =   isset($request->start_date)?  HP::convertDate($request->start_date,true) : @$PayIn->start_date;
-                    $PayIn->amount_bill =  !empty(str_replace(",","",$request->amount))?str_replace(",","",$request->amount):@$PayIn->amount_bill;
-                    $PayIn->save();
-                    $tax_number = (!empty(auth()->user()->reg_13ID) ?  str_replace("-","", auth()->user()->reg_13ID )  : '0000000000000');
-            if($PayIn->conditional_type == 1){ // เรียกเก็บค่าธรรมเนียม  
-
+            if($request->conditional_type == 1)
+            { // เรียกเก็บค่าธรรมเนียม  
+               
                     $setting_payment = CertiSettingPayment::where('certify',4)->where('payin',1)->where('type',1)->first();
-                 
-            if(!is_null($setting_payment) ){
-                        if(strpos($setting_payment->data, 'https')===0){//ถ้าเป็น https
+                    // dd($setting_payment,$PayIn->state,$request->conditional_type );
+                    if(!is_null($setting_payment) )
+                    {
+                        if(strpos($setting_payment->data, 'https')===0)
+                        {//ถ้าเป็น https
                             $arrContextOptions["ssl"] = array(
                                                             "verify_peer" => false,
                                                             "verify_peer_name" => false,
                                                         );
                         }
 
-                    $timestamp = Carbon::now()->timestamp;
-                    $refNo = $PayIn->reference_refno.'-'.$PayIn->auditors_id.$timestamp;
+                        $timestamp = Carbon::now()->timestamp;
+                        $refNo = $PayIn->reference_refno.'-'.$PayIn->auditors_id.$timestamp;
 
-                    // $url     =  "$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$PayIn->reference_refno-$PayIn->auditors_id";
-                    $url     =  "$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo";
+                        // $url     =  "$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$PayIn->reference_refno-$PayIn->auditors_id";
+                        $url     =  "$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo";
 
-                    // dd($url);
-                    $content =  file_get_contents($url, false, stream_context_create($arrContextOptions));
+                        // dd($url);
+                        $content =  file_get_contents($url, false, stream_context_create($arrContextOptions));
 
-                    $api = json_decode($content);
+                        $api = json_decode($content);
+                    
+                        // $file_payin  = self::storeFilePayin($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
 
-                    // dd($api);
-                  
-                    // $file_payin  = self::storeFilePayin($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
-
-                    // if(strpos($setting_payment->data, '127.0.0.1')===0){
-                    if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
-                            
-                        $file_payin  = $this->storeFilePayin($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
-                    }else{
-                        $file_payin  = $this->storeFilePayinDemo($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
-                        // $find_cost_assessment->amount_invoice =   $this->storeFilePayinDemo($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
+                        // if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
+                                
+                            $file_payin  = $this->storeFilePayin($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
+                        }else{
+                            $file_payin  = $this->storeFilePayinDemo($setting_payment,$PayIn->reference_refno,$PayIn->auditors_id,$tb->getTable(),$PayIn->id,'attach_payin1','เรียกเก็บค่าธรรมเนียม');
+                            // $find_cost_assessment->amount_invoice =   $this->storeFilePayinDemo($setting_payment,$app_no,$find_cost_assessment->app_certi_assessment_id);
+                        }
+    
+                        if(!is_null($file_payin) && HP::checkFileStorage($file_payin->url)){
+                            HP::getFileStoragePath($file_payin->url);
+                        }
+            
+                        $transaction = HP::TransactionPayIn1($PayIn->id,$tb->getTable(),'4','1',$api,$PayIn->reference_refno.'-'.$PayIn->auditors_id,$timestamp);
+    
+                    
                     }
- 
-                     if(!is_null($file_payin) && HP::checkFileStorage($file_payin->url)){
-                        HP::getFileStoragePath($file_payin->url);
-                    }
-           
-                     $transaction = HP::TransactionPayIn1($PayIn->id,$tb->getTable(),'4','1',$api,$PayIn->reference_refno.'-'.$PayIn->auditors_id,$timestamp);
- 
-               
-               }
-            }else  if($PayIn->conditional_type == 2){  // ยกเว้นค่าธรรมเนียม
+                }
+                else  if($PayIn->conditional_type == 2)
+                {  // ยกเว้นค่าธรรมเนียม
 
                     $feewaiver  =  Feewaiver::where('certify',1)->first();
                     if(!empty($feewaiver->payin1_file)){
@@ -768,7 +774,7 @@ class TrackingLabsController extends Controller
                                                         'created_by'        => auth()->user()->getKey(),
                                                         'created_at'        => date('Y-m-d H:i:s')
                         ]);
- 
+
                         if(!is_null($feewaiver) && HP::checkFileStorage($feewaiver->payin1_file)){
                             HP::getFileStoragePath($feewaiver->payin1_file);
                         }
@@ -777,29 +783,32 @@ class TrackingLabsController extends Controller
                     $PayIn->start_date_feewaiver        =  $feewaiver->payin2_start_date ?? null;
                     $PayIn->end_date_feewaiver          =  $feewaiver->payin2_end_date ?? null;
                     $PayIn->save();
-   
-            }else  if($PayIn->conditional_type == 3){  // ยกเว้นค่าชำระเงินนอกระบบ, ไม่เรียกชำระเงิน หรือ กรณีอื่นๆธรรมเนียม
+        
+                }
+                else  if($PayIn->conditional_type == 3)
+                {  // ยกเว้นค่าชำระเงินนอกระบบ, ไม่เรียกชำระเงิน หรือ กรณีอื่นๆธรรมเนียม
                     $PayIn->detail = $request->detail ?? null;
                     $PayIn->save();
-                if($request->attach && $request->hasFile('attach')){
-                    $file_payin  =   HP::singleFileUploadRefno(
-                                                                $request->file('attach') ,
-                                                                $this->attach_path.'/'.$PayIn->reference_refno,
-                                                                ( $tax_number),
-                                                                (auth()->user()->FullName ?? null),
-                                                                'Center',
-                                                                ( $tb->getTable() ),
-                                                                $PayIn->id,
-                                                                'attach_payin1',
-                                                                'ยกเว้นค่าชำระเงินนอกระบบ, ไม่เรียกชำระเงิน หรือ กรณีอื่นๆธรรมเนียม'
-                                                             );
+                    if($request->attach && $request->hasFile('attach')){
+                        $file_payin  =   HP::singleFileUploadRefno(
+                                                                    $request->file('attach') ,
+                                                                    $this->attach_path.'/'.$PayIn->reference_refno,
+                                                                    ( $tax_number),
+                                                                    (auth()->user()->FullName ?? null),
+                                                                    'Center',
+                                                                    ( $tb->getTable() ),
+                                                                    $PayIn->id,
+                                                                    'attach_payin1',
+                                                                    'ยกเว้นค่าชำระเงินนอกระบบ, ไม่เรียกชำระเงิน หรือ กรณีอื่นๆธรรมเนียม'
+                                                                );
 
-                        if(!is_null($file_payin) && HP::checkFileStorage($file_payin->url)){
-                            HP::getFileStoragePath($file_payin->url);
-                        }
+                            if(!is_null($file_payin) && HP::checkFileStorage($file_payin->url)){
+                                HP::getFileStoragePath($file_payin->url);
+                            }
+                    }
                 }
-            }
       
+                // dd('break',$PayIn->conditional_type,$request->conditional_type);
                 // สถานะ แต่งตั้งคณะกรรมการ
                 $auditor = TrackingAuditors::findOrFail($PayIn->auditors_id);
                 if(!is_null($auditor)){

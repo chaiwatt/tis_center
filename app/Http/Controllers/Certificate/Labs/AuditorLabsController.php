@@ -158,7 +158,7 @@ class AuditorLabsController extends Controller
     {
         $model = str_slug('auditorlabs','-');
         if(auth()->user()->can('add-'.$model)) {
-
+           
           // try {
                 $tracking =  Tracking::findOrFail($request->tracking_id);
 
@@ -249,15 +249,16 @@ class AuditorLabsController extends Controller
                 }
                 if(count($categories) != 0)
                 {
-           
+                   
                     $boardAuditorExpertTracking = new BoardAuditoExpertTracking();
                                         
                     // กำหนดค่า
-                    $boardAuditorExpertTracking->tracking_auditor_id = $tracking->id; // ตัวอย่าง ID
+                    $boardAuditorExpertTracking->tracking_auditor_id = $auditors->id; // ตัวอย่าง ID
                     $boardAuditorExpertTracking->expert = json_encode($categories); // แปลง $categories เป็น JSON
 
                     // บันทึกข้อมูล
                     $boardAuditorExpertTracking->save(); // บันทึกข้อมูลลงฐานข้อมูล
+                    // dd('ok',$tracking->id,$categories);
                 }
                 
             
