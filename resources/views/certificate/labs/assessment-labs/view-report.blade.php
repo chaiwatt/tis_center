@@ -837,7 +837,7 @@
             $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
             $('.wrapper').css({
                 'pointer-events': 'none', // ปิดการคลิกทั้งหมด
-                'opacity': '0.7' // เพิ่มความโปร่งใส
+                'opacity': '0.8' // เพิ่มความโปร่งใส
             });
             $('#files_wrapper').css('pointer-events', 'auto');
             $('.wrapper button').not('#files_wrapper button').hide();
