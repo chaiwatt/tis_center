@@ -745,16 +745,26 @@
                     
                 }
             @endphp
-            {{-- {{$totalPendingTransactions}} --}}
-            @if ($totalPendingTransactions != 0)
-                <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
-
-                    <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
-                    @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
-                        <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
-                    @endif
+            {{-- {{$assessment->bug_report }} --}}
+            {{-- @if ($totalTransactions != 0 && $totalPendingTransactions != 0) --}}
+            @if ($totalTransactions == 0)
                     
-                </div>
+                    <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
+                            <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
+                            @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
+                                <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
+                            @endif
+                    
+                    </div>
+                @else
+                    <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
+
+                        <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
+                        @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
+                            <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
+                        @endif
+                        
+                    </div>
             @endif
 
 
