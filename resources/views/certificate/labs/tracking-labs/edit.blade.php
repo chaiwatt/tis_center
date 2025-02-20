@@ -213,35 +213,35 @@
                     {!! $assessment_icon !!}    ผลการตรวจประเมิน  <span class="caret"></span>
                  </button>
                  <div class="dropdown-menu" role="menu" >
-   @foreach($tracking->tracking_assessment_many as $key => $assessment)
- @php
-              $assessment_url =  '';
-              $assessment_btn =  '';
-          if ($assessment->degree == 7 || $assessment->degree == 4) { // ผ่านการการประเมิน
-              $assessment_btn =  'btn-info';
-              $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
-          }elseif ($assessment->degree == 0) {  //ฉบับร่าง
-            //   $assessment_btn =  'btn-primary';
-              $assessment_btn =  'btn-warning';
-              $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit'; 
-          }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
-               $assessment_btn =  'btn-success';
-               $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
-          }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
-               $assessment_btn =  '#ffff80';
-               $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
-          }else {    //ผปก. ส่งให้ จนท.
-               $assessment_btn =  'btn-danger';
-               $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
-          }
-  
- @endphp
-     <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
-         ครั้งที่ {{   ($key +1)  }} :  
-         {{ $assessment->auditors_to->auditor ?? '-'}}
-     </a> 
-     <br>
- @endforeach
+                    @foreach($tracking->tracking_assessment_many as $key => $assessment)
+                            @php
+                                    $assessment_url =  '';
+                                    $assessment_btn =  '';
+
+                                    if ($assessment->degree == 7 || $assessment->degree == 4) { // ผ่านการการประเมิน
+                                        $assessment_btn =  'btn-info';
+                                        $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
+                                    }elseif ($assessment->degree == 0) {  //ฉบับร่าง
+                                        //   $assessment_btn =  'btn-primary';
+                                        $assessment_btn =  'btn-warning';
+                                        $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit'; 
+                                    }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
+                                        $assessment_btn =  'btn-success';
+                                        $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
+                                    }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
+                                        $assessment_btn =  '#ffff80';
+                                        $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
+                                    }else {    //ผปก. ส่งให้ จนท.
+                                        $assessment_btn =  'btn-danger';
+                                        $assessment_url =  'certificate/assessment-labs/'.$assessment->id.'/edit';
+                                    }
+                            @endphp
+                                <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                    ครั้งที่ {{   ($key +1)  }} :  
+                                    {{ $assessment->auditors_to->auditor ?? '-'}}
+                                </a> 
+                            <br>
+                        @endforeach
                  </div>
              </div>
          </div>
@@ -270,15 +270,9 @@
             }
         @endphp
 
-        {{-- @foreach($tracking->tracking_assessment_many as $key => $assessment)
-            {{$assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->where('approval',0)->count()}}
-        @endforeach --}}
-         {{--<a  class="form_group btn {{$inspection_btn}}" href="{{ url("certificate/inspection-labs/$inspection->id")}}" >
-            {!! $inspection_icon  !!}     สรุปผลตรวจประเมิน
-        </a> --}}
-
         @php
             $totalPendingTransactions = 0;
+            $totalTransactions = 0;
             $pendingLabReportInfos = 0;
         
             foreach ($tracking->tracking_assessment_many as $assessment) {
@@ -289,22 +283,28 @@
                 }
                 // dd($labReportInfo);
                 $totalPendingTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->where('approval',0)->count();
+                $totalTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->count();
               
                 
             }
         @endphp
         
         {{-- {{$pendingLabReportInfos}} --}}
-        @if ($totalPendingTransactions == 0 && $pendingLabReportInfos == 0)
+        @if ($totalTransactions != 0 && $totalPendingTransactions == 0 && $pendingLabReportInfos == 0)
             <a class="form_group btn {{ $inspection_btn }}" href="{{ url("certificate/inspection-labs/$inspection->id") }}">
                 {!! $inspection_icon !!} สรุปผลตรวจประเมิน
             </a>
         @else 
-            @if ($pendingLabReportInfos != 0)
-                    <span class="text-warning">รอการสร้างรายงานตรวจประเมิน</span>
-                @else
-                    <span class="text-warning">รอการลงนามรายงานตรวจประเมิน</span>
-            @endif
+        @if ($totalTransactions == 0)
+                <span class="text-warning">รอการสร้างรายงานตรวจประเมิน</span>
+            @else
+                @if ($pendingLabReportInfos != 0)
+                        <span class="text-warning">รอการสร้างรายงานตรวจประเมิน</span>
+                    @else
+                        <span class="text-warning">รอการลงนามรายงานตรวจประเมิน</span>
+                @endif
+        @endif
+      
             
         @endif
         

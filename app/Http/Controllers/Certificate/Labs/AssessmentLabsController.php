@@ -699,7 +699,11 @@ class AssessmentLabsController extends Controller
           }
 
 
-  
+        if($assessment->degree == 4)
+        {
+            return redirect('certificate/assessment-labs/view-lab-info/'.$assessment->id)->with('message', 'เรียบร้อยแล้ว!');
+        }
+        
 
     
         if($request->previousUrl){

@@ -730,6 +730,7 @@
             @php
                 $totalPendingTransactions = 0;
                 $pendingLabReportInfos = 0;
+                $totalTransactions = 0;
             
                 foreach ($tracking->tracking_assessment_many as $assessment) {
                     $labReportInfoStatus = $assessment->trackingLabReportInfo->status;
@@ -738,6 +739,7 @@
                         $pendingLabReportInfos ++;
                     }
                     // dd($labReportInfo);
+                    $totalTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->count();
                     $totalPendingTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->where('approval',0)->count();
                 
                     
@@ -780,6 +782,7 @@
         let data;
         let signAssessmentReportTransactions;
         let totalPendingTransactions;
+        let totalTransactions;
         const defectBlock = [
             { id: "2_5_1", defect_info: [] },
             { id: "2_5_2", defect_info: [] },
@@ -823,6 +826,9 @@
             signAssessmentReportTransactions = @json($signAssessmentReportTransactions ?? []);
 
             totalPendingTransactions = @json($totalPendingTransactions ?? null);
+            totalTransactions = @json($totalTransactions ?? null);
+
+            
 
             // console.log('totalPendingTransactions',totalPendingTransactions);
 
@@ -831,19 +837,34 @@
         //          $('.wrapper').css('pointer-events', 'none'); // ปิดการคลิกและโต้ตอบทุกอย่างใน div.wrapper
         //          $('.wrapper').css('opacity', '0.7'); // เพิ่มความโปร่งใสเพื่อแสดงว่าถูกปิดใช้งาน (ไม่บังคับ)
         //    }
-        if(totalPendingTransactions != null)
-        {
-            if (totalPendingTransactions == 0) {
-            $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
-            $('.wrapper').css({
-                'pointer-events': 'none', // ปิดการคลิกทั้งหมด
-                'opacity': '0.8' // เพิ่มความโปร่งใส
-            });
-            $('#files_wrapper').css('pointer-events', 'auto');
-            $('.wrapper button').not('#files_wrapper button').hide();
-        }
 
+        if(totalTransactions !== null)
+        {
+            if(totalTransactions != 0 && totalPendingTransactions == 0)
+            {
+                $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
+                $('.wrapper').css({
+                    'pointer-events': 'none', // ปิดการคลิกทั้งหมด
+                    'opacity': '0.8' // เพิ่มความโปร่งใส
+                });
+                $('#files_wrapper').css('pointer-events', 'auto');
+                $('.wrapper button').not('#files_wrapper button').hide();
+            }
         }
+        // console.log('signAssessmentReportTransactions',signAssessmentReportTransactions)
+
+        // if(totalPendingTransactions != null)
+        // {
+        //     if (totalPendingTransactions == 0) {
+        //         $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
+        //         $('.wrapper').css({
+        //             'pointer-events': 'none', // ปิดการคลิกทั้งหมด
+        //             'opacity': '0.8' // เพิ่มความโปร่งใส
+        //         });
+        //         $('#files_wrapper').css('pointer-events', 'auto');
+        //         $('.wrapper button').not('#files_wrapper button').hide();
+        //     }
+        // }
 
 
             $('.signature-select').select2({
