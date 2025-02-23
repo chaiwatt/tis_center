@@ -306,6 +306,24 @@ class HelperController extends Controller
         //     $admin_role->givePermissionTo($tracking_assessment_report_assignment_delete);
         // }
 
+        // $setting_team_cb_add    = Permission::firstOrCreate(['name' => 'add-setting-team-cb']);
+        // $setting_team_cb_view   = Permission::firstOrCreate(['name' => 'view-setting-team-cb']);
+        // $setting_team_cb_edit   = Permission::firstOrCreate(['name' => 'edit-setting-team-cb']);
+        // $setting_team_cb_delete = Permission::firstOrCreate(['name' => 'delete-setting-team-cb']);
+
+        // if (!$admin->hasPermission($setting_team_cb_add)) {
+        //     $admin_role->givePermissionTo($setting_team_cb_add);
+        // }
+        // if (!$admin->hasPermission($setting_team_cb_view)) {
+        //     $admin_role->givePermissionTo($setting_team_cb_view);
+        // }
+        // if (!$admin->hasPermission($setting_team_cb_edit)) {
+        //     $admin_role->givePermissionTo($setting_team_cb_edit);
+        // }
+        // if (!$admin->hasPermission($setting_team_cb_delete)) {
+        //     $admin_role->givePermissionTo($setting_team_cb_delete);
+        // }
+
         return "done";
 
     }

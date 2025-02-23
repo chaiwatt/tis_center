@@ -60,9 +60,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <input type="text" name="" id="app_id" value="{{$app->id}}">
-                    <input type="text" name="" id="notice_id" value="{{$find_notice->id}}">
-                    <h3 class="box-title pull-left">ระบบบันทึกผลการตรวจประเมิน</h3>
+                    <input type="hidden" name="" id="app_id" value="{{$app->id}}">
+                    <input type="hidden" name="" id="notice_id" value="{{$find_notice->id}}">
+                    <h3 class="box-title pull-left">ระบบบันทึกผลการตรวจประเมิน #{{$find_notice->id}}</h3>
                    
                     @can('view-'.str_slug('auditor'))
                     <a class="btn btn-success pull-right" href="{{ route('save_assessment.index', ['app' => $app ? $app->id : '']) }}">

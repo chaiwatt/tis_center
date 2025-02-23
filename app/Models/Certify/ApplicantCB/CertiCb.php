@@ -682,4 +682,30 @@ public function app_certi_cb_export()
         return $this->hasOne(CbDocReviewAuditor::class, 'app_certi_cb_id');
     }
 
+
+    public function paidPayIn1BoardAuditors()
+    {
+        $appCertiAssessmentIds = CertiCBPayInOne::where('app_certi_cb_id', $this->id)
+            ->where('status', 1)
+            ->pluck('auditors_id')
+            ->toArray();
+
+            // CertiCBAuditorsTo    
+
+        if (!empty($appCertiAssessmentIds)) {
+            
+            $boardAuditors = CertiCBAuditors::whereIn('id', $appCertiAssessmentIds)->get();
+            // dd($boardAuditors);
+            return $boardAuditors;
+            
+        }
+
+        // ถ้าไม่มีข้อมูล รีเทิร์นค่าเปล่า
+        return null;
+    }
+
+    
+
+
+    
 }

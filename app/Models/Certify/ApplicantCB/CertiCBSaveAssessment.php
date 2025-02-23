@@ -15,7 +15,8 @@ class CertiCBSaveAssessment extends Model
     use Sortable;
     protected $table = 'app_certi_cb_assessment';
     protected $primaryKey = 'id';
-    protected $fillable = ['app_certi_cb_id','auditors_id', 'name','laboratory_name','report_date','bug_report','degree','main_state','details','date_car','status_car','state','created_by', 'updated_by','date_scope_edit'];
+    protected $fillable = ['app_certi_cb_id','auditors_id', 'name','laboratory_name','report_date','bug_report','degree','main_state','details','date_car','status_car','state','created_by', 'updated_by'
+    ,'date_scope_edit','submit_type','expert_token','accept_fault','notice_duration','notice_confirm_date'];
 
     public function getDegreeTitleAttribute() {
         $degree = ['0'=>'ฉบับร่าง','1'=>'พบข้อบกพร่อง','2'=>'พบข้อบกพร่อง','3'=>'ไม่ผ่าน','4'=>'ผ่าน'];

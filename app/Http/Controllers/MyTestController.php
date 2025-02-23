@@ -68,6 +68,7 @@ use App\Models\Bcertify\BoardAuditoExpertTracking;
 use App\Models\Certify\Applicant\CertifyTestScope;
 use App\Services\CreateTrackingLabMessageRecordPdf;
 use App\Models\Bcertify\CalibrationBranchInstrument;
+use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
 use App\Models\Certify\Applicant\CertifyLabCalibrate;
 use App\Models\Certify\SignAssessmentReportTransaction;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
@@ -2800,9 +2801,46 @@ public function create_bill()
       }
     }
 
-    public function doSOme()
+    public function copyScopeCbFromAttachement()
     {
-        
+        $copiedScoped = null;
+        $fileSection = null;
+
+        $appId = 237;
+        $latestRecord = CertiCBAttachAll::where('app_certi_cb_id', $appId)
+        ->where('file_section', 3)
+        ->where('table_name', 'app_certi_cb')
+        ->orderBy('created_at', 'desc') // เรียงลำดับจากใหม่ไปเก่า
+        ->first();
+    
+
+        $existingFilePath = 'files/applicants/check_files_cb/' . $latestRecord->file ;
+
+        // ตรวจสอบว่าไฟล์มีอยู่ใน FTP และดาวน์โหลดลงมา
+        if (HP::checkFileStorage($existingFilePath)) {
+            $localFilePath = HP::getFileStoragePath($existingFilePath); // ดึงไฟล์ลงมาที่เซิร์ฟเวอร์
+            dd($localFilePath);
+            $no  = str_replace("RQ-","",$app->app_no);
+            $no  = str_replace("-","_",$no);
+            $dlName = 'scope_'.basename($existingFilePath);
+            $attach_path  =  'files/applicants/check_files_cb/'.$no.'/';
+
+            if (file_exists($localFilePath)) {
+                $storagePath = Storage::putFileAs($attach_path, new \Illuminate\Http\File($localFilePath),  $dlName );
+                $filePath = $attach_path . $dlName;
+                if (Storage::disk('ftp')->exists($filePath)) {
+                    $list  = new  stdClass;
+                    $list->attachs =  $no.'/'.$dlName;
+                    $list->file_client_name =  $dlName;
+                    $scope[] = $list;
+                    $copiedScoped = json_encode($scope);
+                } 
+                unlink($localFilePath);
+            }
+        }
+
+        return $copiedScoped;
     }
+
 }
 

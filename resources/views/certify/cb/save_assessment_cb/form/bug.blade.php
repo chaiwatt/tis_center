@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-sm-12 m-t-15" v-if="isTable">
-        <table class="table color-bordered-table primary-bordered-table">
+        <table class="table color-bordered-table primary-bordered-table no-hover-animate">
             <thead>
             <tr>
                 <th class="text-center" width="2%">ลำดับ</th>
@@ -29,7 +29,7 @@
                     <td class="text-center">
                         {{$key+1}}
                     </td>
-                    <td>
+                    {{-- <td>
                         {!! Form::hidden('id[]',!empty($item->id)?$item->id:null, ['class' => 'form-control'])  !!}
                        {!! Form::text('report[]', $item->report ?? null,  ['class' => 'form-control ','disabled'=>true])!!}
                     </td>
@@ -46,7 +46,29 @@
                             ['class'=>"check checkbox_status $status assessment_results",'data-checkbox'=>"icheckbox_flat-green", "data-key"=>($key+1)]) !!}
                               &nbsp;ผ่าน &nbsp;
                         </label>
-                   </td>
+                   </td> --}}
+                   <td style="padding: 0px;">
+                    <input type="hidden" name="id[]" value="{{ !empty($item->id) ? $item->id : '' }}" class="form-control">
+                    <textarea name="report[]" class="form-control non-editable auto-expand" style="border-right: 1px solid #ccc;" >{{ $item->report ?? '' }}</textarea>
+                </td>
+                <td style="padding: 0px;">
+                    <textarea name="notice[]" class="form-control non-editable notice auto-expand" style="border-left: none; border-right: 1px solid #ccc;" >{{ $item->remark ?? '' }}</textarea>
+                </td>
+                
+                <td style="padding: 0px;">
+                    <textarea name="details" class="form-control non-editable  auto-expand" style="border-left: none; border-right: 1px solid #ccc;"  >{{ $item->details ?? '' }}</textarea>
+                </td>
+                <td class="text-center" style="vertical-align: top">
+                    <label>
+                        <input type="checkbox" name="status[{{ $item->id }}]" value="1" 
+                            class="check checkbox_status {{ $status }} assessment_results" 
+                            data-checkbox="icheckbox_flat-green" 
+                            data-key="{{ $key+1 }}"
+                            {{ !empty($item->status) && $item->status == 1 ? 'checked' : '' }}>
+                        &nbsp;ผ่าน &nbsp;
+                    </label>
+                </td>
+                
                    <td  class="text-center">
 
                        @if(!is_null($item->attachs))
@@ -71,14 +93,15 @@
     </div>
 </div>
 <div class="row" id="div_comment">
-    <div class="col-sm-3 text-right">ระบุข้อคิดเห็น (ผลการประเมิน) :</div>
-    <div class="col-sm-9">
-        <table class="table color-bordered-table primary-bordered-table">
+    <div class="col-sm-12 text-left">ระบุข้อคิดเห็น (ผลการประเมิน) :</div>
+    <div class="col-sm-12">
+        <table class="table color-bordered-table primary-bordered-table no-hover-animate">
             <thead>
                 <tr>
                     <th class="text-center" width="2%">ลำดับ</th>
-                    <th class="text-center" width="40%">ผลการประเมินที่พบ</th>
-                    <th class="text-center" width="58%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">ผลการประเมินที่พบ</th>
+                    <th class="text-center" width="38%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">สาเหตุ</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -86,15 +109,19 @@
                 @foreach($assessment->CertiCBBugMany as $key => $item)
                         @if($item->status != 1)
                             <tr>
-                                <td class="text-center">
+                                <td class="text-center" style="padding: 0px">
                                     {{$key+1}}
                                 </td>
-                                <td>
+                                <td style="padding: 0px;pointer-events: none;opacity: 0.6;">
                                     {{ $item->remark ?? null }}
                                 </td>
-                                <td>
+                                <td style="padding: 0px">
                                     <input type="hidden" class="type_itme" value="{{$item->id}}">
-                                    {!! Form::textarea('comment['.$item->id.']',null, [ 'class' => 'form-control','rows' => 3,'required'=>true]) !!} 
+                                    {{-- {!! Form::textarea('comment['.$item->id.']',null, [ 'class' => 'form-control','rows' => 3,'required'=>true]) !!}  --}}
+                                    <textarea name="comment[{{ $item->id }}]" class="form-control auto-expand" style="border-right: 1px solid #ccc;"  rows="5" required></textarea>
+                                </td>
+                                <td style="padding: 0px">
+                                    <textarea name="cause[{{ $item->id }}]" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;" rows="5" required></textarea>
                                 </td>
                             </tr>
                         @endif
@@ -107,14 +134,15 @@
 
 
 <div class="row" id="div_file_comment">
-    <div class="col-sm-3 text-right">ระบุข้อคิดเห็น (หลักฐาน) :</div>
-    <div class="col-sm-9">
-        <table class="table color-bordered-table primary-bordered-table">
+    <div class="col-sm-12 text-left">ระบุข้อคิดเห็น (หลักฐาน) :</div>
+    <div class="col-sm-12">
+        <table class="table color-bordered-table primary-bordered-table no-hover-animate">
             <thead>
                 <tr>
                     <th class="text-center" width="2%">ลำดับ</th>
-                    <th class="text-center" width="40%">ผลการประเมินที่พบ</th>
-                    <th class="text-center" width="58%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">ผลการประเมินที่พบ</th>
+                    <th class="text-center" width="38%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">สาเหตุ</th>
                 </tr>
             </thead>
             <tbody id="table_body_file">
@@ -122,15 +150,19 @@
                 @foreach($assessment->CertiCBBugMany as $key => $item)
                         @if($item->status == 1 &&   $item->file_status != 1)
                             <tr>
-                                <td class="text-center">
+                                <td class="text-center" style="padding: 0px">
                                     {{$key+1}}
                                 </td>
-                                <td>
+                                <td style="padding: 0px">
                                     {{ $item->remark ?? null }}
                                 </td>
-                                <td>
+                                <td style="padding: 0px">
                                      <input type="hidden" class="type_itme" value="{{$item->id}}">
-                                    {!! Form::textarea('file_comment['.$item->id.']', null ,  ['class' => 'form-control file_comment','rows' => 3,'required'=>true])!!}
+                                    {{-- {!! Form::textarea('file_comment['.$item->id.']', null ,  ['class' => 'form-control file_comment','rows' => 3,'required'=>true])!!} --}}
+                                    <textarea name="file_comment[{{ $item->id }}]" class="form-control file_comment auto-expand" style="border-right: 1px solid #ccc;" rows="5" required></textarea>
+                                </td>
+                                <td style="padding: 0px">
+                                    <textarea name="cause[{{ $item->id }}]" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;" rows="5" required></textarea>
                                 </td>
                             </tr>
                         @endif
@@ -153,7 +185,7 @@
                       {{-- @if($assessment->FileAttachAssessment4To->file !='' && HP::checkFileStorage($attach_path.$assessment->FileAttachAssessment4To->file)) --}}
                          <a href="{{url('certify/check/file_cb_client/'.$assessment->FileAttachAssessment4To->file.'/'.( !empty($assessment->FileAttachAssessment4To->file_client_name) ? $assessment->FileAttachAssessment4To->file_client_name : 'null' ))}}" 
                                 title="{{ !empty($assessment->FileAttachAssessment4To->file_client_name) ? $assessment->FileAttachAssessment4To->file_client_name :  basename($assessment->FileAttachAssessment4To->file) }}" target="_blank">
-                            {!! HP::FileExtension($assessment->FileAttachAssessment4To->file)  ?? '' !!}
+                            {!! HP::FileExtension($assessment->FileAttachAssessment4To->file)  ?? '' !!} 
                        </a>
                       {{-- @endif --}}
                     </p>
@@ -191,7 +223,7 @@
                                 {{-- @if($item->file !='' && HP::checkFileStorage($attach_path.$item->file)) --}}
                                 <a href="{{url('certify/check/file_cb_client/'.$item->file.'/'.( !empty($item->file_client_name) ? $item->file_client_name : 'null' ))}}" 
                                     title="{{ !empty($item->file_client_name) ? $item->file_client_name :  basename($item->file) }}" target="_blank">
-                                        {!! HP::FileExtension($item->file)  ?? '' !!}
+                                        {!! HP::FileExtension($item->file)  ?? '' !!} {{$item->file_client_name}}
                                     </a>  
                                  {{-- @endif --}}
                               </p>

@@ -2,10 +2,12 @@
 
 namespace App\Models\Certify\ApplicantCB;
 
-use Illuminate\Database\Eloquent\Model;
-use App\User;
 use HP;
+use App\User;
 use App\Models\Bcertify\StatusAuditor;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Bcertify\AuditorInformation;
+
 class CertiCBAuditorsList  extends Model
 {
     protected $table = 'app_certi_cb_auditors_list';
@@ -32,5 +34,10 @@ class CertiCBAuditorsList  extends Model
    public function getStatusAuditorTitleAttribute() { 
     
      return @$this->StatusAuditorTo->title ?? '-';
-   }     
+   }  
+   
+   public function auditorInformation()
+   {
+     return $this->belongsTo(AuditorInformation::class,'user_id');
+   }
 }

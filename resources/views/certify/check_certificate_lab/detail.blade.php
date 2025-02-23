@@ -23,7 +23,7 @@
             @endcan
         </div>
 
-        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ {{ $cc->applicant->app_no ?? '-' }}
+        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ landing {{ $cc->applicant->app_no ?? '-' }}
     @php
         $exported = $cc->applicant->certificate_export;
     @endphp
@@ -410,14 +410,10 @@
                             @if ($notice->submit_type == 'confirm' || $notice->submit_type == null)
                                     <a class="btn {{$assessment_btn}}"  href="{{  $assessment_url }}" style="width:750px;text-align: left">   {{$item->auditor}}</a>
                                 @elseif($notice->submit_type == 'save')
-                                <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (ยังไม่ได้ตรวจ)</>  
+                                    <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (ฉบับร่าง)</>  
                             @endif
-                            
-                            {{-- {{$notice->id}} {{$applicant->id}} --}}
-                            {{-- <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (ยังไม่ได้ตรวจ)</>   --}}
                          @else
-                             {{-- <a class="btn {{$assessment_btn}}"  href="{{  $assessment_url }}" style="width:750px;text-align: left">   {{$item->auditor}}</a> --}}
-                             <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (ยังไม่ได้ตรวจ)</>  
+                             <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (อยู่ระหว่างการตรวจสอบ)</>  
                         @endif
                        
                     </a>

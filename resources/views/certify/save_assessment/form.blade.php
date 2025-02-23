@@ -220,7 +220,7 @@
 
             @if ($find_notice != null)
                 @if ($find_notice->submit_type == 'save')
-                <input type="text" id="notice_id" value="{{$find_notice->id}}">
+                <input type="hidden" id="notice_id" value="{{$find_notice->id}}">
                     <div class="col-md-6">
                         <label class="col-md-4 text-right">แจ้งผู้เชี่ยวชาญ : </label>
                         
@@ -247,30 +247,7 @@
                     </div>
                 </div>
             </div>
-            {{-- <div class="col-md-6">
-                <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
-                <div class="col-md-8">
-                    @if(isset($notice)  && !is_null($notice->file)) 
-                        <a href="{{url('certify/check/file_client/'.$notice->file.'/'.( !empty($notice->file_client_name) ? $notice->file_client_name : 'null' ))}}" 
-                            title=" {{ !empty($notice->file_client_name) ? $notice->file_client_name : basename($notice->file)}}"   target="_blank">
-                            {!! HP::FileExtension($notice->file)  ?? '' !!}
-                        </a>
-                    @else 
-                        <div class="fileinput fileinput-new input-group" data-provides="fileinput" >
-                        <div class="form-control" data-trigger="fileinput">
-                        <i class="glyphicon glyphicon-file fileinput-exists"></i>
-                        <span class="fileinput-filename"></span>
-                        </div>
-                        <span class="input-group-addon btn btn-default btn-file">
-                        <span class="fileinput-new">เลือกไฟล์</span>
-                        <span class="fileinput-exists">เปลี่ยน</span>
-                            <input type="file" name="file" required class="check_max_size_file">
-                            </span>
-                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
-                        </div>
-                    @endif
-                </div>
-            </div> --}}
+
             @if(isset($notice)) 
             <div class="col-md-6">
                 <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>

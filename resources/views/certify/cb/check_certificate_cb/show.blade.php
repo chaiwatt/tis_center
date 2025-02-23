@@ -139,7 +139,7 @@
                                         @php 
                                             $i_key = 0;   
                                         @endphp
-                                        @foreach($certi_cb->CertiCBAuditorsManyBy as $key => $item)
+                                        @foreach($certi_cb->CertiCBAuditorsManyBy as $i_key => $item)
                                             @php 
                                                 $auditors_btn =  '';
                                                 if(is_null($item->status)){
@@ -304,6 +304,101 @@
                                         </a> 
                                         <br>
                                     @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form_group btn-group">
+                            <div class="btn-group">
+                                <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-cb")}}" >
+                                    {!! $assessment_icon  !!}    ผลการตรวจประเมิน ทั้งหมด
+                                </a>
+                                <button type="button" class="btn  {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
+                                    <span class="caret"></span>
+                                </button>
+
+                                <div class="dropdown-menu" role="menu" >
+                                    @foreach($certi_cb->paidPayIn1BoardAuditors() as $key => $boardAuditor)
+                                        @php
+                                            $assessment = $boardAuditor->certiCBSaveAssessment();
+                                                $assessment_url =  '';
+                                                $assessment_btn =  '';
+                                                if ($assessment != null) {
+                                                  
+                                                    if ($assessment->degree == 7) { // ผ่านการการประเมิน
+                                                        $assessment_btn =  'btn-info';
+                                                        $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                                    }elseif ($assessment->degree == 0) {  //ฉบับร่าง
+                                                        $assessment_btn =  'btn-primary';
+                                                        $assessment_url =  'certify/save_assessment-cb/'.$assessment->id.'/edit'; 
+                                                    }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
+                                                        $assessment_btn =  'btn-success';
+                                                        $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                                    }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
+                                                        $assessment_btn =  '#ffff80';
+                                                        $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                                    }else {    //ผปก. ส่งให้ จนท.
+                                                        $assessment_btn =  'btn-danger';
+                                                        $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                                    }
+                                                }
+
+
+                                        @endphp
+                                        @if ($assessment != null)
+                                                {{-- <a  class="btn btn-info  " href=""  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                    ครั้งที่ {{ $key + 1 }} :  
+                                                    {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}} dddd
+                                                </a>  --}}
+
+                                                @if ($assessment->submit_type == 'confirm' || $assessment->submit_type == null)
+                                                     
+                                                        <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                            {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}
+                                                        </a> 
+                                                    @elseif($assessment->submit_type == 'save')
+                                                    <a  class="btn btn-info  " href="{{route('save_cb_assessment.create',['id' => $boardAuditor->id])}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                       {{$boardAuditor->auditor}} (ฉบับร่าง)
+                                                    </a> 
+                                                @endif
+
+                                              
+                                            @else
+                                                <a  class="btn btn-info  " href="{{route('save_cb_assessment.create',['id' => $boardAuditor->id])}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                    {{$boardAuditor->auditor}} (อยู่ระหว่างดำเนินการ)
+                                                </a> 
+                                        @endif
+                                        
+                                    @endforeach
+                                    {{-- @foreach($certi_cb->CertiCBSaveAssessmentMany as $key => $assessment)
+                                        @php
+                                            $assessment_url =  '';
+                                            $assessment_btn =  '';
+                                            if ($assessment->degree == 7) { // ผ่านการการประเมิน
+                                                $assessment_btn =  'btn-info';
+                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                            }elseif ($assessment->degree == 0) {  //ฉบับร่าง
+                                                $assessment_btn =  'btn-primary';
+                                                $assessment_url =  'certify/save_assessment-cb/'.$assessment->id.'/edit'; 
+                                            }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
+                                                $assessment_btn =  'btn-success';
+                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                            }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
+                                                $assessment_btn =  '#ffff80';
+                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                            }else {    //ผปก. ส่งให้ จนท.
+                                                $assessment_btn =  'btn-danger';
+                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
+                                            }
+
+                                        @endphp
+                                        <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                            ครั้งที่ {{ count($certi_cb->CertiCBSaveAssessmentMany) - ($key) }} :  
+                                            {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}
+                                        </a> 
+                                        <br>
+                                    @endforeach --}}
                                 </div>
                             </div>
                         </div>

@@ -21,7 +21,7 @@
             <?php endif; ?>
         </div>
 
-        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ <?php echo e($cc->applicant->app_no ?? '-'); ?>
+        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ landing <?php echo e($cc->applicant->app_no ?? '-'); ?>
 
     <?php
         $exported = $cc->applicant->certificate_export;
@@ -342,14 +342,10 @@
                             <?php if($notice->submit_type == 'confirm' || $notice->submit_type == null): ?>
                                     <a class="btn <?php echo e($assessment_btn); ?>"  href="<?php echo e($assessment_url); ?>" style="width:750px;text-align: left">   <?php echo e($item->auditor); ?></a>
                                 <?php elseif($notice->submit_type == 'save'): ?>
-                                <a class="btn btn-info" href="<?php echo e(route('save_assessment.create', ['id' => $item->id])); ?>" style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left"> <?php echo e($item->auditor); ?>  (ยังไม่ได้ตรวจ)</>  
+                                    <a class="btn btn-info" href="<?php echo e(route('save_assessment.create', ['id' => $item->id])); ?>" style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left"> <?php echo e($item->auditor); ?>  (ฉบับร่าง)</>  
                             <?php endif; ?>
-                            
-                            
-                            
                          <?php else: ?>
-                             
-                             <a class="btn btn-info" href="<?php echo e(route('save_assessment.create', ['id' => $item->id])); ?>" style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left"> <?php echo e($item->auditor); ?>  (ยังไม่ได้ตรวจ)</>  
+                             <a class="btn btn-info" href="<?php echo e(route('save_assessment.create', ['id' => $item->id])); ?>" style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left"> <?php echo e($item->auditor); ?>  (อยู่ระหว่างการตรวจสอบ)</>  
                         <?php endif; ?>
                        
                     </a>

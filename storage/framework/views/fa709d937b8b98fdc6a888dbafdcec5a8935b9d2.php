@@ -1,13 +1,37 @@
 <?php $__env->startPush('css'); ?>
     <link href="<?php echo e(asset('plugins/components/icheck/skins/all.css')); ?>" rel="stylesheet" type="text/css" />
     <link href="<?php echo e(asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')); ?>" rel="stylesheet" type="text/css" />
+    <style>
+        textarea.auto-expand {
+            border-radius: 0 !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            resize: none; 
+            overflow: hidden; 
+            min-height: 50px; 
+        }
+        .no-hover-animate tbody tr:hover {
+            background-color: inherit !important; /* ปิดการเปลี่ยนสี background */
+            transition: none !important; /* ปิดเอฟเฟกต์การเปลี่ยนแปลง */
+        }
+        
+        /* กำหนดขนาดความกว้างของ SweetAlert2 */
+        .custom-swal-popup {
+            width: 500px !important;  /* ปรับความกว้างตามต้องการ */
+        }
+
+        textarea.non-editable {
+            pointer-events: none; /* ทำให้ไม่สามารถคลิกหรือแก้ไขได้ */
+            opacity: 0.9; /* กำหนดความทึบของ textarea */
+        }
+    </style>
 <?php $__env->stopPush(); ?>
 <?php $__env->startSection('content'); ?>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">บันทึกผลการตรวจประเมิน (cb) <?php echo e($assessment->id); ?></h3>
+                    <h3 class="box-title pull-left">บันทึกผลการตรวจประเมิน (cb) landing <?php echo e($assessment->id); ?></h3>
                     <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('view-'.str_slug('saveassessmentcb'))): ?>
                         <a class="btn btn-success pull-right" href="<?php echo e(url('/certify/save_assessment-cb')); ?>">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ

@@ -150,9 +150,17 @@ class CertiCBAuditors  extends Model
     return number_format($countItem,2) ?? 0;
    }
    
-      //  สถานะขั้นตอนการทำงาน
-      public function CertiCBAuditorsStepTo()
-      {
-          return $this->belongsTo(CertiCBAuditorsStep::class,'step_id');
-      }
+    //  สถานะขั้นตอนการทำงาน
+    public function CertiCBAuditorsStepTo()
+    {
+        return $this->belongsTo(CertiCBAuditorsStep::class,'step_id');
+    }
+
+    public function certiCBSaveAssessment()
+    {
+        return CertiCBSaveAssessment::where('auditors_id',$this->id)->first();
+    }
+
+
+    
 }

@@ -229,6 +229,8 @@ class SaveAssessmentController extends Controller
 
     public function store(Request $request)
     {
+
+        // dd($request->all());
        
         $auditor = BoardAuditor::findOrFail($request->auditor_id);
         $notice = Notice::where('app_certi_assessment_id',$auditor->assessment_to->id)->first();
@@ -2115,6 +2117,7 @@ class SaveAssessmentController extends Controller
 
         public function viewLabInfo($id)
         {
+            // dd('ok');
             $notice = Notice::find($id);
             $labReportInfo = LabReportInfo::where('app_certi_lab_notice_id',$id)->first();
             // $notice = $labReportInfo->notice;

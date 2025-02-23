@@ -2,13 +2,37 @@
 @push('css')
     <link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')}}" rel="stylesheet" type="text/css" />
+    <style>
+        textarea.auto-expand {
+            border-radius: 0 !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            resize: none; 
+            overflow: hidden; 
+            min-height: 50px; 
+        }
+        .no-hover-animate tbody tr:hover {
+            background-color: inherit !important; /* ปิดการเปลี่ยนสี background */
+            transition: none !important; /* ปิดเอฟเฟกต์การเปลี่ยนแปลง */
+        }
+        
+        /* กำหนดขนาดความกว้างของ SweetAlert2 */
+        .custom-swal-popup {
+            width: 500px !important;  /* ปรับความกว้างตามต้องการ */
+        }
+
+        textarea.non-editable {
+            pointer-events: none; /* ทำให้ไม่สามารถคลิกหรือแก้ไขได้ */
+            opacity: 0.9; /* กำหนดความทึบของ textarea */
+        }
+    </style>
 @endpush
 @section('content')
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">บันทึกผลการตรวจประเมิน (cb) {{ $assessment->id }}</h3>
+                    <h3 class="box-title pull-left">บันทึกผลการตรวจประเมิน (cb) landing {{ $assessment->id }}</h3>
                     @can('view-'.str_slug('saveassessmentcb'))
                         <a class="btn btn-success pull-right" href="{{ url('/certify/save_assessment-cb') }}">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ

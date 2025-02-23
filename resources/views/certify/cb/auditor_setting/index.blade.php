@@ -118,19 +118,22 @@
                         <tr>
                             <th>#</th>
                             <th><input type="checkbox" id="checkall"></th>
-                            <th>สาขาการรับรอง</th>
-                            <th>สาขาการรับรอง Eng</th>
-                            <th>สถานะ</th>
+                            <th>ชื่อคณะตรวจ</th>
+                            <th>คณะตรวจประเมิน</th>
+                            <th>คณะลงนาม</th>
                             <th class="text-right">จัดการ</th>
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($calibrationBranchs as $calibrationBranch)
+                        @foreach($cbAuditorTeams as $cbAuditorTeam)
                             <tr>
                                 <td>{{ $loop->iteration or $calibrationBranch->id }}</td>
-                                <td><input type="checkbox" name="item-selection[]" class="item-selection" value="{{ $calibrationBranch->id }}"></td>
-                                <td>{{ $calibrationBranch->title }}</td>
-                                <td>{{ $calibrationBranch->title_en }}</td>
+                                <td><input type="checkbox" name="item-selection[]" class="item-selection" value="{{ $cbAuditorTeam->id }}"></td>
+                                <td>{{ $cbAuditorTeam->name }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                               {{--  <td>{{ $calibrationBranch->title_en }}</td>
                                 <td>
                                   @if($calibrationBranch->state=='1')
 
@@ -166,7 +169,13 @@
                                         </a>
                                     @endcan
 
-                                </td>
+                                    @can('edit-'.str_slug('bcertify-scope-lab-cal'))
+                                    <a href="{{ url('/bcertify/setting_scope_lab_cal/instrument-group/' . $calibrationBranch->id) }}"
+                                      title="Link" class="btn btn-warning btn-xs">
+                                          <i class="fa fa-link" aria-hidden="true"> </i>
+                                    </a>
+                                @endcan
+                                </td> --}}
                             </tr>
                           @endforeach
                         </tbody>
@@ -174,7 +183,7 @@
 
                     <div class="pagination-wrapper">
                       {!!
-                          $calibrationBranchs->appends([
+                          $cbAuditorTeams->appends([
                                         'perPage' => Request::get('perPage'),
                                                  ])->render()
                       !!}

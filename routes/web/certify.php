@@ -501,6 +501,7 @@ Route::group(['prefix' => 'certify'], function () {
     Route::post('/check_certificate-ib/update_review/{id?}', 'Certify\IB\\CheckCertificateIBController@UpdateReview');
 
     Route::get('/auditor/status/ib_and_cb/{id?}/{type?}', 'Certify\IB\\AuditorIBController@ApiAuditorExpertise');
+    
     // อ่านไฟล์ที่แนบมา
     // Route::get('check/files_ib/{filename}', function($filename)
     // {
@@ -580,9 +581,18 @@ Route::group(['prefix' => 'certify'], function () {
     Route::post('/check_certificate_cb/check_pay_in_cb','Certify\CB\\CheckCertificateCBController@check_pay_in_cb');
     // บันทึกผลการตรวจประเมิน  (CB)
     Route::resource('/save_assessment-cb', 'Certify\CB\\SaveAssessmentCBController');
+    Route::get('/save_assessment-cb/create/{id?}','Certify\CB\\SaveAssessmentCBController@create')->name('save_cb_assessment.create');
+    Route::post('/save_assessment-cb/store/{id?}','Certify\CB\\SaveAssessmentCBController@store')->name('save_cb_assessment.store');
     Route::get('/save_assessment-cb/certi_cb/{id?}', 'Certify\CB\\SaveAssessmentCBController@DataCertiCb');
     Route::get('/save_assessment-cb/assessment/{id?}/edit', 'Certify\CB\\SaveAssessmentCBController@DataAssessment');
     Route::post('/save_assessment-cb/update/{id?}', 'Certify\CB\\SaveAssessmentCBController@UpdateAssessment');
+
+    Route::post('/save_assessment-cb/email-to-cb-expert/{id?}', 'Certify\CB\\SaveAssessmentCBController@EmailToCbExpert')->name('save_assessment.email_to_cb_expert');
+
+
+    Route::get('/view-cb-info/{id?}','Certify\CB\\SaveAssessmentCBController@viewCbInfo')->name('save_assessment.view_cb_info');
+    Route::post('/update-cb-info','Certify\CB\\SaveAssessmentCBController@updateCbInfo')->name('save_assessment.update_cb_info');
+
      // สรุปรายงานและเสนออนุกรรมการฯ
     Route::post('/check_certificate-cb/report/{id?}', 'Certify\CB\\CheckCertificateCBController@UpdateReport');
     // แนบใบ Pay-in ครั้งที่ 2
@@ -616,6 +626,12 @@ Route::group(['prefix' => 'certify'], function () {
     Route::get('check_certificate-cb/check_api_pid/cbs', 'Certify\CB\\CertificateExportCBController@check_api_pid');
 
 
+    Route::get('setting-team-cb', 'Certify\CB\\CbAuditorTeamController@index');
+    Route::get('setting-team-cb/create', 'Certify\CB\\CbAuditorTeamController@create');
+    Route::post('setting-team-cb/store', 'Certify\CB\\CbAuditorTeamController@store');
+    Route::get('setting-team-cb/view/{id}', 'Certify\CB\\CbAuditorTeamController@view');
+    Route::put('setting-team-cb/update/{id}', 'Certify\CB\\CbAuditorTeamController@update');
+    Route::delete('setting-team-cb/delete/{id}', 'Certify\CB\\CbAuditorTeamController@delete');
 
     Route::group(['prefix' => 'certificate_detail-cb'], function () { 
         Route::post('/del_attach','Certify\CB\\CheckCertificateCBController@del_attach');

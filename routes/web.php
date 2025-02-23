@@ -61,8 +61,7 @@ Route::get('/get-attached-file-from-request','MyTestController@getAttachedFileFr
 
 Route::get('/get-doc-review-auditor','MyTestController@getDocReviewAuditor');
 
-
-
+Route::get('/cb-scope','MyTestController@copyScopeCbFromAttachement');
 
 Route::get('/proxy', function (\Illuminate\Http\Request $request) {
     $url = $request->query('url'); // รับ URL ของ PDF ที่ต้องการ
@@ -95,6 +94,10 @@ Route::get('/store-by-expert-get-app/{app_no?}','ExternalExpertActionController@
 Route::get('/create-by-expert-lab-sur/{notice_id?}','ExternalExpertActionController@createByExpertLabSur')->name('create_by_expert.lab_sur');
 Route::post('/store-by-expert-lab-sur','ExternalExpertActionController@storeByExpertLabSur')->name('store_by_expert.lab_sur');
 Route::get('/store-by-expert-get-app-lab-sur/{app_no?}','ExternalExpertActionController@storeByExpertGetAppLabSur')->name('store_by_expert_get_app.lab_sur');
+
+Route::get('/create-by-cb-expert/{assessment_id?}','ExternalCBExpertActionController@createByCbExpert');
+Route::post('/store-by-cb-expert','ExternalCBExpertActionController@storeByCbExpert')->name('store_by_cb_expert');
+Route::get('/store-by-cb-expert-get-app/{app_no?}','ExternalCBExpertActionController@storeByExpertGetApp')->name('store_by_cb_expert_get_app');
 
 
 // HelperController

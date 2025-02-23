@@ -34,6 +34,12 @@
                         "url": "\/bcertify\/setting_scope_cb"
                     },
                     {
+                        "title": "setting_team_cb",
+                        "display": "คณะตรวจประเมิน CB",
+                        "icon": "mdi mdi-speedometer",
+                        "url": "\/certify\/setting-team-cb"
+                    },
+                    {
                         "title": "bcertify_setting_running",
                         "display": "ตั้งค่าเลขรัน",
                         "icon": "mdi mdi-speedometer",
