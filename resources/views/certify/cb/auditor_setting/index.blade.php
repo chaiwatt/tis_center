@@ -72,7 +72,7 @@
       <div class="row">
         <div class="col-sm-12">
             <div class="white-box">
-                <h3 class="box-title pull-left">ขอบข่าย Lab (สอบเทียบ)</h3>
+                <h3 class="box-title pull-left">คณะตรวจประเมิน</h3>
 
                 <div class="pull-right">
 
@@ -89,7 +89,7 @@
                   @endcan
 
                   @can('add-'.str_slug('bcertify-scope-lab-cal'))
-                      <a class="btn btn-success btn-sm waves-effect waves-light" href="{{ url('/bcertify/setting_scope_lab_cal/create') }}">
+                      <a class="btn btn-success btn-sm waves-effect waves-light" href="{{ url('/certify/setting-team-cb/create') }}">
                         <span class="btn-label"><i class="fa fa-plus"></i></span><b>เพิ่ม</b>
                       </a>
                   @endcan
@@ -105,11 +105,11 @@
                 <div class="clearfix"></div>
                 <div class="table-responsive">
 
-                  {!! Form::open(['url' => '/bcertify/setting_scope_lab_cal/multiple', 'method' => 'delete', 'id' => 'myForm', 'class'=>'hide']) !!}
+                  {{-- {!! Form::open(['url' => '/bcertify/setting_scope_lab_cal/multiple', 'method' => 'delete', 'id' => 'myForm', 'class'=>'hide']) !!}
 
-                  {!! Form::close() !!}
+                  {!! Form::close() !!} --}}
 
-                  {!! Form::open(['url' => '/bcertify/setting_scope_lab_cal/update-state', 'method' => 'put', 'id' => 'myFormState', 'class'=>'hide']) !!}
+                  {!! Form::open(['url' => '/certify/setting-team-cb/update-state', 'method' => 'put', 'id' => 'myFormState', 'class'=>'hide']) !!}
                     <input type="hidden" name="state" id="state" />
                   {!! Form::close() !!}
 
@@ -120,19 +120,52 @@
                             <th><input type="checkbox" id="checkall"></th>
                             <th>ชื่อคณะตรวจ</th>
                             <th>คณะตรวจประเมิน</th>
-                            <th>คณะลงนาม</th>
-                            <th class="text-right">จัดการ</th>
+                            <th class="text-right">สถานะ</th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($cbAuditorTeams as $cbAuditorTeam)
+                          @php
+                              // แปลง auditor_team_json จาก JSON เป็น array
+                              $auditorTeamData = json_decode($cbAuditorTeam->auditor_team_json, true);
+                          @endphp
                             <tr>
                                 <td>{{ $loop->iteration or $calibrationBranch->id }}</td>
                                 <td><input type="checkbox" name="item-selection[]" class="item-selection" value="{{ $cbAuditorTeam->id }}"></td>
                                 <td>{{ $cbAuditorTeam->name }}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td>     
+                                  <ul>
+                                    @foreach($auditorTeamData['temp_users'] as $key => $users)
+                                      <li>
+                                          @php
+                                              $status = HP::cbDocAuditorStatus($key)->title;
+                                              // ตรวจสอบค่า temp_departments และเปลี่ยนข้อความที่ตรงกับเงื่อนไข
+                                              $department = $auditorTeamData['temp_departments'][$key][0];
+                                              
+                                              if ($department == 'ไม่มีรายละเอียดหน่วยงานโปรดแก้ไข') {
+                                                  $department = 'ไม่มีรายละเอียดหน่วยงาน';
+                                              }
+                                          @endphp
+                                          <strong>{{ $status }} </strong>
+                                          <ul>
+                                              @foreach($users as $user)
+                                                  <li>{{ $user }} ({{ $department }})</li>
+                                              @endforeach
+                                          </ul>
+                                      </li>
+                                  @endforeach
+                                
+                                  </ul>
+                                </td>
+                                <td class="text-right">
+                                  @if($cbAuditorTeam->state == 1)
+                                      <span class="badge badge-success">ใช้งาน</span>
+                                  @else
+                                      <span class="badge badge-danger">ปิดการใช้งาน</span>
+                                  @endif
+                              </td>
+                              
+                                {{-- <td></td> --}}
                                {{--  <td>{{ $calibrationBranch->title_en }}</td>
                                 <td>
                                   @if($calibrationBranch->state=='1')
@@ -152,29 +185,24 @@
                                 </a>
 
                               @endif
-                                </td>
+                                </td> --}}
                                 
-                                <td class="text-right">
+                                {{-- <td class="text-right">
                                 
-                                    @can('view-'.str_slug('bcertify-scope-lab-cal'))
-                                        <a href="{{ url('/bcertify/setting_scope_lab_cal/' . $calibrationBranch->id) }}"
-                                           title="View" class="btn btn-info btn-xs">
-                                              <i class="fa fa-eye" aria-hidden="true"></i>
-                                        </a>
-                                    @endcan
+
                                     @can('edit-'.str_slug('bcertify-scope-lab-cal'))
-                                        <a href="{{ url('/bcertify/setting_scope_lab_cal/' . $calibrationBranch->id . '/edit') }}"
+                                        <a href="{{ url('/bcertify/setting_scope_lab_cal/' . $cbAuditorTeam->id . '/edit') }}"
                                            title="Edit" class="btn btn-primary btn-xs">
                                               <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
                                         </a>
                                     @endcan
 
                                     @can('edit-'.str_slug('bcertify-scope-lab-cal'))
-                                    <a href="{{ url('/bcertify/setting_scope_lab_cal/instrument-group/' . $calibrationBranch->id) }}"
-                                      title="Link" class="btn btn-warning btn-xs">
-                                          <i class="fa fa-link" aria-hidden="true"> </i>
-                                    </a>
-                                @endcan
+                                      <a href="{{ url('/bcertify/setting_scope_lab_cal/instrument-group/' . $cbAuditorTeam->id) }}"
+                                        title="Link" class="btn btn-warning btn-xs">
+                                            <i class="fa fa-link" aria-hidden="true"> </i>
+                                      </a>
+                                    @endcan
                                 </td> --}}
                             </tr>
                           @endforeach
@@ -232,7 +260,8 @@
 
       function UpdateState(state){
 
-        if($('#myTable').find('input.item-selection:checked').length > 0){//ถ้าเลือกแล้ว
+        if($('#myTable').find('input.item-selection:checked').length > 0)
+        {//ถ้าเลือกแล้ว
             $('#myTable').find('input.item-selection:checked').appendTo("#myFormState");
             $('#state').val(state);
             $('#myFormState').submit();

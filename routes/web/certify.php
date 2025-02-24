@@ -632,6 +632,7 @@ Route::group(['prefix' => 'certify'], function () {
     Route::get('setting-team-cb/view/{id}', 'Certify\CB\\CbAuditorTeamController@view');
     Route::put('setting-team-cb/update/{id}', 'Certify\CB\\CbAuditorTeamController@update');
     Route::delete('setting-team-cb/delete/{id}', 'Certify\CB\\CbAuditorTeamController@delete');
+    Route::put('setting-team-cb/update-state', 'Certify\CB\\CbAuditorTeamController@updateState');
 
     Route::group(['prefix' => 'certificate_detail-cb'], function () { 
         Route::post('/del_attach','Certify\CB\\CheckCertificateCBController@del_attach');
