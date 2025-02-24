@@ -90,6 +90,11 @@ class HP
         return StatusAuditor::find($id);
     }
 
+    public static function ibDocAuditorStatus($id)
+    {
+        return StatusAuditor::find($id);
+    }
+
     public static function CancelCertiCb($appCertiCb,$reason)
     {//บันทึกลงตารางข้อมูลบุคคลธรรมดา
 

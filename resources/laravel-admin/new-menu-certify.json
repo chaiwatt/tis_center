@@ -40,6 +40,12 @@
                         "url": "\/certify\/setting-team-cb"
                     },
                     {
+                        "title": "setting_team_ib",
+                        "display": "คณะตรวจประเมิน IB",
+                        "icon": "mdi mdi-speedometer",
+                        "url": "\/certify\/setting-team-ib"
+                    },
+                    {
                         "title": "bcertify_setting_running",
                         "display": "ตั้งค่าเลขรัน",
                         "icon": "mdi mdi-speedometer",

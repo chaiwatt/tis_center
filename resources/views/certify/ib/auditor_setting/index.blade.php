@@ -72,7 +72,7 @@
       <div class="row">
         <div class="col-sm-12">
             <div class="white-box">
-                <h3 class="box-title pull-left">คณะตรวจประเมิน CB</h3>
+                <h3 class="box-title pull-left">คณะตรวจประเมิน IB</h3>
 
                 <div class="pull-right">
 
@@ -89,7 +89,7 @@
                   @endcan
 
                   @can('add-'.str_slug('bcertify-scope-lab-cal'))
-                      <a class="btn btn-success btn-sm waves-effect waves-light" href="{{ url('/certify/setting-team-cb/create') }}">
+                      <a class="btn btn-success btn-sm waves-effect waves-light" href="{{ url('/certify/setting-team-ib/create') }}">
                         <span class="btn-label"><i class="fa fa-plus"></i></span><b>เพิ่ม</b>
                       </a>
                   @endcan
@@ -109,7 +109,7 @@
 
                   {!! Form::close() !!} --}}
 
-                  {!! Form::open(['url' => '/certify/setting-team-cb/update-state', 'method' => 'put', 'id' => 'myFormState', 'class'=>'hide']) !!}
+                  {!! Form::open(['url' => '/certify/setting-team-ib/update-state', 'method' => 'put', 'id' => 'myFormState', 'class'=>'hide']) !!}
                     <input type="hidden" name="state" id="state" />
                   {!! Form::close() !!}
 
@@ -124,23 +124,26 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($cbAuditorTeams as $cbAuditorTeam)
+                        @foreach($ibAuditorTeams as $ibAuditorTeam)
                           @php
                               // แปลง auditor_team_json จาก JSON เป็น array
-                              $auditorTeamData = json_decode($cbAuditorTeam->auditor_team_json, true);
-                              
+                              $auditorTeamData = json_decode($ibAuditorTeam->auditor_team_json, true);
                           @endphp
-                          
                             <tr>
-                                <td>{{ $loop->iteration or $calibrationBranch->id }}  </td>
-                                <td><input type="checkbox" name="item-selection[]" class="item-selection" value="{{ $cbAuditorTeam->id }}"></td>
-                                <td>{{ $cbAuditorTeam->name }}</td>
-                                <td>     
+                                <td>{{ $loop->iteration or $calibrationBranch->id }}</td>
+                                <td><input type="checkbox" name="item-selection[]" class="item-selection" value="{{ $ibAuditorTeam->id }}"></td>
+                                <td>{{ $ibAuditorTeam->name }}</td>
+                                <td>  
+                                  {{-- {{$ibAuditorTeam->auditor_team_json}}    --}}
                                   <ul>
                                     @foreach($auditorTeamData['temp_users'] as $key => $users)
                                       <li>
+                                        {{-- {{$auditorTeamData['status'][$key]}} --}}
+                                        @php
+                                            $statusId = $auditorTeamData['status'][$key]
+                                        @endphp
                                           @php
-                                              $status = HP::cbDocAuditorStatus($key)->title;
+                                              $status = HP::ibDocAuditorStatus($statusId)->title;
                                               // ตรวจสอบค่า temp_departments และเปลี่ยนข้อความที่ตรงกับเงื่อนไข
                                               $department = $auditorTeamData['temp_departments'][$key][0];
                                               
@@ -160,7 +163,7 @@
                                   </ul>
                                 </td>
                                 <td class="text-right">
-                                  @if($cbAuditorTeam->state == 1)
+                                  @if($ibAuditorTeam->state == 1)
                                       <span class="badge badge-success">ใช้งาน</span>
                                   @else
                                       <span class="badge badge-danger">ปิดการใช้งาน</span>
@@ -193,14 +196,14 @@
                                 
 
                                     @can('edit-'.str_slug('bcertify-scope-lab-cal'))
-                                        <a href="{{ url('/bcertify/setting_scope_lab_cal/' . $cbAuditorTeam->id . '/edit') }}"
+                                        <a href="{{ url('/bcertify/setting_scope_lab_cal/' . $ibAuditorTeam->id . '/edit') }}"
                                            title="Edit" class="btn btn-primary btn-xs">
                                               <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
                                         </a>
                                     @endcan
 
                                     @can('edit-'.str_slug('bcertify-scope-lab-cal'))
-                                      <a href="{{ url('/bcertify/setting_scope_lab_cal/instrument-group/' . $cbAuditorTeam->id) }}"
+                                      <a href="{{ url('/bcertify/setting_scope_lab_cal/instrument-group/' . $ibAuditorTeam->id) }}"
                                         title="Link" class="btn btn-warning btn-xs">
                                             <i class="fa fa-link" aria-hidden="true"> </i>
                                       </a>
@@ -213,7 +216,7 @@
 
                     <div class="pagination-wrapper">
                       {!!
-                          $cbAuditorTeams->appends([
+                          $ibAuditorTeams->appends([
                                         'perPage' => Request::get('perPage'),
                                                  ])->render()
                       !!}

@@ -469,6 +469,15 @@ Route::group(['prefix' => 'certify'], function () {
     Route::post('/save_assessment-ib/update/{id?}', 'Certify\IB\\SaveAssessmentIbController@UpdateAssessment');
 
 
+    Route::get('setting-team-ib', 'Certify\IB\\IbAuditorTeamController@index');
+    Route::get('setting-team-ib/create', 'Certify\IB\\IbAuditorTeamController@create');
+    Route::post('setting-team-ib/store', 'Certify\IB\\IbAuditorTeamController@store');
+    Route::get('setting-team-ib/view/{id}', 'Certify\IB\\IbAuditorTeamController@view');
+    Route::put('setting-team-ib/update/{id}', 'Certify\IB\\IbAuditorTeamController@update');
+    Route::delete('setting-team-ib/delete/{id}', 'Certify\IB\\IbAuditorTeamController@delete');
+    Route::put('setting-team-ib/update-state', 'Certify\IB\\IbAuditorTeamController@updateState');
+
+
     //ออกใบรับรอง (IB)
     Route::get('certificate-export-ib/delete_file_certificate/{id?}','Certify\IB\\CertificateExportIBController@delete_file_certificate');
     Route::post('certificate-export-ib/create', 'Certify\IB\\CertificateExportIBController@create');
