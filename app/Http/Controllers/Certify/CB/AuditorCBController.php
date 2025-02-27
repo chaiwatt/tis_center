@@ -4,32 +4,39 @@ namespace App\Http\Controllers\Certify\CB;
 
 use DB;
 use HP;
-
 use Storage;
+
 use App\User;
 use stdClass;
 use Carbon\Carbon;
 use App\Http\Requests;
-
 use Illuminate\Http\Request;
 
+use App\Models\Besurv\Signer;
+
+use App\Certify\CbAuditorTeam;
 use App\Mail\CB\CBAuditorsMail;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;   
 use  App\Models\Bcertify\StatusAuditor; 
 use App\Mail\CB\CbDocReviewAuditorsMail;
+use App\Models\Bcertify\AuditorInformation;
 use App\Models\Certify\ApplicantCB\CertiCb; 
 use App\Models\Certify\Applicant\CostDetails;
 use App\Models\Certificate\CbDocReviewAuditor;
 use App\Models\Certify\ApplicantCB\CertiCBCost; 
+use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Bcertify\BoardAuditorMsRecordInfo;
 use App\Models\Certify\ApplicantCB\CertiCBCheck; 
+
 use App\Models\Certify\ApplicantCB\CertiCBReview;
+
+use App\Models\Bcertify\CbBoardAuditorMsRecordInfo;
+use App\Models\Bcertify\CbMessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCbHistory; 
 use App\Models\Certify\ApplicantCB\CertiCBAuditors; 
 use App\Models\Certify\ApplicantCB\CertiCBPayInOne; 
-
 use App\Models\Certify\ApplicantCB\CertiCBAttachAll; 
-
 use App\Models\Certify\ApplicantCB\CertiCBAuditorsCost;
 use App\Models\Certify\ApplicantCB\CertiCBAuditorsDate;
 use App\Models\Certify\ApplicantCB\CertiCBAuditorsList; 
@@ -136,23 +143,20 @@ class AuditorCBController extends Controller
                                        ->orderby('id','desc')
                                        ->pluck('app_no', 'id');
            }
-
-            return view('certify.cb.auditor_cb.create',['app_no' => $app_no ,'auditorcb' => $auditorcb,'auditors_status'=> $auditors_status,'previousUrl'=>$previousUrl]);
+           $signers = Signer::all();
+           $cbAuditorTeams = CbAuditorTeam::where('state',1)->get();
+            return view('certify.cb.auditor_cb.create',['cbAuditorTeams'=>$cbAuditorTeams,'signers'=>$signers,'app_no' => $app_no ,'auditorcb' => $auditorcb,'auditors_status'=> $auditors_status,'previousUrl'=>$previousUrl]);
         }
         abort(403);
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
+
     public function store(Request $request)
     {
-      // dd('ok');
+        $cbAuditorTeam = CbAuditorTeam::find($request->cbAuditorTeam);
+        $auditorTeamData = json_decode($cbAuditorTeam->auditor_team_json, true);
+        // dd($request->all());
         $model = str_slug('auditorcb','-');
         if(auth()->user()->can('add-'.$model)) {
   
@@ -174,13 +178,14 @@ class AuditorCBController extends Controller
                   //วันที่ตรวจประเมิน
                 $this->DataCertiCBAuditorsDate($auditors->id,$request);
 
-        
-                $this->storeStatus($auditors->id,(array)$requestData['list']);
+                // $this->storeStatus($auditors->id,(array)$requestData['list']);
+                $this->storeStatusFromCbAuditorTeam($auditors->id,$auditorTeamData);
 
                 //ค่าใช้จ่าย
                 $this->storeItems($auditors->id,$request);
 
                 $certi_cb = CertiCb::findOrFail($auditors->app_certi_cb_id);
+                $this->saveSignature($request,$auditors->id,$certi_cb);
                 if(!is_null($certi_cb->email)){
                     if(isset($request->vehicle)){
                         $certi_cb->update(['status'=>10]); // อยู่ระหว่างดำเนินการ 	
@@ -244,7 +249,15 @@ class AuditorCBController extends Controller
               $auditors_status = [new CertiCBAuditorsStatus];
           }
             $attach_path = $this->attach_path;//path ไฟล์แนบ
-            return view('certify/cb.auditor_cb.edit', compact('auditorcb','auditors_status','previousUrl','attach_path'));
+            $signers = Signer::all();
+            $cbAuditorTeams = CbAuditorTeam::where('state',1)->get();
+
+            $messageRecordTransaction = CbMessageRecordTransaction::where('board_auditor_id',$id)->first();
+            $messageRecordTransactions = CbMessageRecordTransaction::where('board_auditor_id',$id)->get();
+
+            // dd('fuck');
+
+            return view('certify.cb.auditor_cb.edit', compact('messageRecordTransaction','messageRecordTransactions','cbAuditorTeams','signers','auditorcb','auditors_status','previousUrl','attach_path'));
         }
         abort(403);
     }
@@ -555,6 +568,79 @@ class AuditorCBController extends Controller
           }
        }
      } 
+     public function storeStatusFromCbAuditorTeam($baId, $auditorTeamData) 
+     {
+        CertiCBAuditorsStatus::where('auditors_id',$baId)->delete();
+        CertiCBAuditorsList::where('auditors_id',$baId)->delete();
+          foreach($auditorTeamData['status'] as $key => $itme) {
+            if($itme != null){
+                $input = [];
+                $input['auditors_id'] = $baId;
+                $input['status'] =  $itme;
+                $auditors_status =  CertiCBAuditorsStatus::create($input);
+                $this->storeList($auditors_status,
+                                $auditorTeamData['temp_users'][$auditors_status->status],
+                                $auditorTeamData['user_id'][$auditors_status->status],
+                                $auditorTeamData['temp_departments'][$auditors_status->status]
+                              );
+            }
+          }
+     } 
+
+
+     public function saveSignature($request,$baId,$app)
+     {
+         CbBoardAuditorMsRecordInfo::where('board_auditor_id',$baId)->delete();
+         CertiCBAuditors::find($baId)->update([
+             'message_record_status' => 1
+         ]);
+ 
+         $check = CbMessageRecordTransaction::where('board_auditor_id',$baId)->get();
+         if($check->count() == 0){
+             $signatures = json_decode($request->input('signaturesJson'), true);
+             $viewUrl = url('/certify/auditor/view-cb-message-record/'.$baId);
+             if ($signatures) {
+                 foreach ($signatures as $signatureId => $signature) {
+                     try {
+                         // ลองสร้างข้อมูลในฐานข้อมูล
+                         CbMessageRecordTransaction::create([
+                             'board_auditor_id' => $baId,
+                             'signer_id' => $signature['signer_id'],
+                             'certificate_type' => 2,
+                             'app_id' => $app->app_no,
+                             'view_url' => $viewUrl,
+                             'signature_id' => $signature['id'],
+                             'is_enable' => false,
+                             'show_name' => false,
+                             'show_position' => false,
+                             'signer_name' => $signature['signer_name'],
+                             'signer_position' => $signature['signer_position'],
+                             'signer_order' => preg_replace('/[^0-9]/', '', $signatureId),
+                             'file_path' => null,
+                             'page_no' => 0,
+                             'pos_x' => 0,
+                             'pos_y' => 0,
+                             'linesapce' => 20,
+                             'approval' => 0,
+                         ]);
+                     } catch (\Exception $e) {
+                         // จัดการข้อผิดพลาดหากล้มเหลว
+                         echo "เกิดข้อผิดพลาด: " . $e->getMessage();
+                     }
+                 } 
+             }
+         }else{
+             CbMessageRecordTransaction::where('board_auditor_id',$baId)->update([
+                 'approval' => 0
+             ]);
+         }
+      
+        //  $board  =  BoardAuditor::findOrFail($baId);
+        //  $this->sendMailToExaminer($board,$board->CertiLabs); 
+     }
+
+
+
      public function storeList($status,$temp_users,$user_id,$temp_departments) {
         foreach($temp_users as $key => $itme) {
           if($itme != null){
@@ -876,6 +962,83 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
     ]);
   }
 
+  public function CreateCbMessageRecord($id)
+  {
+    
+      // สำหรับ admin และเจ้าหน้าที่ lab
+      if (!in_array(auth()->user()->role, [6, 7, 11, 28])) {
+          abort(403);
+      }
+
+      $boardAuditor = CertiCBAuditors::find($id);
+
+      $auditorIds = []; // สร้าง array ว่างเพื่อเก็บ auditor_id
+
+      $statusAuditorMap = []; // สร้าง array ว่างสำหรับเก็บข้อมูล
+
+
+      $uniqueAuditorIds = array_unique($auditorIds);
+
+      $auditorInformations = AuditorInformation::whereIn('id',$uniqueAuditorIds)->get();
+
+      $certi_cb = CertiCb::find($boardAuditor->app_certi_cb_id);
+
+   
+
+      $boardAuditorDate = CertiCBAuditorsDate::where('auditors_id',$id)->first();
+      $dateRange = "";
+
+      
+
+      if (!empty($boardAuditorDate->start_date) && !empty($boardAuditorDate->end_date)) {
+          if ($boardAuditorDate->start_date == $boardAuditorDate->end_date) {
+              // ถ้าเป็นวันเดียวกัน
+              $dateRange = "ในวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date);
+          } else {
+              // ถ้าเป็นคนละวัน
+              $dateRange = "ตั้งแต่วันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date) . 
+                          " ถึงวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->end_date);
+          }
+      }
+      
+      
+
+
+      $data = new stdClass();
+
+      $data->header_text1 = '';
+      $data->header_text2 = '';
+      $data->header_text3 = '';
+      $data->header_text4 = $certi_cb->app_no;
+      $data->lab_type = $certi_cb->lab_type == 3 ? 'ทดสอบ' : ($certi_cb->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
+      $data->lab_name = $certi_cb->lab_name;
+      $data->app_np = 'ทดสอบ ๑๖๗๑';
+      $data->certificate_no = '13-LB0037';
+      $data->register_date = HP::formatDateThaiFullNumThai($certi_cb->created_at);
+      $data->get_date = HP::formatDateThaiFullNumThai($certi_cb->get_date);
+
+      $data->date_range = $dateRange;
+      $data->statusAuditorMap = $statusAuditorMap;
+      $data->fix_text1 = <<<HTML
+                  <div class="section-title">๒. ข้อกฎหมาย/กฎระเบียบที่เกี่ยวข้อง</div>
+                  <div style="text-indent:125px">๒.๑ พระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศในราชกิจจานุเบกษา วันที่ ๔ มีนาคม ๒๕๕๑) มาตรา ๒๘ วรรค ๒ ระบุ "การขอใบรับรอง การตรวจสอบและการออกใบรับรองตามวรรคหนึ่ง ให้เป็นไปตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการประกาศกำหนด"</div>
+                  <div style="text-indent:125px">๒.๒ ประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไข วันที่ ๔ มีนาคม ๒๕๕๑ การรับรองหน่วยรับรองระบบงาน (ประกาศในราชกิจจานุเบกษา วันที่ ๑๗ พฤษภาคม ๒๕๖๔)"</div>
+                  <div style="text-indent:150px">ข้อ ๖.๑.๒.๑ (๑) ระบุว่า "แต่งตั้งคณะผู้ตรวจประเมิน ประกอบด้วย หัวหน้าคณะผู้ตรวจ ประเมิน ผู้ตรวจประเมินด้านวิชาการ และผู้ตรวจประเมิน ซึ่งอาจมีผู้เชี่ยวชาญร่วมด้วยตามความเหมาะสม"</div>
+                  <div style="text-indent:150px">และข้อ ๖.๑.๒.๑ (๑) "คณะผู้ตรวจประเมินจะทบทวนและประเมินและประเมินเอกสารต่างๆ ของหน่วยตรวจ ตรวจประเมินความสามารถและ ประสิทธิผลของการดำเนินงานของหน่วยตรวจ โดยพิจารณาหลักฐานและเอกสารที่เกี่ยวข้อง การสัมภาษณ์รวมทั้งการสังเกตการปฎิบัติตามมาตรฐานการตรวจสอบและรับรองที่เกี่ยวข้อง ณ สถานประกอบการของผู้ยื่นคำขอ และสถานที่ทำการอื่นในสาขาที่ขอรับการรับรอง"</div>
+                  <div style="text-indent:125px">๒.๓ คำสั่งสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม ที่ ๓๔๒/๒๕๖๖ เรื่อง มอบอำนาจให้ข้าราชการสั่งและปฏิบัติราชการแทนเลขาธิการสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม (สั่ง ณ วันที่ ๑๓ พฤศจิกายน ๒๕๖๖) ข้อ ๓ ระบุว่า "ให้ผู้อำนวยการสำนักงานคณะกรรมการการมาตรฐานแห่งชาติ เป็นผู้มีอำนาจพิจารณาแต่งตั้งคณะผู้ตรวจประเมิน ตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑" </div>
+              HTML;
+
+      $data->fix_text2 = <<<HTML
+                  <div class="section-title">๓. สาระสำคัญและข้อเท็จจริง</div>
+                  <div style="text-indent:125px">ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการรับรองหน่วยตรวจ พ.ศ.๒๕๖๔ สำนักงานจะตรวจติดตามผลรับรองหน่วยตรวจอย่างน้อย ๑ ครั้ง ภายใน ๒ ปี โดยแต่ละครั้งอาจจะตรวจประเมินเพียงบางส่วนหรือทุกข้อกำหนดก็ได้ตามความเหมาะสม และก่อนครบการรับรอง ๕ ปี ต้องตรวจประเมินให้ครบทุกข้อกำหนด</div>
+              HTML;
+      
+      // dd($certi_cb,$boardAuditor,$boardAuditorDate->start_date,$dateRange);
+      return view('certify.cb.auditor_cb.initial-message-record', [
+          'data' => $data,
+          'id' => $id
+      ]);
+  }
    
   
 }

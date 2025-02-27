@@ -352,7 +352,7 @@
                                                     {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}} dddd
                                                 </a>  --}}
 
-                                                @if ($assessment->submit_type == 'confirm' || $assessment->submit_type == null)
+                                                @if ($assessment->submit_type == 'confirm' || $assessment->submit_type == null || $assessment->bug_report == 2)
                                                      
                                                         <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                                             {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}

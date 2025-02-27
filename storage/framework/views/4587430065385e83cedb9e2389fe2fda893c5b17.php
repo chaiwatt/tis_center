@@ -354,7 +354,7 @@
                                         <?php if($assessment != null): ?>
                                                 
 
-                                                <?php if($assessment->submit_type == 'confirm' || $assessment->submit_type == null): ?>
+                                                <?php if($assessment->submit_type == 'confirm' || $assessment->submit_type == null || $assessment->bug_report == 2): ?>
                                                      
                                                         <a  class="btn <?php echo e($assessment_btn); ?>  " href="<?php echo e(url("$assessment_url")); ?>"  style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left">
                                                             <?php echo e($assessment->CertiCBAuditorsTo->auditor ?? '-'); ?>

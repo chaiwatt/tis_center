@@ -490,7 +490,6 @@ class BoardAuditorController extends Controller
 
     public function saveSignature($request,$baId,$app)
     {
-        
         BoardAuditorMsRecordInfo::where('board_auditor_id',$baId)->delete();
         BoardAuditor::find($baId)->update([
             'message_record_status' => 1
@@ -503,7 +502,6 @@ class BoardAuditorController extends Controller
             $viewUrl = url('/certify/auditor/view-lab-message-record/'.$baId);
             if ($signatures) {
                 foreach ($signatures as $signatureId => $signature) {
-                    // dd($signature);
                     try {
                         // ลองสร้างข้อมูลในฐานข้อมูล
                         MessageRecordTransaction::create([
@@ -527,12 +525,10 @@ class BoardAuditorController extends Controller
                             'approval' => 0,
                         ]);
                     
-                        // แสดงข้อความหากสำเร็จ
-                        echo "บันทึกข้อมูลสำเร็จ";
+
                     } catch (\Exception $e) {
                         // จัดการข้อผิดพลาดหากล้มเหลว
                         echo "เกิดข้อผิดพลาด: " . $e->getMessage();
-                        // dd( $e->getMessage());
                     }
                     
                 } 
@@ -543,12 +539,8 @@ class BoardAuditorController extends Controller
             ]);
         }
      
-        // dd($app->EmailStaff);
         $board  =  BoardAuditor::findOrFail($baId);
-        // $this->sendMailToSigner($board,$board->CertiLabs); 
         $this->sendMailToExaminer($board,$board->CertiLabs); 
-
-        
     }
 
     public function saveSignature_use_template($request,$baId,$app)

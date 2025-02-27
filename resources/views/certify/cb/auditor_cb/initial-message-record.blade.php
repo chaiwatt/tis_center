@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>บันทึกข้อความ</title>
     
@@ -191,7 +191,7 @@
     }
 
     /* Animation สำหรับการหมุน */
-    @keyframes  spin {
+    @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
@@ -211,16 +211,16 @@
 <body>
     <div class="wrapper">
 
-        <?php if($errors->any()): ?>
+        @if ($errors->any())
             <div class="custom-alert error">
                 <strong>เกิดข้อผิดพลาด!</strong>
                 <ul>
-                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <li><?php echo e($error); ?></li>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
                 </ul>
             </div>
-        <?php endif; ?>
+        @endif
 
         <!-- Div สำหรับสถานะการโหลด -->
         <div id="loadingStatus" class="loading-overlay" style="display: none;">
@@ -232,18 +232,18 @@
         <!-- Header Section -->
         <div class="header">
             <div>
-                
-                <img src="<?php echo e(asset('images/krut.jpg')); ?>" alt="Logo">
+                {{-- <img src="https://www.thailibrary.in.th/wp-content/uploads/2013/04/krut.jpg" alt="Logo"> --}}
+                <img src="{{ asset('images/krut.jpg') }}" alt="Logo">
             </div>
             <div class="header-title">
               <span>บันทึกข้อความ</span>  
             </div>
         </div>
 
-        <form id="labMessageForm" method="POST" action="<?php echo e(route('save.create_lab_message_record')); ?>">
-            <?php echo csrf_field(); ?>
+        <form id="labMessageForm" method="POST" action="{{ route('save.create_lab_message_record') }}">
+            @csrf
             <!-- ส่วนราชการ -->
-            <input type="hidden" name="id" value="<?php echo e($id); ?>">
+            <input type="hidden" name="id" value="{{$id}}">
             <table class="table-section">
                 <tr>
                     <td>ส่วนราชการ</td>
@@ -251,9 +251,9 @@
                         <input type="text" class="input-no-border" id="header_text1" name="header_text1" value="สก รป." >
                     </td>
                     <td style="font-size:22px">โทรศัพท์</td>
-                    
+                    {{-- <td style="width: 200px;font-size:22px" class="under-line">{{$data->header_text3}}</td> --}}
                     <td style="width: 235px">
-                        <input type="text" class="input-no-border" id="header_text2" name="header_text2" value="<?php echo e(old('header_text2')); ?>" >
+                        <input type="text" class="input-no-border" id="header_text2" name="header_text2" value="{{ old('header_text2') }}" >
                     </td>
                 </tr>
             </table>
@@ -266,9 +266,9 @@
                         <input type="text" class="input-no-border" id="header_text3" name="header_text3" value="อก ๐๗๑๔/" >
                     </td>
                     <td>วันที่</td>
-                    
+                    {{-- <td style="width: 300px;font-size:22px" class="under-line">{{$data->header_text3}}</td> --}}
                     <td style="width: 300px;">
-                        <input type="text" class="input-no-border" id="header_text4" name="header_text4" value="<?php echo e(HP::formatDateThaiFullNumThai(\Carbon\Carbon::now()->format('Y-m-d'))); ?>" >
+                        <input type="text" class="input-no-border" id="header_text4" name="header_text4" value="{{ HP::formatDateThaiFullNumThai(\Carbon\Carbon::now()->format('Y-m-d')) }}" >
                     </td>
                 </tr>
             </table>
@@ -277,66 +277,96 @@
             <table class="table-section" >
                 <tr>
                     <td>เรื่อง</td>
-                    <td style="width: 700px;font-size:22px" class="under-line">การแต่งตั้งคณะผู้ตรวจประเมินห้องปฏิบัติการ (คำขอเลขที่ <?php echo e($data->header_text4); ?>)</td>
+                    <td style="width: 700px;font-size:22px" class="under-line">การแต่งตั้งคณะผู้ตรวจประเมิน หน่วยรับรอง (CB) (คำขอเลขที่ {{$data->header_text4}})</td>
                 </tr>
             </table>
 
             <!-- Main Content -->
             <div class="section">
-                <div>เรียน ผอ.สก. ผ่าน ผก.รป.<input type="text" class="input-no-border" id="body_text1" name="body_text1" value="<?php echo e(old('body_text1')); ?>" style="width:30px" ></div>
+                <div>เรียน ผอ.สก. ผ่าน ผก.รป.<input type="text" class="input-no-border" id="body_text1" name="body_text1" value="{{ old('body_text1') }}" style="width:30px" ></div>
                 <div class="section-title" >๑. เรื่องเดิม</div>
                 <div class="indent" style="text-indent: 125px;" >
-                    วันที่ <?php echo e($data->register_date); ?> ชื่อห้องปฏิบัติการ<?php echo e($data->lab_name); ?> ได้ยื่นคำขอรับใบรับรองห้องปฏิบัติการ<?php echo e($data->lab_type); ?> สาขา<?php echo e($data->scope_branch); ?> ในระบบ E-Accreditation และสามารถรับคำขอได้เมื่อวันที่ <?php echo e($data->get_date); ?>
-
+                    วันที่ {{$data->register_date}} หน่วยรับรอง xxx การรับรองระบบงานหน่วยรับรอง (CB) ในระบบ E-Accreditation และสามารถรับคำขอได้เมื่อวันที่ {{$data->get_date}}
                 </div>
             </div>
             
             <!-- ข้อกฎหมาย -->
-            
+            {{-- <div class="section">
+                <div class="section-title">๒. ข้อกฎหมาย/กฎระเบียบที่เกี่ยวข้อง</div>
+                <div class="indent" style="margin-left:110px">๒.๑ พระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศในราชกิจจานุเบกษา</div>
+                <div class="indent">วันที่ ๔ มีนาคม ๒๕๕๑) มาตรา ๒๘ วรรค ๒ ระบุ "การขอใบรับรอง การตรวจสอบและการออกใบรับรอง ให้เป็นไปตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการประกาศกำหนด"</div>
+                <div class="indent" style="margin-left:110px">๒.๒ ประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไข</div>
+                <div class="indent">วันที่ ๔ มีนาคม ๒๕๕๑) การรับรองห้องปฏิบัติการ (ประกาศในราชกิจจานุเบกษา วันที่ ๑๗ พฤษภาคม ๒๕๖๔)"</div>
+                <div class="indent" style="margin-left:150px">ข้อ ๖.๑.๒ (๑) แต่งตั้งคณะผู้ตรวจประเมิน ประกอบด้วย หัวหน้าคณะผู้ตรวจ</div>
+                <div class="indent">ประเมิน ผู้ตรวจประเมินด้านวิชาการ และผู้ตรวจประเมิน ซึ่งอาจมีผู้เชี่ยวชาญร่วมด้วยตามความเหมาะสม</div>
+                <div class="indent" style="margin-left:150px">ข้อ ๖.๑.๒ (๒.๑) คณะผู้ตรวจประเมินจะทบทวนและประเมินและประเมินเอกสาร</div>
+                <div class="indent">ของห้องปฏิบัติการ และข้อ ๖.๑.๒ (๒.๒) คณะผู้ตรวจประเมินจะตรวจประเมินความสามารถและ</div>
+                <div class="indent">ประสิทธิผลของการดำเนินงานตามระบบการบริหารงานและมาตรฐานการตรวจสอบและรับรองที่</div>
+                <div class="indent">เกี่ยวข้อง ณ สถานประกอบการของผู้ยื่นคำขอ และสถานที่ทำการอื่นในสาขาที่ขอรับการรับรอง</div>
+                <div class="indent" style="margin-left:110px">๒.๓ ประกาศสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม เรื่อง แนวทางการแต่งตั้ง</div>
+                <div class="indent">พนักงานเจ้าหน้าที่ตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศ ณ วันที่ </div>
+                <div class="indent">๙ กุมภาพันธ์ พ.ศ. ๒๕๖๐) ซึ่งระบุพนักงานเจ้าหน้าที่ต้องมีคุณสมบัติตามข้อ ๑. ถึง ๓. </div>
+                <div class="indent" style="margin-left:110px">๒.๔ คำสั่งสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม ที่ ๓๔๒/๒๕๖๖ เรื่อง มอบอำนาจ</div>
+                <div class="indent">ให้ข้าราชการสั่งและปฏิบัติราชการแทนเลขาธิการสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรมในการ</div>
+                <div class="indent">เป็นผู้มีอำนาจพิจารณาดำเนินการตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (สั่ง ณ  </div>
+                <div class="indent">วันที่ ๑๓พฤศจิกายน ๒๕๖๖) ข้อ ๓ ระบุให้ผู้อำนวยการสำนักงานคณะกรรมการการมาตรฐานแห่ง</div>
+                <div class="indent">ชาติ เป็นผู้มีอำนาจพิจารณาแต่งตั้งคณะผู้ตรวจประเมิน ตามพระราชบัญญัติการมาตรฐานแห่งชาติ </div>
+                <div class="indent">พ.ศ. ๒๕๕๑ และข้อ ๕.๒ ในกรณีที่ข้าราชการผู้รับมอบอำนาจตามข้อ ๓.ไม่อาจปฏิบัติราชการได้</div>
+                <div class="indent">หรือไม่มีผู้ดำรงตำแหน่งดังกล่าว ให้รองเลขาธิการสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรมที่กำกับ</div>
+                <div class="indent">เป็นผู้พิจารณาแต่งตั้งคณะผู้ตรวจประเมิน ตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑</div>
+            </div> --}}
 
             <div class="section">
-                <?php echo $data->fix_text1; ?>
-
+                {!!$data->fix_text1!!}
             </div>
 
             <div class="section">
-                <?php echo $data->fix_text2; ?>
-
+                {!!$data->fix_text2!!}
             </div>
+{{-- 
+            <!-- Page Break -->
+            <div style="page-break-after: always;"></div>
 
+            <!-- สาระสำคัญ -->
+            <div class="section">
+                <div class="section-title">๓. สาระสำคัญและข้อเท็จจริง</div>
+                <div class="indent" style="margin-left:135px">ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และ</div>
+                <div class="indent">เงื่อนไขการรับรองห้องปฏิบัติการ สมอ. มีอำนาจหน้าที่ในการรับรองความสามารถห้องปฏิบัติการ </div>
+                <div class="indent">กำหนดให้มีการประเมินเพื่อพิจารณาให้การรับรองความสามารถห้องปฏิบัติการ{{$data->lab_type}} </div>
+                <div class="indent">ตามมาตรฐานเลขที่ มอก. 17025-2561</div>
+            </div> --}}
 
             <!-- การดำเนินการ -->
             <div class="section">
                 <div class="section-title">๔. การดำเนินการ</div>
                 <div style="text-indent: 137px;margin-top:10px;line-height:34px">
-                    รป.<input type="text" class="input-no-border" id="body_text2" name="body_text2" value="<?php echo e(old('body_text1')); ?>" style="width:30px" > สก. ได้สรรหาคณะผู้ตรวจประเมินประกอบด้วย <?php echo e($data->experts); ?>
-
-                    เพื่อดำเนินการตรวจประเมินให้การรับรองห้องปฏิบัติการ และกำหนดการตรวจประเมินห้องปฏิบัติการ ห้องปฏิบัติการ<?php echo e($data->lab_name); ?> <?php echo e($data->date_range); ?> ซึ่งเห็นสมควรเสนอแต่งตั้งคณะผู้ตรวจประเมินห้องปฏิบัติการ ดังนี้
+                    รป.<input type="text" class="input-no-border" id="body_text2" name="body_text2" value="{{ old('body_text1') }}" style="width:30px" > สก. ได้สรรหาคณะผู้ตรวจประเมินประกอบด้วย xxxx
+                    เพื่อดำเนินการตรวจประเมินให้การรับรองการรับรองระบบงานหน่วยรับรอง (CB) หน่วยตรวจ{{$data->lab_name}} {{$data->date_range}} ซึ่งเห็นสมควรเสนอแต่งตั้งคณะผู้ตรวจประเมิน ดังนี้
                 </div>
                 <div style="margin-top:15px">
-                    <?php
+                    @php
                         $index = 0;
-                    ?>
+                    @endphp
                     <table style="margin-left: 110px">
-                        <?php $__currentLoopData = $data->statusAuditorMap; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusId => $auditorIds): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        @foreach ($data->statusAuditorMap as $statusId => $auditorIds)
                         
-                            <?php
+                            @php
                                 $index++;
-                            ?>
+                            @endphp
     
-                            <?php $__currentLoopData = $auditorIds; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $auditorId): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <?php
+                            @foreach ($auditorIds as $auditorId)
+                                @php
                                     $info = HP::getExpertInfo($statusId, $auditorId);
                                     
-                                ?>
+                                @endphp
                                 <tr>
-                                    <td style="width: 200px"><?php echo e(HP::toThaiNumber($index)); ?>. <?php echo e($info->auditorInformation->title_th); ?><?php echo e($info->auditorInformation->fname_th); ?> <?php echo e($info->auditorInformation->lname_th); ?></td>
-                                    <td style="width: 100px"><?php echo e($info->auditorInformation->number_auditor); ?></td>
-                                    <td style="padding-left:20px"><?php echo e($info->statusAuditor->title); ?></td>
+                                    <td style="width: 200px">{{HP::toThaiNumber($index)}}. {{$info->auditorInformation->title_th}}{{$info->auditorInformation->fname_th}} {{$info->auditorInformation->lname_th}}</td>
+                                    <td style="width: 100px">{{$info->auditorInformation->number_auditor}}</td>
+                                    <td style="padding-left:20px">{{$info->statusAuditor->title}}</td>
                                 </tr>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            @endforeach
                         
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        @endforeach
                     </table>
 
                 </div>
@@ -360,7 +390,7 @@
                 <div class="section-title">๗. ข้อเสนอ</div>
                 <div class="indent" style="margin-left:135px">จึงเรียนมาเพื่อโปรดพิจารณา หากเห็นเป็นการสมควร ขอได้โปรดนำเรียน ลมอ</div>  
                 <div class="indent">เพื่ออนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเพื่อดำเนินการตรวจประเมินให้การรับรองห้องปฏิบัติการ</div>
-                <div class="indent"><?php echo e($data->lab_type); ?> ห้องปฏิบัติการ<?php echo e($data->lab_name); ?> รายละเอียดดังข้างต้น</div>         
+                <div class="indent">{{$data->lab_type}} ห้องปฏิบัติการ{{$data->lab_name}} รายละเอียดดังข้างต้น</div>         
             </div>
             <div class="submit-section">
                 <button type="submit" class="btn-submit" >บันทึก</button>
@@ -436,7 +466,7 @@ $(document).ready(function() {
             data: formData, // ข้อมูลที่ส่งไป
             success: function(response) {
                 // ลบสถานะการกำลังบันทึก
-                window.location.href = "<?php echo e(route('certify.auditor.index')); ?>";
+                window.location.href = "{{ route('certify.auditor.index') }}";
                 // $('#loadingStatus').hide();
             },
             error: function(xhr, status, error) {

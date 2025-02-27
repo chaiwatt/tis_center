@@ -583,6 +583,12 @@ Route::group(['prefix' => 'certify'], function () {
     Route::resource('/auditor-cb', 'Certify\CB\\AuditorCBController');
     Route::get('/auditor-cb/app_no/{id}', 'Certify\CB\\AuditorCBController@DataCertiNo');
     Route::post('/auditor-cb/update_delete/{id?}', 'Certify\CB\\AuditorCBController@update_delete');
+
+
+    Route::get('/auditor-cb/create-cb-message-record/{id?}', 'Certify\CB\\AuditorCBController@CreateCbMessageRecord')->name('certify.create_cb_message_record');
+    Route::post('/auditor-cb/save-cb-message-record/{id?}', 'Certify\CB\\AuditorCBController@SaveCbMessageRecord')->name('save.create_cb_message_record');
+    Route::get('/auditor-cb/view-cb-message-record/{id?}', 'Certify\CB\\AuditorCBController@ViewCbMessageRecord')->name('view.create_cb_message_record');
+
     // Pay-in ครั้งที่ 1 (CB)
     Route::get('/check_certificate-cb/Pay_In1/{id?}/{token?}', 'Certify\CB\\CheckCertificateCBController@GetCBPayInOne');
     Route::post('/check_certificate-cb/pay-in/{id?}', 'Certify\CB\\CheckCertificateCBController@CertiCBPayInOne');
@@ -598,9 +604,19 @@ Route::group(['prefix' => 'certify'], function () {
 
     Route::post('/save_assessment-cb/email-to-cb-expert/{id?}', 'Certify\CB\\SaveAssessmentCBController@EmailToCbExpert')->name('save_assessment.email_to_cb_expert');
 
+    Route::get('/save_assessment-cb/cb-report-create/{id}','Certify\CB\\SaveAssessmentCBController@createCbReport')->name('save_assessment.cb_report_create');
+    Route::post('/save_assessment-cb/cb-report-store','Certify\CB\\SaveAssessmentCBController@storeCbReport')->name('save_assessment.cb_report_store');
+    Route::get('/save_assessment-cb/cb-report-view/{id}','Certify\CB\\SaveAssessmentCBController@viewCbReport')->name('save_assessment.cb_report_view');
 
     Route::get('/view-cb-info/{id?}','Certify\CB\\SaveAssessmentCBController@viewCbInfo')->name('save_assessment.view_cb_info');
     Route::post('/update-cb-info','Certify\CB\\SaveAssessmentCBController@updateCbInfo')->name('save_assessment.update_cb_info');
+
+    Route::post('/save_assessment-cb/add-auditor-representative','Certify\CB\\SaveAssessmentCBController@addAuditorRepresentative')->name('save_assessment.add_auditor_representative');
+    Route::post('/save_assessment-cb/delete-auditor-representative','Certify\CB\\SaveAssessmentCBController@deleteAuditorRepresentative')->name('delete_assessment.add_auditor_representative');
+
+    Route::post('/save_assessment-cb/add-reference-document','Certify\CB\\SaveAssessmentCBController@addReferenceDocument')->name('delete_assessment.add_reference_document');
+    Route::post('/save_assessment-cb/delete-reference-document','Certify\CB\\SaveAssessmentCBController@deleteReferenceDocument')->name('delete_assessment.add_reference_document');
+
 
      // สรุปรายงานและเสนออนุกรรมการฯ
     Route::post('/check_certificate-cb/report/{id?}', 'Certify\CB\\CheckCertificateCBController@UpdateReport');

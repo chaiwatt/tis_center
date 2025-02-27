@@ -2,13 +2,14 @@
 
 namespace App\Models\Certify\ApplicantCB;
 
-use Illuminate\Database\Eloquent\Model;
-use Kyslik\ColumnSortable\Sortable;
-
-use HP;
 use DB;
+use HP;
 
 use App\User;
+use Kyslik\ColumnSortable\Sortable;
+
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\ApplicantCB\AuditorRepresentative;
 
 class CertiCBSaveAssessment extends Model
 {
@@ -52,6 +53,13 @@ class CertiCBSaveAssessment extends Model
     {
        return $this->hasMany(CertiCBSaveAssessmentBug::class, 'assessment_id','id');
     }
+
+    public function auditorRepresentatives()
+    {
+       return $this->hasMany(AuditorRepresentative::class, 'assessment_id','id');
+    }
+    
+
     public function CertiCBHistorys()
     {
       $tb = new CertiCBSaveAssessment;

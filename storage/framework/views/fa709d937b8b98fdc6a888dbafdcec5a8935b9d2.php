@@ -102,18 +102,64 @@
                                     <label class="col-md-5 text-right"><span class="text-danger">*</span> รายงานข้อบกพร่อง : </label>
                                     <div class="col-md-7">
                                         <div class="row">
-                                            <label class="col-md-6">
-                                                <?php echo Form::radio('bug_report', '1', false , ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']); ?>  มี
-                                            </label>
-                                            <label class="col-md-6">
-                                                <?php echo Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']); ?> ไม่มี
-                                            </label>
+                                            
+                                            <?php if(isset($assessment)): ?>
+                                            
+                                                <?php if($assessment->CertiCBBugMany->count() != 0): ?>
+                                                    <?php
+                                                        $hasReport = false;
+                                                    ?>
+
+                                                    <?php $__currentLoopData = $assessment->CertiCBBugMany; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $bug): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php if(!is_null($bug->report)): ?>
+                                                            <?php
+                                                                $hasReport = true;
+                                                                break;
+                                                            ?>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                                                    <?php if($hasReport): ?>
+                                                        <label class="col-md-6">
+                                                            <?php echo Form::radio('bug_report', '2', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']); ?> มี
+                                                        </label>
+                                                        <label class="col-md-6">
+                                                            <?php echo Form::radio('bug_report', '1', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']); ?> ไม่มี
+                                                        </label>
+                                                    <?php else: ?>
+                                                        <label class="col-md-6">
+                                                            <?php echo Form::radio('bug_report', '1', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']); ?> มี
+                                                        </label>
+                                                        <label class="col-md-6">
+                                                            <?php echo Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']); ?> ไม่มี
+                                                        </label>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+
+
+                                            <?php else: ?>
+                                                <label class="col-md-6">
+                                                    <?php echo Form::radio('bug_report', '1', false , ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']); ?>  มี
+                                                </label>
+                                                <label class="col-md-6">
+                                                    <?php echo Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']); ?> ไม่มี
+                                                </label>
+                                            <?php endif; ?>
+
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
                                     <div class="col-md-8">
+
+                                       <?php if(isset($assessment)): ?>
+                                        <a href="<?php echo e(route('save_assessment.cb_report_create',['id' => $assessment->id ])); ?>" title="จัดทำรายงาน" class="btn btn-warning">
+                                            <i class="fa fa-book" aria-hidden="true"> </i>
+                                        </a>
+                                       <?php endif; ?>
+                                       
+
                                         <?php if(isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)): ?> 
                                               <p id="RemoveFlie">
                                                 

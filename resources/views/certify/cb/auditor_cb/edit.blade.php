@@ -29,7 +29,7 @@
                         'id'=>'form_auditor'
                     ]) !!}
 
-                    @include ('certify/cb.auditor_cb.form')
+                    @include ('certify.cb.auditor_cb.form')
 
                     {!! Form::close() !!}
 

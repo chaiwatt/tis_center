@@ -99,18 +99,64 @@
                                     <label class="col-md-5 text-right"><span class="text-danger">*</span> รายงานข้อบกพร่อง : </label>
                                     <div class="col-md-7">
                                         <div class="row">
-                                            <label class="col-md-6">
-                                                {!! Form::radio('bug_report', '1', false , ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!}  มี
-                                            </label>
-                                            <label class="col-md-6">
-                                                {!! Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
-                                            </label>
+                                            
+                                            @if (isset($assessment))
+                                            
+                                                @if ($assessment->CertiCBBugMany->count() != 0)
+                                                    @php
+                                                        $hasReport = false;
+                                                    @endphp
+
+                                                    @foreach ($assessment->CertiCBBugMany as $bug)
+                                                        @if (!is_null($bug->report))
+                                                            @php
+                                                                $hasReport = true;
+                                                                break;
+                                                            @endphp
+                                                        @endif
+                                                    @endforeach
+
+                                                    @if ($hasReport)
+                                                        <label class="col-md-6">
+                                                            {!! Form::radio('bug_report', '2', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!} มี
+                                                        </label>
+                                                        <label class="col-md-6">
+                                                            {!! Form::radio('bug_report', '1', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
+                                                        </label>
+                                                    @else
+                                                        <label class="col-md-6">
+                                                            {!! Form::radio('bug_report', '1', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!} มี
+                                                        </label>
+                                                        <label class="col-md-6">
+                                                            {!! Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
+                                                        </label>
+                                                    @endif
+                                                @endif
+
+
+                                            @else
+                                                <label class="col-md-6">
+                                                    {!! Form::radio('bug_report', '1', false , ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!}  มี
+                                                </label>
+                                                <label class="col-md-6">
+                                                    {!! Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
+                                                </label>
+                                            @endif
+
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
                                     <div class="col-md-8">
+
+                                       @if (isset($assessment))
+                                        <a href="{{route('save_assessment.cb_report_create',['id' => $assessment->id ])}}" title="จัดทำรายงาน" class="btn btn-warning">
+                                            <i class="fa fa-book" aria-hidden="true"> </i>
+                                        </a>
+                                       @endif
+                                       
+
                                         @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) 
                                               <p id="RemoveFlie">
                                                 {{-- @if($assessment->FileAttachAssessment1To->file !='' && HP::checkFileStorage($attach_path.$assessment->FileAttachAssessment1To->file)) --}}

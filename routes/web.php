@@ -63,6 +63,13 @@ Route::get('/get-doc-review-auditor','MyTestController@getDocReviewAuditor');
 
 Route::get('/cb-scope','MyTestController@copyScopeCbFromAttachement');
 
+Route::get('/demo_html_pdf_editor','MyTestController@demo_html_pdf_editor');
+
+
+
+
+
+
 Route::get('/proxy', function (\Illuminate\Http\Request $request) {
     $url = $request->query('url'); // รับ URL ของ PDF ที่ต้องการ
 

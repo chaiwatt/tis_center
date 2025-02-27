@@ -18,13 +18,14 @@ use Illuminate\Http\Request;
 use App\Certify\CbReportInfo;
 use App\Mail\Cb\MailToCbExpert;
 use App\Mail\Lab\MailToLabExpert;
+use App\Certify\CbReportInfoSigner;
 use App\Http\Controllers\Controller;
 use App\Mail\CB\CheckSaveAssessment;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CB\CBSaveAssessmentMail;
 use App\Mail\CB\CBSaveAssessmentPastMail;
-use App\Models\Certify\ApplicantCB\CertiCb;
 
+use App\Models\Certify\ApplicantCB\CertiCb;
 use App\Models\Certify\ApplicantCB\CertiCBCheck;
 use App\Models\Certify\ApplicantCB\CertiCBReport;
 use App\Models\Certify\ApplicantCB\CertiCBReview;
@@ -32,6 +33,7 @@ use App\Models\Certify\ApplicantCB\CertiCbHistory;
 use App\Models\Certify\ApplicantCB\CertiCBAuditors;
 use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
 use App\Models\Certify\ApplicantCB\CertiCBAuditorsList;
+use App\Models\Certify\ApplicantCB\AuditorRepresentative;
 use App\Models\Certify\ApplicantCB\CertiCBSaveAssessment;
 use App\Models\Certify\ApplicantCB\CertiCBSaveAssessmentBug;
 
@@ -183,7 +185,7 @@ class SaveAssessmentCBController extends Controller
      */
     public function store(Request $request)
     {
-   
+        // dd($request->all());
         $model = str_slug('saveassessmentcb','-');
         if(auth()->user()->can('add-'.$model)) 
         {
@@ -455,39 +457,39 @@ class SaveAssessmentCBController extends Controller
             }
 
 
-if($auditors->bug_report == 2){
-            // รายงาน Scope
-            if($request->file_scope  && $request->hasFile('file_scope')){
-                foreach ($request->file_scope as $index => $item){
-                        $certi_cb_attach_more = new CertiCBAttachAll();
-                        $certi_cb_attach_more->app_certi_cb_id  = $auditors->app_certi_cb_id ?? null;
-                        $certi_cb_attach_more->ref_id           = $auditors->id;
-                        $certi_cb_attach_more->table_name       = $tb->getTable();
-                        $certi_cb_attach_more->file_section     = '2';
-                        $certi_cb_attach_more->file             = $this->storeFile($item,$CertiCb->app_no);
-                        $certi_cb_attach_more->file_client_name = HP::ConvertCertifyFileName($item->getClientOriginalName());
-                        $certi_cb_attach_more->token            = str_random(16);
-                        $certi_cb_attach_more->save();
+            if($auditors->bug_report == 2){
+                // รายงาน Scope
+                if($request->file_scope  && $request->hasFile('file_scope')){
+                    foreach ($request->file_scope as $index => $item){
+                            $certi_cb_attach_more = new CertiCBAttachAll();
+                            $certi_cb_attach_more->app_certi_cb_id  = $auditors->app_certi_cb_id ?? null;
+                            $certi_cb_attach_more->ref_id           = $auditors->id;
+                            $certi_cb_attach_more->table_name       = $tb->getTable();
+                            $certi_cb_attach_more->file_section     = '2';
+                            $certi_cb_attach_more->file             = $this->storeFile($item,$CertiCb->app_no);
+                            $certi_cb_attach_more->file_client_name = HP::ConvertCertifyFileName($item->getClientOriginalName());
+                            $certi_cb_attach_more->token            = str_random(16);
+                            $certi_cb_attach_more->save();
+                    }
+                }
+                // รายงาน สรุปรายงานการตรวจทุกครั้ง
+                if($request->file_report  && $request->hasFile('file_report')){
+                    foreach ($request->file_report as $index => $item){
+                            $certi_cb_attach_more = new CertiCBAttachAll();
+                            $certi_cb_attach_more->app_certi_cb_id  = $auditors->app_certi_cb_id ?? null;
+                            $certi_cb_attach_more->ref_id           = $auditors->id;
+                            $certi_cb_attach_more->table_name       = $tb->getTable();
+                            $certi_cb_attach_more->file_section     = '3';
+                            $certi_cb_attach_more->file             = $this->storeFile($item,$CertiCb->app_no);
+                            $certi_cb_attach_more->file_client_name = HP::ConvertCertifyFileName($item->getClientOriginalName());
+                            $certi_cb_attach_more->token            = str_random(16);
+                            $certi_cb_attach_more->save();
+                    }
                 }
             }
-           // รายงาน สรุปรายงานการตรวจทุกครั้ง
-            if($request->file_report  && $request->hasFile('file_report')){
-                foreach ($request->file_report as $index => $item){
-                        $certi_cb_attach_more = new CertiCBAttachAll();
-                        $certi_cb_attach_more->app_certi_cb_id  = $auditors->app_certi_cb_id ?? null;
-                        $certi_cb_attach_more->ref_id           = $auditors->id;
-                        $certi_cb_attach_more->table_name       = $tb->getTable();
-                        $certi_cb_attach_more->file_section     = '3';
-                        $certi_cb_attach_more->file             = $this->storeFile($item,$CertiCb->app_no);
-                        $certi_cb_attach_more->file_client_name = HP::ConvertCertifyFileName($item->getClientOriginalName());
-                        $certi_cb_attach_more->token            = str_random(16);
-                        $certi_cb_attach_more->save();
-                }
-            }
-}
 
- // ไฟล์แนบ
- if($request->attachs   && $request->hasFile('attachs') &&  $auditors->bug_report == 1){
+            // ไฟล์แนบ
+            if($request->attachs   && $request->hasFile('attachs') &&  $auditors->bug_report == 1){
                 foreach ($request->attachs as $index => $item){
                         $certi_cb_attach_more = new CertiCBAttachAll();
                         $certi_cb_attach_more->app_certi_cb_id  = $auditors->app_certi_cb_id ?? null;
@@ -499,38 +501,36 @@ if($auditors->bug_report == 2){
                         $certi_cb_attach_more->token = str_random(16);
                         $certi_cb_attach_more->save();
                 }
- }
+            }
 
 
-      // สถานะ แต่งตั้งคณะกรรมการ
+        // สถานะ แต่งตั้งคณะกรรมการ
          $committee = CertiCBAuditors::findOrFail($auditors->auditors_id);
          if(in_array($auditors->degree,[1,8])  && $auditors->bug_report == 1){
-                //Log
-                  $this->set_history_bug($auditors);
-                  //  Mail
-                $this->set_mail($auditors,$CertiCb);
-                 if($auditors->main_state == 1 ){
-                      $committee->step_id = 8; // แก้ไขข้อบกพร่อง/ข้อสังเกต
-                      $committee->save();
+            $this->set_history_bug($auditors);
+            //  Mail
+            $this->set_mail($auditors,$CertiCb);
+                if($auditors->main_state == 1 ){
+                    $committee->step_id = 8; // แก้ไขข้อบกพร่อง/ข้อสังเกต
+                    $committee->save();
 
-                  }else{
-                      $committee->step_id = 9; // ไม่ผ่านการตรวจสอบประเมิน
-                      $committee->save();
+                }else{
+                    $committee->step_id = 9; // ไม่ผ่านการตรวจสอบประเมิน
+                    $committee->save();
 
-                    // สถานะ แต่งตั้งคณะกรรมการ
-                    $auditor = CertiCBAuditors::where('app_certi_cb_id',$CertiCb->id)
-                                                ->whereIn('step_id',[9,10])
-                                                ->whereNull('status_cancel')
-                                                ->get();
+                // สถานะ แต่งตั้งคณะกรรมการ
+                $auditor = CertiCBAuditors::where('app_certi_cb_id',$CertiCb->id)
+                                            ->whereIn('step_id',[9,10])
+                                            ->whereNull('status_cancel')
+                                            ->get();
 
-                    if(count($auditor) == count($CertiCb->CertiCBAuditorsManyBy)){
-                        $report = new   CertiCBReview;  //ทบทวนฯ
-                        $report->app_certi_cb_id  = $CertiCb->id;
-                        $report->save();
-                        $CertiCb->update(['review'=>1,'status'=>11]);  // ทบทวน
-                    }
-                  }
-
+                if(count($auditor) == count($CertiCb->CertiCBAuditorsManyBy)){
+                    $report = new   CertiCBReview;  //ทบทวนฯ
+                    $report->app_certi_cb_id  = $CertiCb->id;
+                    $report->save();
+                    $CertiCb->update(['review'=>1,'status'=>11]);  // ทบทวน
+                }
+                }
           }
 
           if($auditors->degree == 4){
@@ -538,7 +538,6 @@ if($auditors->bug_report == 2){
                $committee->save();
                $this->set_history($auditors);
                $this->set_mail_past($auditors,$CertiCb);
-
           }
 
         if($request->previousUrl){
@@ -1109,7 +1108,7 @@ public function copyScopeCbFromAttachement($certiCbId)
         
         public function viewCbInfo($id)
         {
-            // dd('ok');
+
             $assessment = CertiCBSaveAssessment::find($id);
             $cbReportInfo = CbReportInfo::where('cb_assessment_id',$id)->first();
 
@@ -1240,4 +1239,193 @@ public function copyScopeCbFromAttachement($certiCbId)
             //     'id' => $id
             // ]);
         }
+
+        public function createCbReport($id)
+        {
+            $assessment = CertiCBSaveAssessment::find($id);
+            $cbReportInfo = CbReportInfo::where('cb_assessment_id',$id)->first();
+            $certi_cb = CertiCb::find($assessment->app_certi_cb_id);
+
+            $referenceDocuments = CertiCBAttachAll::where('app_certi_cb_id',$assessment->app_certi_cb_id)
+                    ->where('ref_id',$assessment->id)
+                    ->where('file_section','123')
+                    ->get();
+            if($cbReportInfo == null)
+            {
+                return view('certify.cb.save_assessment_cb.report.index',[
+                    'assessment' => $assessment,
+                    'certi_cb' =>$certi_cb,
+                    'referenceDocuments' => $referenceDocuments
+                ]);
+            }else{
+                $cbReportInfoSigners = CbReportInfoSigner::where('cb_report_info_id',$cbReportInfo->id)->get();
+                return view('certify.cb.save_assessment_cb.report.view',[
+                    'cbReportInfo' => $cbReportInfo,
+                    'assessment' => $assessment,
+                    'certi_cb' =>$certi_cb,
+                    'referenceDocuments' => $referenceDocuments,
+                    'cbReportInfoSigners' => $cbReportInfoSigners,
+                ]);
+            }
+
+        }
+        public function storeCbReport(Request $request)
+        {
+            // dd($request->status);
+            $signers = json_decode($request->input('signer'), true);
+            // dd($signers);
+            $data = json_decode($request->input('data'), true); // แปลง JSON String เป็น Array
+            $id = $request->id;
+
+            CbReportInfo::where('cb_assessment_id',$id)->delete();
+
+            $assessment = CertiCBSaveAssessment::find($id);
+
+            // สร้าง array สำหรับ insert
+            $insertData = [
+                'cb_assessment_id' => $id,
+                'eval_riteria_text' => $data[0]['eval_riteria_text'] ?? null,
+                'background_history' => $data[0]['background_history'] ?? null, // แปลงเป็น JSON หากเป็น array
+                'insp_proc' => $data[0]['insp_proc'] ?? null,
+                'evaluation_key_point' => $data[0]['evaluation_key_point'] ?? null,
+                'observation' => $data[0]['observation'] ?? null,
+                'evaluation_result' => $data[0]['evaluation_result'] ?? null,
+                'auditor_suggestion' => $data[0]['auditor_suggestion'] ?? null,
+                'status' => $request->status,
+            ];
+        
+            // ดึงข้อมูล evaluation_detail และแมปเข้าไป
+            foreach ($data[0]['evaluation_detail'] as $key => $value) {
+                $insertData["{$key}_chk"] = $value['chk'] ?? false;
+                $insertData["{$key}_eval_select"] = $value['eval_select'] ?? null;
+                $insertData["{$key}_comment"] = $value['comment'] ?? null;
+            }
+
+            $cbReportInfo = CbReportInfo::create($insertData);
+
+            $config = HP::getConfig();
+            $url  =   !empty($config->url_center) ? $config->url_center : url('');
+            CbReportInfoSigner::where('cb_report_info_id', $cbReportInfo->id)->delete();
+            foreach ($signers as $signer) {
+                // ตรวจสอบความถูกต้องของข้อมูล
+                if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
+                    continue; // ข้ามรายการนี้หากข้อมูลไม่ครบถ้วน
+                }
+
+                CbReportInfoSigner::create([
+                    'cb_report_info_id' => $cbReportInfo->id,
+                    'signer_id' => $signer['signer_id'],
+                    'signer_name' => $signer['signer_name'],
+                    'signer_position' => $signer['signer_position'],
+                    'signer_order' => $signer['id'],
+                    'view_url' => $url . '/certify/save_assessment-cb/cb-report-create/'. $id,
+                    'certificate_type' => 2,
+                    'app_id' => $assessment->CertiCBCostTo->app_no,
+                ]);
+            }
+            return response()->json(['cbReportInfo' => $cbReportInfo]);
+        }
+        
+        public function viewCbReport($id)
+        {
+
+        }
+
+        public function addAuditorRepresentative(Request $request)
+        {
+            // Validate input
+            $request->validate([
+                'assessment_id' => 'required|integer',
+                'name' => 'required|string|max:255',
+                'position' => 'required|string|max:255',
+            ]);
+        
+            // Create new AuditorRepresentative record
+            $auditor = AuditorRepresentative::create([
+                'assessment_id' => $request->assessment_id,
+                'name' => $request->name,
+                'position' => $request->position,
+            ]);
+        
+            // Get updated list
+            $auditorRepresentatives = AuditorRepresentative::where('assessment_id', $request->assessment_id)->get();
+            // dd($auditorRepresentatives);
+            // Return updated list as JSON
+            return response()->json(['auditorRepresentatives' => $auditorRepresentatives]);
+        }
+
+        public function deleteAuditorRepresentative(Request $request)
+        {
+            // ตรวจสอบ input
+            $request->validate([
+                'auditor_id' => 'required|integer',
+                'assessment_id' => 'required|integer',
+            ]);
+
+            // ลบข้อมูล
+            AuditorRepresentative::where('id', $request->auditor_id)->delete();
+
+            // ดึงข้อมูลอัปเดต
+            $auditorRepresentatives = AuditorRepresentative::where('assessment_id', $request->assessment_id)->get();
+
+            // ส่งข้อมูลที่อัปเดตกลับไป
+            return response()->json(['auditorRepresentatives' => $auditorRepresentatives]);
+        }
+
+        public function addReferenceDocument(Request $request)
+        {
+            // dd($request->all());
+            $assessment = CertiCBSaveAssessment::find($request->ref_id);
+            
+            $certi_cb_attach_more = new CertiCBAttachAll();
+            $certi_cb_attach_more->app_certi_cb_id  = $assessment->app_certi_cb_id ?? null;
+            $certi_cb_attach_more->ref_id           = $assessment->id;
+            $certi_cb_attach_more->table_name       = (new CertiCBAttachAll)->getTable();
+            $certi_cb_attach_more->file_section     = '123';
+            $certi_cb_attach_more->file             = $this->storeFile($request->file, $assessment->app_no);
+            $certi_cb_attach_more->file_client_name = HP::ConvertCertifyFileName($request->file->getClientOriginalName());
+            $certi_cb_attach_more->token            = Str::random(16);
+            $certi_cb_attach_more->save();
+
+             // ส่งข้อมูลไฟล์กลับไปที่ JavaScript แบบเดิม
+            $referenceDocuments = CertiCBAttachAll::where('app_certi_cb_id', $assessment->app_certi_cb_id)
+            ->where('ref_id', $assessment->id)
+            ->where('file_section', '123')
+            ->get();  // ไม่ต้องแปลงเป็นอาร์เรย์
+
+            return response()->json(['referenceDocuments' => $referenceDocuments]);
+        }
+
+        public function deleteReferenceDocument(Request $request)
+        {
+            $assessment = CertiCBSaveAssessment::find($request->assessment_id);
+            // ค้นหาข้อมูลเอกสารที่ต้องการลบ
+            $referenceDocument = CertiCBAttachAll::find($request->id);
+
+            
+
+            if ($referenceDocument) {
+                if (Storage::exists($referenceDocument->file)) {
+                    Storage::delete($referenceDocument->file);
+                }
+
+                // ลบข้อมูลจากฐานข้อมูล
+                $referenceDocument->delete();
+
+                // ส่งผลลัพธ์กลับว่าลบสำเร็จ
+                // return response()->json(['success' => true]);
+            }
+
+            // ส่งข้อมูลไฟล์กลับไปที่ JavaScript แบบเดิม
+            $referenceDocuments = CertiCBAttachAll::where('app_certi_cb_id', $assessment->app_certi_cb_id)
+            ->where('ref_id', $assessment->id)
+            ->where('file_section', '123')
+            ->get();  // ไม่ต้องแปลงเป็นอาร์เรย์
+
+            // dd( $referenceDocuments);
+
+            return response()->json(['referenceDocuments' => $referenceDocuments]);
+        }
+
+
 }

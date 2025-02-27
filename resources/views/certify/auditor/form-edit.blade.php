@@ -174,16 +174,7 @@
             <div class="form-group {{ $errors->has('other_attach') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('other_attach', '<span class="text-danger">*</span> บันทึก ลมอ. แต่งตั้งคณะผู้ตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
-                    {{-- @if ($messageRecordTransaction->file_path !== null)
-                        <a href="{{url('certify/check/file_client/'.$messageRecordTransaction->file_path.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($messageRecordTransaction->file_path) ))}}" title="{{ !empty($ba->file_client_name) ? $ba->file_client_name :  basename($messageRecordTransaction->file_path) }}" target="_blank">
-                            {!! HP::FileExtension($messageRecordTransaction->file_path)  ?? '' !!}
-                        </a>
 
-                        <a  class="mb-1 mt-1 mr-1 btn btn-xs btn-warning"  
-                        onclick="openPdfModal()">
-                            <i class="fa fa-file-text"></i>
-                       </a>  
-                    @endif --}}
                     @if (!is_null($ba->file) &&  $ba->file != '')
 
                     @php
@@ -199,17 +190,6 @@
                     @else  
                         -  
                     @endif
-
-                            {{-- <a href="{{url('certify/check/file_client/'.$ba->file.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($ba->file) ))}}" title="{{ !empty($ba->file_client_name) ? $ba->file_client_name :  basename($ba->file) }}" target="_blank">
-                                {!! HP::FileExtension($ba->file)  ?? '' !!}
-                            </a> --}}
-                            {{-- กกก --}}
-                            {{-- @if ($ba->status != 1)  
-                            <a href="{{url('certify/auditor/delete-file/'. $ba->id )}}" class="mb-1 mt-1 mr-1 btn btn-xs btn-danger div_hide"  
-                                 onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </a>                       
-                            @endif --}}
                     @else
                     <div class="fileinput fileinput-new input-group" data-provides="fileinput">
                         <div class="form-control" data-trigger="fileinput">

@@ -2675,29 +2675,29 @@
             }
         });
 
-        return;
+        // return;
 
-        // ส่งข้อมูลด้วย AJAX
-        $.ajax({
-            url: "{{ route('bcertify.api.standard') }}", // URL สำหรับส่งข้อมูล
-            method: "POST", // วิธีส่งข้อมูล
-            data: {
-                _token: "{{ csrf_token() }}", // CSRF Token เพื่อความปลอดภัย
-                id1: id1,
-                id2: id2,
-                id3: id3,
-            },
-            success: function(response) {
-                // จัดการเมื่อส่งข้อมูลสำเร็จ
-                alert("ส่งข้อมูลสำเร็จ");
-                console.log(response); // แสดงข้อมูลที่ตอบกลับมาใน console
-            },
-            error: function(xhr, status, error) {
-                // จัดการข้อผิดพลาด
-                alert("เกิดข้อผิดพลาด: " + error);
-                console.error(xhr.responseText); // แสดงข้อความผิดพลาดใน console
-            }
-        });
+        // // ส่งข้อมูลด้วย AJAX
+        // $.ajax({
+        //     url: "{{ route('bcertify.api.standard') }}", // URL สำหรับส่งข้อมูล
+        //     method: "POST", // วิธีส่งข้อมูล
+        //     data: {
+        //         _token: "{{ csrf_token() }}", // CSRF Token เพื่อความปลอดภัย
+        //         id1: id1,
+        //         id2: id2,
+        //         id3: id3,
+        //     },
+        //     success: function(response) {
+        //         // จัดการเมื่อส่งข้อมูลสำเร็จ
+        //         alert("ส่งข้อมูลสำเร็จ");
+        //         console.log(response); // แสดงข้อมูลที่ตอบกลับมาใน console
+        //     },
+        //     error: function(xhr, status, error) {
+        //         // จัดการข้อผิดพลาด
+        //         alert("เกิดข้อผิดพลาด: " + error);
+        //         console.error(xhr.responseText); // แสดงข้อความผิดพลาดใน console
+        //     }
+        // });
 
     });
 

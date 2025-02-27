@@ -1,3 +1,4 @@
+{{-- AuditorCBController --}}
 @push('css')
     <link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')}}" rel="stylesheet" type="text/css" />
@@ -14,6 +15,7 @@
 
 
 <div class="row">
+    <input type="hidden" name="signaturesJson" id="signaturesJson">
     <div class="col-md-12">
         <div class="col-md-9">
             <div class="form-group {{ $errors->has('certi_no') ? 'has-error' : ''}}">
@@ -126,6 +128,87 @@
                     @endif
                 </div>
             </div>
+
+            @if (!isset($messageRecordTransactions))
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('select_user_id', '<span class="text-danger">*</span> ผู้ลงนามท้ายขอบข่าย', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="select_user_id" id="select_user_id" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนามท้ายขอบข่าย -</option>
+                        @foreach ($signers as $id => $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_1', '<span class="text-danger">*</span> เจ้าหน้าที่ผู้รับผิดชอบ', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_1" id="signer_1" class="form-control" required>
+                        <option value="" selected>- เจ้าหน้าที่ผู้รับผิดชอบ -</option>
+                        @foreach ($signers as $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                        
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_2', '<span class="text-danger">*</span> ผู้ลงนาม (ผก.)', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_2" id="signer_2" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนาม -</option>
+                        @foreach ($signers as $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_3', '<span class="text-danger">*</span> ผู้ลงนาม (ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_3" id="signer_3" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนาม -</option>
+                        @foreach ($signers as $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_4', '<span class="text-danger">*</span> ผู้ลงนาม (ลมอ. / ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_4" id="signer_4" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนาม -</option>
+                        @foreach ($signers as $signer)
+                        <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('cbAuditorTeam', '<span class="text-danger">*</span> คณะตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="cbAuditorTeam" id="cbAuditorTeam" class="form-control" required>
+                        <option value="" selected>- คณะตรวจประเมิน -</option>
+                        @foreach ($cbAuditorTeams as $cbAuditorTeam)
+                        <option value="{{ $cbAuditorTeam->id }}" >{{ $cbAuditorTeam->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+
+            @endif
+            
+             
+            
+
             <div class="form-group {{ $errors->has('attach') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('attach', '<span class="text-danger">*</span> กำหนดการตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
@@ -158,175 +241,79 @@
                   @endif
                 </div>
             </div>
+
+
+
+
+
+            <div class="form-group {{ $errors->has('other_attach') ? 'has-error' : ''}}">
+                {!! HTML::decode(Form::label('other_attach', '<span class="text-danger">*</span> บันทึก ลมอ. แต่งตั้งคณะผู้ตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+
+                    {{-- @if (!is_null($ba->file) &&  $ba->file != '')
+
+                    @php
+                        $allApproved = $messageRecordTransactions->every(function ($item) {
+                            return $item->approval == 1;
+                        });
+                    @endphp
+
+                    @if ($allApproved)
+                        <a href="{{url('certify/check/file_client/'.$ba->file.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($ba->file) ))}}" title="{{ !empty($ba->file_client_name) ? $ba->file_client_name :  basename($ba->file) }}" target="_blank">
+                            {!! HP::FileExtension($ba->file)  ?? '' !!}
+                        </a>
+                    @else  
+                        -  
+                    @endif
+                    @else
+                    <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                        <div class="form-control" data-trigger="fileinput">
+                            <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                            <span class="fileinput-filename"></span>
+                        </div>
+                        <span class="input-group-addon btn btn-default btn-file">
+                            <span class="fileinput-new">เลือกไฟล์</span>
+                            <span class="fileinput-exists">เปลี่ยน</span>
+                            <input type="file" name="other_attach" required class="check_max_size_file">
+                        </span>
+                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
+                    </div>
+                    @endif --}}
+{{-- {{$messageRecordTransactions}} --}}
+                    @if (isset($messageRecordTransactions))
+                        @if ($messageRecordTransactions->count() != 0)
+                        <table class="table color-bordered-table primary-bordered-table" style="margin-top: 10px">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%">ชื่อ-สกุล</th>
+                                    <th style="width: 45%">ตำแหน่ง</th>
+                                    <th style="width: 20%">สถานะ</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($messageRecordTransactions as $key => $item)
+                                        <tr>
+                                        
+                                            <td>{{ $item->signer_name }}</td>
+                                            <td>{{ $item->signer_position }}</td>
+                                            <td>
+                                                <span class="badge {{ $item->approval == 1 ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ $item->approval == 1 ? 'ลงนามแล้ว' : 'รอดำเนินการ' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                        </table>
+                        @endif
+                    @endif
+
+                   
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
-<div class="col-md-12 repeater">
-    <button type="button" class="btn btn-success btn-sm pull-right clearfix  {{ ($auditorcb->vehicle == 1 || $auditorcb->status_cancel == 1) ? 'hide' : ''}}" id="plus-row">
-        <i class="icon-plus" aria-hidden="true"></i>
-        เพิ่ม
-    </button>
-    <div class="clearfix"></div>
-    <br/>
-
-    <table class="table color-bordered-table primary-bordered-table">
-        <thead>
-        <tr>
-            {{-- <th class="text-center">ลำดับ</th>  --}}
-            <th class="text-center">สถานะผู้ตรวจประเมิน</th>
-            <th class="text-center">ชื่อผู้ตรวจประเมิน</th>
-            <th class="text-center"></th>
-            <th class="text-center">หน่วยงาน</th>
-            <th class="text-center  {{ ($auditorcb->vehicle == 1 || $auditorcb->status_cancel == 1) ? 'hide' : ''}}"> ลบรายการ</th>
-        </tr>
-        </thead>
-        <tbody id="table-body">
-            @foreach($auditors_status as $key => $item)    
-        <tr class="repeater-item">
-            <td class="text-center text-top">
-                <div class="form-group {{ $errors->has('taxid') ? 'has-error' : ''}}">
-                    <div class="col-md-9">
-                        {!! Form::select('list[status][]',    
-                          App\Models\Bcertify\StatusAuditor::pluck('title', 'id'),
-                          $item->status ??  null,
-                           ['class' => 'form-control item status select2', 
-                          'placeholder'=>'-เลือกสถานะผู้ตรวจประเมิน-',
-                           'data-name'=>'status', 
-                           'required'=>true]); !!}
-                    </div>
-                </div>
-            </td>
-
-            {{-- จะแสดงข้อมูลชื่อผู้ทบทวนฯ จากการติ๊กเลือกใน popup  --}}
-            <td class="align-right text-top ">
-                <div class="td-users">
-                    @if(count($item->CertiCBAuditorsLists) > 0)
-                        @foreach($item->CertiCBAuditorsLists as $key1 => $item1) 
-                        {!! Form::text('filter_search',
-                            $item1->temp_users ?? null, 
-                            ['class' => 'form-control item', 
-                            'readonly' => true])
-                         !!}
-                          <input type="hidden" name="list[temp_users][{{$item->status}}][]"  value="{{$item1->temp_users}}">
-                         <input type="hidden" name="list[user_id][{{$item->status}}][]"  value="{{$item1->user_id}}">
-                         <input type="hidden" name="list[temp_departments][{{$item->status}}][]" value="{{$item1->temp_departments}}">
-                        @endforeach
-                     @else 
-                      {!! Form::text('filter_search', null, ['class' => 'form-control item', 'placeholder'=>'','data-name'=>'filter_search','required' => true]); !!}
-                     @endif
-                </div>
-                <div class="div-users"></div>
-            </td>
-            {{-- จะแสดงข้อมูลใน popup ก็ต้องเมื่อเลือก "สถานะผู้ทบทวนผลการประเมิน" --}}
-            <td class="text-top">
-                <button type="button" class="btn btn-primary repeater-modal-open exampleModal" data-toggle="modal" data-target="#exampleModal"  {{ !is_null($item->status) ? '' : 'disabled' }} 
-                        data-whatever="@mdo"> select
-                </button>
-                <!--   popup ข้อมูลผู้ตรวจการประเมิน   -->
-                <div class="modal fade repeater-modal exampleModal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
-                    <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                                </button>
-                                <h4 class="modal-title" id="exampleModalLabel1">ผู้ตรวจประเมิน</h4>
-                            </div>
-                            <div class="modal-body">
-                                {{-- ------------------------------------------------------------------------------------------------- --}}
-                                <div class="white-box">
-                                    <div class="row">
-                                        <div class="form-group {{ $errors->has('myInput') ? 'has-error' : ''}}">
-                                            {!! HTML::decode(Form::label('myInput', 'ค้นหา', ['class' => 'col-md-2 control-label'])) !!}
-                                            <div class="col-md-7">
-                                                <input class="form-control myInput"  type="text" placeholder="ชื่อผู้ตรวจประเมิน,หน่วยงาน,ตำแหน่ง,สาขา">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 form-group ">
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered color-table primary-table" id="myTable" width="100%">
-                                                    <thead>
-                                                    <tr>
-                                                        <th  class="text-center" width="2%">#</th>
-                                                        <th  class="text-center" width="2%">
-                                                            <input type="checkbox" class="select-all">
-                                                        </th>
-                                                        <th class="text-center" width="10%">ชื่อผู้ตรวจประเมิน</th>
-                                                        <th class="text-center" width="10%">หน่วยงาน</th>
-                                                        <th class="text-center" width="10%">ตำแหน่ง</th>
-                                                        <th class="text-center" width="10%">สาขา</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody class="tbody-auditor">
-                                                        @if(count($item->AuditorExpertiseTitle) > 0)
-                                                            @foreach($item->AuditorExpertiseTitle as $key2 => $item2) 
-                                                            <tr>
-                                                                <td> {{ $key2 +1 }}</td>
-                                                                <td  class="text-center"> 
-                                                                <input type="checkbox"
-                                                                    value="{{$item2->id}}"  
-                                                                    data-value="{{$item2->NameTh}}"  
-                                                                    data-department="{{$item2->department}}" 
-
-                                                                    data-status="{{$item->status}}"
-                                                                >
-                                                                </td>
-                                                                <td> {{ $item2->NameTh}}</td>
-                                                                <td> {{ $item2->department}}</td>
-                                                                <td> {{ $item2->position}}</td>
-                                                                <td> {{ $item2->branchable}}</td>
-                                                            </tr>
-                                                            @endforeach
-                                                        @endif
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-md-8">
-                                    <div class="pull-right">
-                                        {!! Form::button('<i class="icon-check"></i> เลือก', ['type' => 'button', 'class' => 'btn btn-primary btn-user-select']) !!}
-                                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">
-                                            {!! __('ยกเลิก') !!}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </td>
-            <td class="align-top text-top  ">
-                <div class="td-departments">
-                @if(count($item->CertiCBAuditorsLists) > 0)
-                    @foreach($item->CertiCBAuditorsLists as $key1 => $item1) 
-                        <input type="text" class="form-control item" readonly value="{{ $item1->temp_departments }}">
-                    @endforeach
-                 @else 
-                     {!! Form::text('department', 
-                        null,
-                        ('' == 'required') ?
-                        ['class' => 'form-control item', 'required' => 'required'] :
-                        ['class' => 'form-control item','readonly'=>'readonly',
-                        'data-name'=>'department']) 
-                    !!}
-                 @endif
-              
-                </div>
-                <div class="div-departments"></div>
-         
-            </td>
-            <td align="center" class="text-top  {{ ($auditorcb->vehicle == 1 || $auditorcb->status_cancel == 1) ? 'hide' : ''}}">
-                <button type="button" class="btn btn-danger btn-xs repeater-remove">
-                    <i class="fa fa-trash-o" aria-hidden="true"></i>
-                </button>
-            </td>
-          </tr>
-          @endforeach
-        </tbody>
-    </table>
 </div>
 
 
@@ -454,6 +441,82 @@
   <script src="{{asset('plugins/components/sweet-alert2/sweetalert2.all.min.js')}}"></script>
   <script>
     function submit_form() {
+        
+        var selectUserId = $('#select_user_id').val();
+            var signer1 = $('#signer_1').val();
+            var signer2 = $('#signer_2').val();
+            var signer3 = $('#signer_3').val();
+            var signer4 = $('#signer_4').val();
+
+            if (selectUserId === "") {
+                alert('กรุณาเลือกผู้ลงนามท้ายขอบข่าย');
+                return
+            }
+
+            if (![signer1, signer2, signer3, signer4].every(function(signer) { return signer !== ""; })) {
+                alert('กรุณาเลือกเจ้าหน้าที่ผู้ลงนาม');
+                return;
+            }
+
+            const signatures = [
+            {
+                id: 'Signature1',
+                enable: false,
+                show_name: false,
+                show_position: false,
+                signer_name: "",
+                signer_id: "",
+                signer_position: "ตำแหน่ง ผู้จัดการทั่วไป",    
+                line_space: 20
+            },
+            {
+                id: 'Signature2',
+                enable: false,
+                show_name: true,
+                show_position: false,
+                signer_name: "",
+                signer_id: "",
+                signer_position: "ตำแหน่ง ปฏิบัติราชการแทน",
+                line_space: 5
+            },
+            {
+                id: 'Signature3',
+                enable: false,
+                show_name: true,
+                show_position: true,
+                signer_name: "",
+                signer_id: "",
+                signer_position: "ตำแหน่ง นักเรียนโอลิมปิกเคมี",
+                line_space: 20
+            },
+            {
+                id: 'Signature4',
+                enable: false,
+                show_name: true,
+                show_position: true,
+                signer_name: "",
+                signer_id: "",
+                signer_position: "ตำแหน่ง กำลังจะสอบ ม.1",
+                line_space: 20
+            }
+        ];
+
+            // ดึงค่าที่ถูกเลือกและอัปเดต signatures
+            for (let i = 1; i <= 4; i++) {
+                const selectElement = $(`#signer_${i}`);
+                const selectedId = selectElement.val();
+                const selectedName = selectElement.find('option:selected').text();
+                const selectedPosition = selectElement.find('option:selected').data('position');
+
+                // อัปเดตใน signatures
+                signatures[i - 1].signer_id = selectedId || "";
+                signatures[i - 1].signer_name = selectedName || "";
+                signatures[i - 1].signer_position = selectedPosition || "";
+            }
+
+            console.log("Updated signatures:", signatures);
+
+        $('#signaturesJson').val(JSON.stringify(signatures));
          Swal.fire({
               title: 'ยืนยันทำรายการ !',
               icon: 'warning',

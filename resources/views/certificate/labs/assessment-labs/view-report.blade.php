@@ -1016,9 +1016,7 @@
 
                         });
 
-                    } else {
-                        alert('ไม่มีข้อมูลผู้ลงนาม');
-                    }
+                    } 
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
