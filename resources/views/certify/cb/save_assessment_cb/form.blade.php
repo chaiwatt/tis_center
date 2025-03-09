@@ -251,7 +251,6 @@
      <div class="col-md-12">
          <div class="white-box" style="border: 2px solid #e5ebec;">
          <legend><h3>ขอบข่ายที่ขอรับการรับรอง (Scope)</h3></legend>   
-               
             <div class="row">
                 <div class="col-md-12 ">
                     <div id="other_attach-box">
@@ -284,12 +283,12 @@
                        </div>
                  </div>
             </div>
-            <div class="row">
+            {{-- <div class="row">
                 <div class="col-md-12 ">
                     <div id="other_attach_report">
                         <div class="form-group other_attach_report">
                             <div class="col-md-4 text-right">
-                                <label class="attach_remove"><!--<span class="text-danger">*</span> -->สรุปรายงานการตรวจทุกครั้ง </label>
+                                <label class="attach_remove">สรุปรายงานการตรวจทุกครั้ง </label>
                             </div>
                             <div class="col-md-6">
                                 <div class="fileinput fileinput-new input-group " data-provides="fileinput">
@@ -315,7 +314,7 @@
                          </div>
                        </div>
                  </div>
-            </div>
+            </div> --}}
 
         </div>
     </div>

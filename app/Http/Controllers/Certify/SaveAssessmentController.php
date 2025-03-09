@@ -2089,14 +2089,15 @@ class SaveAssessmentController extends Controller
             $config = HP::getConfig();
             $url  =   !empty($config->url_center) ? $config->url_center : url('');
 
-            SignAssessmentReportTransaction::where('lab_report_info_id', $labReportInfo->id)->delete();
+            SignAssessmentReportTransaction::where('report_info_id', $labReportInfo->id)
+                                        ->where('certificate_type',2)->delete();
             foreach ($signers as $signer) {
                 // ตรวจสอบความถูกต้องของข้อมูล
                 if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
                     continue; // ข้ามรายการนี้หากข้อมูลไม่ครบถ้วน
                 }
                 SignAssessmentReportTransaction::create([
-                    'lab_report_info_id' => $labReportInfo->id,
+                    'report_info_id' => $labReportInfo->id,
                     'signer_id' => $signer['signer_id'],
                     'signer_name' => $signer['signer_name'],
                     'signer_position' => $signer['signer_position'],
@@ -2230,7 +2231,9 @@ class SaveAssessmentController extends Controller
                 $labRequest = LabTestRequest::where('app_certi_lab_id',$app_certi_lab->id)->where('type',1)->first();
             }
 
-            $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->get();
+            $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)
+                                                ->where('certificate_type',2)
+                                                ->get();
             $approveNoticeItems = NoticeItem::where('app_certi_lab_notice_id', $notice->id)
                 ->whereNotNull('attachs')
                 ->where('status',1)
@@ -2698,7 +2701,9 @@ class SaveAssessmentController extends Controller
             $config = HP::getConfig();
             $url  =   !empty($config->url_center) ? $config->url_center : url('');
 
-            SignAssessmentReportTransaction::where('lab_report_info_id', $labReportInfo->id)->delete();
+            SignAssessmentReportTransaction::where('report_info_id', $labReportInfo->id)
+                                            ->where('certificate_type',2)
+                                            ->delete();
             foreach ($signers as $signer) {
                 // ตรวจสอบความถูกต้องของข้อมูล
                 if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
@@ -2706,7 +2711,7 @@ class SaveAssessmentController extends Controller
                 }
 
                 SignAssessmentReportTransaction::create([
-                    'lab_report_info_id' => $labReportInfo->id,
+                    'report_info_id' => $labReportInfo->id,
                     'signer_id' => $signer['signer_id'],
                     'signer_name' => $signer['signer_name'],
                     'signer_position' => $signer['signer_position'],

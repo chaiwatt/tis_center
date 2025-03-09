@@ -10,7 +10,7 @@ class CbBoardAuditorMsRecordInfo extends Model
 {
     use Sortable;
     protected $fillable = [
-        'app_certi_cb_auditors',
+        'board_auditor_id',
         'header_text1',
         'header_text2',
         'header_text3',
@@ -23,6 +23,6 @@ class CbBoardAuditorMsRecordInfo extends Model
 
     public function certiCBAuditor()
     {
-        return $this->belongsTo(CertiCBAuditors::class, 'app_certi_cb_auditors', 'id');
+        return $this->belongsTo(CertiCBAuditors::class, 'board_auditor_id', 'id');
     }
 }

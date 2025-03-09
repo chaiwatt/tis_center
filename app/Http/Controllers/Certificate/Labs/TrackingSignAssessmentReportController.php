@@ -193,26 +193,31 @@ class TrackingSignAssessmentReportController extends Controller
 
     public function signDocument(Request $request)
     {
-        // dd($request->all());
-        SignAssessmentTrackingReportTransaction::find($request->id)->update([
-            'approval' => 1
-        ]);
 
+        $signAssessmentTrackingReportTransaction = SignAssessmentTrackingReportTransaction::find($request->id);
 
-        $signAssessmentReportTransaction = SignAssessmentTrackingReportTransaction::find($request->id);
-        $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id',$signAssessmentReportTransaction->lab_report_info_id)
-                                ->whereNotNull('signer_id')
-                                ->where('approval',0)
-                                ->get();           
-
-        if($signAssessmentReportTransactions->count() == 0){
-            $pdfService = new CreateTrackingLabReportPdf($signAssessmentReportTransaction->tracking_lab_report_info_id,"ia");
-            $pdfContent = $pdfService->generateTrackingLabReportPdf();
-
-            $this->downloadScopeAndReUpload($request->id);
-
-            
-        }                        
+        if($signAssessmentTrackingReportTransaction->certificate_type == 2)
+        {
+            SignAssessmentTrackingReportTransaction::find($request->id)->update([
+                'approval' => 1
+            ]);
+        
+            $signAssessmentReportTransaction = SignAssessmentTrackingReportTransaction::find($request->id);
+            $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$signAssessmentReportTransaction->report_info_id)
+                                    ->where('certificate_type',2)                        
+                                    ->whereNotNull('signer_id')
+                                    ->where('approval',0)
+                                    ->get();           
+    
+            if($signAssessmentReportTransactions->count() == 0){
+                $pdfService = new CreateTrackingLabReportPdf($signAssessmentReportTransaction->tracking_report_info_id,"ia");
+                $pdfContent = $pdfService->generateTrackingLabReportPdf();
+    
+                $this->downloadScopeAndReUpload($request->id);
+            }  
+        }
+        
+                      
         
     }
 

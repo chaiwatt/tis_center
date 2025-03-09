@@ -294,6 +294,12 @@ class CreateLabScopePdf
                 'I' => "THSarabunNew-Italic.ttf",
                 'BI' => "THSarabunNew-BoldItalic.ttf",
             ],
+            'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
         ];
 
         $mpdf = new Mpdf([
@@ -373,6 +379,12 @@ class CreateLabScopePdf
                 'B' => "THSarabunNew-Bold.ttf",
                 'I' => "THSarabunNew-Italic.ttf",
                 'BI' => "THSarabunNew-BoldItalic.ttf",
+            ],
+            'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
             ],
         ];
 
@@ -470,12 +482,57 @@ class CreateLabScopePdf
       if(count($data) > 1){
           $siteType = "multi";
       }
+
       $mpdfArray = []; 
 
     // วนลูปข้อมูล
       foreach ($data as $key => $details) {
 
         $scopes = $details->scope;
+
+
+
+        // วนลูปผ่าน $scopes เพื่อเพิ่ม measurement_edit
+        foreach ($scopes as $scope) {
+            $measurementEdit = [];
+
+            // วนลูปผ่าน measurements ของแต่ละ scope
+            foreach ($scope->measurements as $measurement) {
+                $groupedRanges = [];
+
+                // จัดกลุ่ม ranges ตาม description
+                foreach ($measurement->ranges as $range) {
+                    $description = $range->description;
+
+                    if (!isset($groupedRanges[$description])) {
+                        $groupedRanges[$description] = [
+                            'ranges' => [],
+                            'uncertainties' => []
+                        ];
+                    }
+
+                    $groupedRanges[$description]['ranges'][] = $range->range;
+                    $groupedRanges[$description]['uncertainties'][] = $range->uncertainty;
+                }
+
+                // สร้างโครงสร้าง measurement_edit ใหม่
+                $measurementEdit[] = [
+                    'name' => $measurement->name,
+                    'type' => $measurement->type,
+                    'ranges' => $groupedRanges
+                ];
+            }
+
+            // เพิ่มคีย์ measurement_edit ลงใน $scope
+            $scope->measurement_edit = $measurementEdit;
+        }
+
+        
+        // จัดเรียง $scopes ตาม category ตามตัวอักษร
+        usort($scopes, function ($a, $b) {
+            return strcmp($a->category, $b->category);
+        });
+
 
           // ใช้ array_map เพื่อดึงค่าของ 'key' จากแต่ละรายการใน $scopes
           $keys = array_map(function ($item) {
@@ -549,6 +606,12 @@ class CreateLabScopePdf
                   'B' => "THSarabunNew-Bold.ttf",
                   'I' => "THSarabunNew-Italic.ttf",
                   'BI' => "THSarabunNew-BoldItalic.ttf",
+              ],
+              'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+                  'R' => "DejaVuSans.ttf",
+                  'B' => "DejaVuSans-Bold.ttf",
+                  'I' => "DejaVuSerif-Italic.ttf",
+                  'BI' => "DejaVuSerif-BoldItalic.ttf",
               ],
           ];
   
@@ -738,7 +801,9 @@ class CreateLabScopePdf
           }
       }
 
-
+        // $title = "mypdf.pdf";
+        
+        // $combinedPdf->Output($title, "I");  
 
 
     // $defaultDisk = config('filesystems.default');
@@ -874,6 +939,12 @@ class CreateLabScopePdf
                   'B' => "THSarabunNew-Bold.ttf",
                   'I' => "THSarabunNew-Italic.ttf",
                   'BI' => "THSarabunNew-BoldItalic.ttf",
+              ],
+              'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+                  'R' => "DejaVuSans.ttf",
+                  'B' => "DejaVuSans-Bold.ttf",
+                  'I' => "DejaVuSerif-Italic.ttf",
+                  'BI' => "DejaVuSerif-BoldItalic.ttf",
               ],
           ];
   
@@ -1070,6 +1141,8 @@ class CreateLabScopePdf
       // ส่งออกไฟล์ PDF
     //   $combinedPdf->Output('combined.pdf', \Mpdf\Output\Destination::INLINE);
 
+    
+
 
     $app_certi_lab = CertiLab::find($id);
     $no = str_replace("RQ-", "", $app_certi_lab->app_no);
@@ -1164,6 +1237,12 @@ class CreateLabScopePdf
               'I' => "THSarabunNew-Italic.ttf",
               'BI' => "THSarabunNew-BoldItalic.ttf",
           ],
+          'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+              'R' => "DejaVuSans.ttf",
+              'B' => "DejaVuSans-Bold.ttf",
+              'I' => "DejaVuSerif-Italic.ttf",
+              'BI' => "DejaVuSerif-BoldItalic.ttf",
+          ],
       ];
 
       $mpdf = new Mpdf([
@@ -1243,6 +1322,12 @@ class CreateLabScopePdf
               'B' => "THSarabunNew-Bold.ttf",
               'I' => "THSarabunNew-Italic.ttf",
               'BI' => "THSarabunNew-BoldItalic.ttf",
+          ],
+          'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+              'R' => "DejaVuSans.ttf",
+              'B' => "DejaVuSans-Bold.ttf",
+              'I' => "DejaVuSerif-Italic.ttf",
+              'BI' => "DejaVuSerif-BoldItalic.ttf",
           ],
       ];
 

@@ -188,7 +188,7 @@ class BoardAuditor extends Model
 
     public function messageRecordTransactions()
     {
-        return $this->hasMany(MessageRecordTransaction::class, 'board_auditor_id');
+        return $this->hasMany(MessageRecordTransaction::class, 'board_auditor_id')->where('certificate_type',2);
     }
 
     public function boardAuditorMsRecordInfos()

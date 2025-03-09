@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">แต่งตั้งคณะผู้ตรวจประเมิน (CB) #{{ $auditorcb->id }}</h3>
+                    <h3 class="box-title pull-left">แต่งตั้งคณะผู้ตรวจประเมิน (CB) landing #{{ $auditorcb->id }}</h3>
                     @can('view-'.str_slug('auditorcb'))
                         <a class="btn btn-success pull-right" href="{{ url('/certify/auditor-cb') }}">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ

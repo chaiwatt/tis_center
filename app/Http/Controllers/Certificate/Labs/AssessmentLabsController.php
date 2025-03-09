@@ -1463,7 +1463,9 @@ class AssessmentLabsController extends Controller
             $labRequest = LabTestRequest::where('app_certi_lab_id',$certi_lab->id)->where('type',1)->first();
         }
         
-        $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id',$labReportInfo->id)->get();
+        $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$labReportInfo->id)
+                                        ->where('certificate_type',2)
+                                        ->get();
         $labInformation = $certi_lab->information;
         return view('certificate.labs.assessment-labs.view-report', [
             'data' => $data,
@@ -1548,7 +1550,9 @@ class AssessmentLabsController extends Controller
         $config = HP::getConfig();
         $url  =   !empty($config->url_center) ? $config->url_center : url('');
 
-        SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id', $trackingLabReportInfo->id)->delete();
+        SignAssessmentTrackingReportTransaction::where('tracking_report_info_id', $trackingLabReportInfo->id)
+                                            ->where('certificate_type',2)
+                                            ->delete();
         foreach ($signers as $signer) {
             // ตรวจสอบความถูกต้องของข้อมูล
             if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
@@ -1556,7 +1560,7 @@ class AssessmentLabsController extends Controller
             }
 
             SignAssessmentTrackingReportTransaction::create([
-                'tracking_lab_report_info_id' => $trackingLabReportInfo->id,
+                'tracking_report_info_id' => $trackingLabReportInfo->id,
                 'signer_id' => $signer['signer_id'],
                 'signer_name' => $signer['signer_name'],
                 'signer_position' => $signer['signer_position'],

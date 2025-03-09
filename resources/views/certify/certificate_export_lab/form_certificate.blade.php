@@ -370,14 +370,43 @@
                 </div>
             </div>
 
-            <div class="col-sm-12">
+            {{-- <div class="col-sm-12">
                 <div class="form-group {{ $errors->has('status') ? 'has-error' : ''}}">
                     {!! HTML::decode(Form::label('status', '<span class="text-danger">*</span> สถานะ :', ['class' => 'col-md-4 control-label label-filter text-right'])) !!}
                     <div class="col-md-7">
                         {!! Form::select('status', $status, !empty($export_lab->status) ?$export_lab->status:null, ['class' => 'form-control',  'placeholder'=>'- เลือกสถานะ -', 'id'=>'status', 'required' => true]); !!}
                     </div>
                 </div>
+            </div> --}}
+
+            {{-- {{$status}} --}}
+
+            
+
+            <div class="col-sm-12">
+                <div class="form-group {{ $errors->has('status') ? 'has-error' : '' }}">
+                    <label for="status" class="col-md-4 control-label label-filter text-right">
+                        <span class="text-danger">*</span> สถานะ :
+                    </label>
+                    <div class="col-md-7">
+                        @if (isset($status))
+                            <select name="status" id="status" class="form-control" required>
+                                <option value="">- เลือกสถานะ -</option>
+                                @foreach($status as $key => $value)
+                                    <option value="{{ $key }}" {{ !empty($export_lab->status) && $export_lab->status == $key ? 'selected' : '' }}>
+                                        {{ $value }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @endif
+                    </div>
+                </div>
             </div>
+            
+                
+           
+
+
 
             <div class="col-sm-12" id="certificate_section" style="display: none;">
                 <div class="form-group {{ $errors->has('attach') ? 'has-error' : ''}}">

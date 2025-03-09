@@ -18,715 +18,715 @@
     
     
     <style>
-     body {
-        font-family: 'Sarabun', sans-serif;
-        font-size: 20px;
-        line-height: 1.5;
-        margin: 0;
-        padding: 0;
-        background-color: #f5f5f5; /* สีพื้นหลัง */
-    }
-
-    .wrapper {
-        max-width: 800px; /* ขนาดความกว้าง */
-        margin: 0 auto; /* จัดให้อยู่กึ่งกลางแนวนอน */
-        padding: 20px; /* เพิ่มช่องว่างรอบเนื้อหา */
-        background-color: #fff; /* สีพื้นหลังของเนื้อหา */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* เพิ่มเงา */
-        /* border-radius: 8px;  */
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    .header {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-    }
-
-    .header-request {
-        width: 100%;
-        text-align: left;
-        margin-bottom: -10px;
-        padding-left: 10px;
-    }
-
-    .header-request span {
-        font-size: 18px;
-    }
-
-    .header-title {
-        padding-top: 20px;
-        text-align: center;
-        font-weight: bold;
-        font-size: 24px;
-    }
-
-    /* .header-title span{
-        margin-left: -100px;
-    } */
-    .section {
-        margin-top: 15px;
-        margin-bottom: 10px;
-    }
-
-    .section-title {
-        font-weight: bold;
-        margin-left: 110px;
-        margin-top:20px;
-    }
-
-    .indent {
-        margin-left: 5px;
-        margin-top:5px;
-    }
-
-    .table-section {
-        margin-top: 10px;
-        margin-bottom: 5px;
-    }
-
-    .table-section td {
-        font-size: 28px;
-        vertical-align: bottom;
-    }
-
-    .table-section td:first-child {
-        
-        font-weight: 500;
-    }
-
-    .table-section td:last-child {
-        
-        /* padding-left: 20px; */
-    }
-
-    .under-line {
-        border-bottom: 1px dotted #000;
-    }
-
-    .input-no-border {
-        width: 100%;
-        font-size: 22px;
-        font-family: 'Sarabun', sans-serif;
-        border: none;
-        outline: none;
-        background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
-        border-bottom: 1px dotted #000;
-        color: #000;
-        padding: 2px 0;
-        transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
-    }
-
-    .input-no-border.has-value,
-    .input-no-border:focus {
-        background-color: #ffffff; /* พื้นหลังสีขาว */
-    }
-
-    .text-area-no-border {
-        width: 100%;
-        font-size: 18px;
-        font-family: 'Sarabun', sans-serif;
-        border: none;
-        outline: none;
-        background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
-        border-bottom: 1px dotted #000;
-        color: #000;
-        padding: 2px 0;
-        transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
-    }
-
-    .text-area-no-border.has-value,
-    .text-area-no-border:focus {
-        background-color: #ffffff; /* พื้นหลังสีขาว */
-    }
-
-
-    /* เพิ่มการตั้งค่าการจัดตำแหน่ง */
-    .submit-section {
-        text-align: center;  /* ทำให้ปุ่มอยู่ตรงกลาง */
-        margin-top: 50px;     /* เว้นระยะห่างจากเนื้อหาด้านบน */
-        margin-bottom: 30px;
-    }
-
-    .btn-submit {
-        font-family: 'Sarabun', sans-serif;
-        padding: 10px 20px;  /* เพิ่มขนาดของปุ่ม */
-        background-color: #4CAF50; /* สีพื้นหลัง */
-        color: white;         /* สีตัวอักษร */
-        border: none;         /* ไม่ให้มีขอบ */
-        border-radius: 5px;   /* ทำมุมโค้ง */
-        font-size: 22px;      /* ขนาดตัวอักษร */
-        cursor: pointer;     /* เปลี่ยนรูปแบบเมาส์เมื่อชี้ที่ปุ่ม */
-        transition: background-color 0.3s; /* เพิ่มการเปลี่ยนสีเมื่อ hover */
-    }
-
-    .btn-submit:hover {
-        background-color: #45a049;  /* เปลี่ยนสีปุ่มเมื่อ hover */
-    }
-
-    .btn-draft {
-        font-family: 'Sarabun', sans-serif;
-        padding: 10px 20px;  /* เพิ่มขนาดของปุ่ม */
-        background-color: #f75e06; /* สีพื้นหลัง */
-        color: white;         /* สีตัวอักษร */
-        border: none;         /* ไม่ให้มีขอบ */
-        border-radius: 5px;   /* ทำมุมโค้ง */
-        font-size: 22px;      /* ขนาดตัวอักษร */
-        cursor: pointer;     /* เปลี่ยนรูปแบบเมาส์เมื่อชี้ที่ปุ่ม */
-        transition: background-color 0.3s; /* เพิ่มการเปลี่ยนสีเมื่อ hover */
-    }
-
-    .btn-draft:hover {
-        background-color: #45a049;  /* เปลี่ยนสีปุ่มเมื่อ hover */
-    }
-
-    /* Custom Alert Styles */
-    .custom-alert {
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 5px;
-        font-size: 14px;
-        line-height: 1.5;
-        position: relative;
-        border: 1px solid transparent;
-    }
-
-    .custom-alert strong {
-        font-weight: bold;
-    }
-
-    .custom-alert.error {
-        background-color: #f8d7da;
-        color: #842029;
-        border-color: #f5c2c7;
-    }
-
-    .custom-alert.success {
-        background-color: #d1e7dd;
-        color: #0f5132;
-        border-color: #badbcc;
-    }
-
-    /* สไตล์สำหรับ overlay */
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
-        display: flex;
-        flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
-        justify-content: center;
-        align-items: center;
-        z-index: 9999; /* อยู่ด้านหน้า */
-    }
-
-    /* สไตล์สำหรับสปินเนอร์ */
-    .spinner {
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid #ffffff;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-    }
-
-    /* Animation สำหรับการหมุน */
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
-    .loading-text {
-        color: white;
-        font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
-        margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
-        text-align: center;
-    }
-
-    /* body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        } */
-
-        #toolbar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        button.toolbar {
-            padding: 6px 14px;
-            font-size: 12px;
-            cursor: pointer;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f8f9fa;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        button.toolbar:hover {
-            background-color: #007bff;
-            color: white;
-        }
-
-        button.toolbar:active {
-            background-color: #0056b3;
-            color: white;
-        }
-
-        
-
-
-        .editor {
-            width: 780px;
-            min-height: 200px;
-            max-height: 600px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            font-family: 'Sarabun', sans-serif; /* ใช้ฟอนต์ TH Sarabun */
-            font-size: 18px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .editor-table {
-            border-collapse: collapse;
-            min-width: 200px;
-            width: auto;
-            max-width: 100%;
-            table-layout: auto;
-        }
-
-        .editor-table, .editor-table th, .editor-table td {
-            border: 1px solid black;
-            padding: 5px;
-            text-align: center;
-            position: relative;
-        }
-
-
-        .resizer {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 5px;
-            height: 100%;
-            cursor: col-resize;
-            background: transparent;
-        }
-
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            width: 350px;
-            text-align: center;
-            z-index: 1000;
-            font-family: Arial, sans-serif;
-        }
-
-        .popup label {
-            display: inline-block;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            margin-right: 10px;
-        }
-
-        .popup input {
-            display: inline-block;
-            width: 40px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .popup button {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            margin: 5px;
-        }
-
-        .popup button:first-of-type {
-            background: #28a745;
-            color: white;
-        }
-
-        .popup button:last-of-type {
-            background: #dc3545;
-            color: white;
-        }
-
-        .popup button:hover {
-            opacity: 0.85;
-        }
-
-        #contextMenu {
-            position: absolute;
-            display: none;
-            background: white;
-            border: 1px solid #ccc;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
-            padding: 5px;
-            z-index: 1000;
-        }
-
-        #contextMenu button {
-            display: block;
+        body {
+           font-family: 'Sarabun', sans-serif;
+           font-size: 20px;
+           line-height: 1.5;
+           margin: 0;
+           padding: 0;
+           background-color: #f5f5f5; /* สีพื้นหลัง */
+       }
+   
+       .wrapper {
+           max-width: 800px; /* ขนาดความกว้าง */
+           margin: 0 auto; /* จัดให้อยู่กึ่งกลางแนวนอน */
+           padding: 20px; /* เพิ่มช่องว่างรอบเนื้อหา */
+           background-color: #fff; /* สีพื้นหลังของเนื้อหา */
+           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* เพิ่มเงา */
+           /* border-radius: 8px;  */
+           margin-top: 20px;
+           margin-bottom: 20px;
+       }
+       .header {
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           width: 100%;
+       }
+   
+       .header-request {
+           width: 100%;
+           text-align: left;
+           margin-bottom: -10px;
+           padding-left: 10px;
+       }
+   
+       .header-request span {
+           font-size: 18px;
+       }
+   
+       .header-title {
+           padding-top: 20px;
+           text-align: center;
+           font-weight: bold;
+           font-size: 24px;
+       }
+   
+       /* .header-title span{
+           margin-left: -100px;
+       } */
+       .section {
+           margin-top: 15px;
+           margin-bottom: 10px;
+       }
+   
+       .section-title {
+           font-weight: bold;
+           margin-left: 110px;
+           margin-top:20px;
+       }
+   
+       .indent {
+           margin-left: 5px;
+           margin-top:5px;
+       }
+   
+       .table-section {
+           margin-top: 10px;
+           margin-bottom: 5px;
+       }
+   
+       .table-section td {
+           font-size: 28px;
+           vertical-align: bottom;
+       }
+   
+       .table-section td:first-child {
+           
+           font-weight: 500;
+       }
+   
+       .table-section td:last-child {
+           
+           /* padding-left: 20px; */
+       }
+   
+       .under-line {
+           border-bottom: 1px dotted #000;
+       }
+   
+       .input-no-border {
+           width: 100%;
+           font-size: 18px !important;
+           font-family: 'Sarabun', sans-serif;
+           border: none;
+           outline: none;
+           background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
+           border-bottom: 1px dotted #000;
+           color: #000;
+           padding: 2px 0;
+           transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
+       }
+   
+       .input-no-border.has-value,
+       .input-no-border:focus {
+           background-color: #ffffff; /* พื้นหลังสีขาว */
+       }
+   
+       .text-area-no-border {
             width: 100%;
-            background: none;
-            border: none;
-            padding: 5px 10px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        #contextMenu button:hover {
-            background-color: #007bff;
-            color: white;
-        }
-        .inline-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 5px;
-        }
-
-        .label {
-            white-space: nowrap;
-            font-weight: bold;
-            width: 200px;
-        }
-
-        .content {
-            flex: 1;
-            word-wrap: break-word;
-        }
-        .content .info{
-            margin-left:20px
-        }
-        .spaced {
-            display: flex;
-            gap: 100px;
-        }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: auto auto;
-            gap: 10px;
-            margin-top:10px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            user-select: none;
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            transform: scale(1.2); /* ปรับขนาด Checkbox */
-        }
-
-        .checkbox-item label {
-            cursor: pointer;
-        }
-
-        .report-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .report-table table {
-            border-collapse: collapse;
-            width: 100%;
-            text-align: center;
-            font-family: 'Sarabun', sans-serif;
-            font-size: 18px;
-            border: 1px solid #000;
-        }
-
-
-        .report-table th, .report-table td {
-            border: 1px solid #000;
-            padding: 5px;
-        }
-
-        .report-table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-
-        .report-table td {
-            vertical-align: top;
-            text-align: left;
-        }
-
-        .report-table td:nth-child(3) {
-            text-align: center;
-        }
-
-        .report-table td:nth-child(4) {
-            text-align: left;
-        }
-
-        .report-table tbody tr td {
-            padding: 5px;
-        }
-
-        .report-table tbody tr:nth-child(odd) {
-            background-color: #fafafa;
-        }
-
-        .report-table tbody tr:nth-child(even) {
-            background-color: #fff;
-        }
-
-        .evaluation-select {
-            font-family: 'Sarabun', sans-serif;
-            padding: 3px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 16px
-        }
-
-        .evaluation-checkbox-item {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
-
-        .evaluation-checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            transform: scale(1.2); /* ปรับขนาด Checkbox */
-        }
-
-        .evaluation-checkbox-item label {
-            cursor: pointer;
-        }
-
-        /* CSS */
-        .signature-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px; /* ระยะห่างระหว่างแต่ละแถว */
-            width: 70%; /* กำหนดความกว้าง */
-            margin-left: auto; /* ดันให้ติดขวา */
-            margin-right: 0;
-            text-align: left; /* ตัวอักษรชิดซ้ายใน input */
-        }
-
-        .signature-select {
-            width: 100%; /* กำหนด select ให้กว้างเต็ม container */
             font-size: 16px;
             font-family: 'Sarabun', sans-serif;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 5px;
-        }
-
-        /* ปรับขนาด Select2 */
-        .select2-container .select2-selection--single {
-            height: 38px; /* ปรับความสูง */
-            font-size: 18px; /* ปรับขนาดฟอนต์ */
-            line-height: 38px; /* จัดข้อความให้อยู่ตรงกลาง */
-            display: flex; /* ใช้ Flexbox */
-            align-items: center; /* จัดให้อยู่กลางแนวตั้ง */
-        }
-
-        .select2-container .select2-selection__rendered {
-            font-family: 'Sarabun', sans-serif;
-            font-size: 18px; /* ขนาดฟอนต์ที่แสดงผล */
-            padding-left: 10px; /* ระยะห่างด้านซ้าย */
-        }
-
-        .select2-container .select2-selection__arrow {
-            height: 36px; /* ความสูงของลูกศร */
-        }
-
-        .select2-container .select2-dropdown {
-            font-size: 18px; /* ปรับขนาดตัวเลือกใน dropdown */
-        }
-
-        .select2-container--default .select2-selection--single {
-            border: 1px solid #ccc; /* สีขอบ */
-            border-radius: 4px; /* มุมโค้ง */
-            display: flex; /* ใช้ Flexbox */
-            align-items: center; /* จัดให้อยู่กลางแนวตั้ง */
-        }
-
-
-        .select2-container .select2-search--dropdown .select2-search__field {
-            height: 40px; /* ความสูงของช่องค้นหา */
-            font-size: 18px; /* ขนาดฟอนต์ */
-            padding: 5px 10px; /* ระยะห่างภายใน */
-            border: 1px solid #ccc; /* ขอบสีเทา */
-            border-radius: 4px; /* มุมโค้ง */
-            outline: none; /* เอาเส้นขอบ Highlight ออก */
-            box-shadow: none; /* ป้องกันเงาเวลาคลิก */
-        }
-
-        .select2-container .select2-search--dropdown .select2-search__field:focus {
-            border-color: #999; /* เปลี่ยนสีขอบเมื่อโฟกัส */
-        }
-
-        /* สไตล์สำหรับ overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
-            display: flex;
-            flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
-            justify-content: center;
-            align-items: center;
-            z-index: 9999; /* อยู่ด้านหน้า */
-        }
-
-        /* สไตล์สำหรับสปินเนอร์ */
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #ffffff;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        /* Animation สำหรับการหมุน */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
-        .loading-text {
-            color: white;
-            font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
-            margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
-            text-align: center;
-        }
-
-        /* พื้นหลัง Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* กล่อง Modal */
-        .modal-dialog {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 350px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* หัวข้อ Modal */
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            /* border-bottom: 1px solid #ddd; */
-            padding-bottom: 5px;
-        }
-
-        .modal-title
-        {
-            font-size: 20px;
-        }
-
-        .modal-footer {
-            margin-top: 15px;
-            text-align: right;
-        }
-        /* ปิด Modal */
-        .close {
-            font-size: 20px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .close:hover {
-            color: red;
-        }
-
-        /* ปรับสไตล์ Input */
-        .input-field {
-            width: 95%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+            border: none;
             outline: none;
+            background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
+            border-bottom: 1px dotted #000;
+            color: #000;
+            padding: 2px;
+            transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
         }
 
-        .input-field:focus {
-            border-color: #007bff;
-        }
-
-        /* ปุ่ม */
-        .btn {
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .btn-primary {
-            background-color: #1f794f;
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: #ccc;
-        }
-
-        .btn:hover {
-            opacity: 0.8;
-        }
-
-
-    </style>
+       .text-area-no-border.has-value,
+       .text-area-no-border:focus {
+           background-color: #ffffff; /* พื้นหลังสีขาว */
+       }
+   
+   
+       /* เพิ่มการตั้งค่าการจัดตำแหน่ง */
+       .submit-section {
+           text-align: center;  /* ทำให้ปุ่มอยู่ตรงกลาง */
+           margin-top: 50px;     /* เว้นระยะห่างจากเนื้อหาด้านบน */
+           margin-bottom: 30px;
+       }
+   
+       .btn-submit {
+           font-family: 'Sarabun', sans-serif;
+           padding: 10px 20px;  /* เพิ่มขนาดของปุ่ม */
+           background-color: #4CAF50; /* สีพื้นหลัง */
+           color: white;         /* สีตัวอักษร */
+           border: none;         /* ไม่ให้มีขอบ */
+           border-radius: 5px;   /* ทำมุมโค้ง */
+           font-size: 22px;      /* ขนาดตัวอักษร */
+           cursor: pointer;     /* เปลี่ยนรูปแบบเมาส์เมื่อชี้ที่ปุ่ม */
+           transition: background-color 0.3s; /* เพิ่มการเปลี่ยนสีเมื่อ hover */
+       }
+   
+       .btn-submit:hover {
+           background-color: #45a049;  /* เปลี่ยนสีปุ่มเมื่อ hover */
+       }
+   
+       .btn-draft {
+           font-family: 'Sarabun', sans-serif;
+           padding: 10px 20px;  /* เพิ่มขนาดของปุ่ม */
+           background-color: #f75e06; /* สีพื้นหลัง */
+           color: white;         /* สีตัวอักษร */
+           border: none;         /* ไม่ให้มีขอบ */
+           border-radius: 5px;   /* ทำมุมโค้ง */
+           font-size: 22px;      /* ขนาดตัวอักษร */
+           cursor: pointer;     /* เปลี่ยนรูปแบบเมาส์เมื่อชี้ที่ปุ่ม */
+           transition: background-color 0.3s; /* เพิ่มการเปลี่ยนสีเมื่อ hover */
+       }
+   
+       .btn-draft:hover {
+           background-color: #45a049;  /* เปลี่ยนสีปุ่มเมื่อ hover */
+       }
+   
+       /* Custom Alert Styles */
+       .custom-alert {
+           padding: 15px;
+           margin: 10px 0;
+           border-radius: 5px;
+           font-size: 14px;
+           line-height: 1.5;
+           position: relative;
+           border: 1px solid transparent;
+       }
+   
+       .custom-alert strong {
+           font-weight: bold;
+       }
+   
+       .custom-alert.error {
+           background-color: #f8d7da;
+           color: #842029;
+           border-color: #f5c2c7;
+       }
+   
+       .custom-alert.success {
+           background-color: #d1e7dd;
+           color: #0f5132;
+           border-color: #badbcc;
+       }
+   
+       /* สไตล์สำหรับ overlay */
+       .loading-overlay {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
+           display: flex;
+           flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
+           justify-content: center;
+           align-items: center;
+           z-index: 9999; /* อยู่ด้านหน้า */
+       }
+   
+       /* สไตล์สำหรับสปินเนอร์ */
+       .spinner {
+           border: 4px solid rgba(255, 255, 255, 0.3);
+           border-top: 4px solid #ffffff;
+           border-radius: 50%;
+           width: 50px;
+           height: 50px;
+           animation: spin 1s linear infinite;
+       }
+   
+       /* Animation สำหรับการหมุน */
+       @keyframes spin {
+           0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+       }
+   
+       /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
+       .loading-text {
+           color: white;
+           font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
+           margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
+           text-align: center;
+       }
+   
+       /* body {
+               font-family: Arial, sans-serif;
+               padding: 20px;
+           } */
+   
+           #toolbar {
+               display: flex;
+               gap: 10px;
+               margin-bottom: 10px;
+               flex-wrap: wrap;
+           }
+   
+           button.toolbar {
+               padding: 6px 14px;
+               font-size: 12px;
+               cursor: pointer;
+               border: 1px solid #ccc;
+               border-radius: 5px;
+               background-color: #f8f9fa;
+               color: #333;
+               transition: background-color 0.3s, color 0.3s;
+           }
+   
+           button.toolbar:hover {
+               background-color: #007bff;
+               color: white;
+           }
+   
+           button.toolbar:active {
+               background-color: #0056b3;
+               color: white;
+           }
+   
+           
+   
+   
+           .editor {
+               width: 740px;
+               min-height: 200px;
+               max-height: 600px;
+               white-space: pre-wrap;
+               word-wrap: break-word;
+               overflow-wrap: break-word;
+               font-family: 'Sarabun', sans-serif; /* ใช้ฟอนต์ TH Sarabun */
+               font-size: 17px;
+               padding: 10px;
+               border: 1px solid #ccc;
+               overflow: hidden;
+               margin-bottom: 20px;
+           }
+   
+           .editor-table {
+               border-collapse: collapse;
+               min-width: 200px;
+               width: auto;
+               max-width: 100%;
+               table-layout: auto;
+           }
+   
+           .editor-table, .editor-table th, .editor-table td {
+               border: 1px solid black;
+               padding: 5px;
+               text-align: center;
+               position: relative;
+           }
+   
+   
+           .resizer {
+               position: absolute;
+               right: 0;
+               top: 0;
+               width: 5px;
+               height: 100%;
+               cursor: col-resize;
+               background: transparent;
+           }
+   
+           .popup {
+               display: none;
+               position: fixed;
+               top: 50%;
+               left: 50%;
+               transform: translate(-50%, -50%);
+               background: white;
+               padding: 20px;
+               border-radius: 10px;
+               box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+               width: 350px;
+               text-align: center;
+               z-index: 1000;
+               font-family: Arial, sans-serif;
+           }
+   
+           .popup label {
+               display: inline-block;
+               font-size: 14px;
+               font-weight: bold;
+               margin-bottom: 10px;
+               margin-right: 10px;
+           }
+   
+           .popup input {
+               display: inline-block;
+               width: 40px;
+               padding: 5px;
+               border: 1px solid #ccc;
+               border-radius: 5px;
+               text-align: center;
+               font-size: 14px;
+           }
+   
+           .popup button {
+               padding: 8px 15px;
+               border: none;
+               border-radius: 5px;
+               font-size: 14px;
+               cursor: pointer;
+               margin: 5px;
+           }
+   
+           .popup button:first-of-type {
+               background: #28a745;
+               color: white;
+           }
+   
+           .popup button:last-of-type {
+               background: #dc3545;
+               color: white;
+           }
+   
+           .popup button:hover {
+               opacity: 0.85;
+           }
+   
+           #contextMenu {
+               position: absolute;
+               display: none;
+               background: white;
+               border: 1px solid #ccc;
+               box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
+               padding: 5px;
+               z-index: 1000;
+           }
+   
+           #contextMenu button {
+               display: block;
+               width: 100%;
+               background: none;
+               border: none;
+               padding: 5px 10px;
+               text-align: left;
+               cursor: pointer;
+               font-size: 14px;
+           }
+   
+           #contextMenu button:hover {
+               background-color: #007bff;
+               color: white;
+           }
+           .inline-group {
+               display: flex;
+               align-items: flex-start;
+               gap: 5px;
+           }
+   
+           .label {
+               white-space: nowrap;
+               font-weight: bold;
+               width: 200px;
+           }
+   
+           .content {
+               flex: 1;
+               word-wrap: break-word;
+           }
+           .content .info{
+               margin-left:20px
+           }
+           .spaced {
+               display: flex;
+               gap: 100px;
+           }
+   
+           .checkbox-group {
+               display: grid;
+               grid-template-columns: auto auto;
+               gap: 10px;
+               margin-top:10px;
+           }
+   
+           .checkbox-item {
+               display: flex;
+               align-items: center;
+               gap: 5px;
+               user-select: none;
+           }
+   
+           .checkbox-item input[type="checkbox"] {
+               width: 20px;
+               height: 20px;
+               cursor: pointer;
+               transform: scale(1.2); /* ปรับขนาด Checkbox */
+           }
+   
+           .checkbox-item label {
+               cursor: pointer;
+           }
+   
+           .report-table {
+               width: 100%;
+               overflow-x: auto;
+           }
+   
+           .report-table table {
+               border-collapse: collapse;
+               width: 100%;
+               text-align: center;
+               font-family: 'Sarabun', sans-serif;
+               font-size: 18px;
+               border: 1px solid #000;
+           }
+   
+   
+           .report-table th, .report-table td {
+               border: 1px solid #000;
+               padding: 5px;
+           }
+   
+           .report-table th {
+               background-color: #f2f2f2;
+               font-weight: bold;
+           }
+   
+           .report-table td {
+               vertical-align: top;
+               text-align: left;
+           }
+   
+           .report-table td:nth-child(3) {
+               text-align: center;
+           }
+   
+           .report-table td:nth-child(4) {
+               text-align: left;
+           }
+   
+           .report-table tbody tr td {
+               padding: 5px;
+           }
+   
+           .report-table tbody tr:nth-child(odd) {
+               background-color: #fafafa;
+           }
+   
+           .report-table tbody tr:nth-child(even) {
+               background-color: #fff;
+           }
+   
+           .evaluation-select {
+               font-family: 'Sarabun', sans-serif;
+               padding: 3px;
+               border: 1px solid #ccc;
+               border-radius: 4px;
+               width: 100%;
+               box-sizing: border-box;
+               font-size: 16px
+           }
+   
+           .evaluation-checkbox-item {
+               display: flex;
+               justify-content: center;
+               align-items: center;
+               height: 100%;
+           }
+   
+           .evaluation-checkbox-item input[type="checkbox"] {
+               width: 20px;
+               height: 20px;
+               cursor: pointer;
+               transform: scale(1.2); /* ปรับขนาด Checkbox */
+           }
+   
+           .evaluation-checkbox-item label {
+               cursor: pointer;
+           }
+   
+           /* CSS */
+           .signature-section {
+               display: flex;
+               flex-direction: column;
+               gap: 15px; /* ระยะห่างระหว่างแต่ละแถว */
+               width: 70%; /* กำหนดความกว้าง */
+               margin-left: auto; /* ดันให้ติดขวา */
+               margin-right: 0;
+               text-align: left; /* ตัวอักษรชิดซ้ายใน input */
+           }
+   
+           .signature-select {
+               width: 100%; /* กำหนด select ให้กว้างเต็ม container */
+               font-size: 16px;
+               font-family: 'Sarabun', sans-serif;
+               border: 1px solid #ccc;
+               border-radius: 4px;
+               padding: 5px;
+           }
+   
+           /* ปรับขนาด Select2 */
+           .select2-container .select2-selection--single {
+               height: 38px; /* ปรับความสูง */
+               font-size: 18px; /* ปรับขนาดฟอนต์ */
+               line-height: 38px; /* จัดข้อความให้อยู่ตรงกลาง */
+               display: flex; /* ใช้ Flexbox */
+               align-items: center; /* จัดให้อยู่กลางแนวตั้ง */
+           }
+   
+           .select2-container .select2-selection__rendered {
+               font-family: 'Sarabun', sans-serif;
+               font-size: 18px; /* ขนาดฟอนต์ที่แสดงผล */
+               padding-left: 10px; /* ระยะห่างด้านซ้าย */
+           }
+   
+           .select2-container .select2-selection__arrow {
+               height: 36px; /* ความสูงของลูกศร */
+           }
+   
+           .select2-container .select2-dropdown {
+               font-size: 18px; /* ปรับขนาดตัวเลือกใน dropdown */
+           }
+   
+           .select2-container--default .select2-selection--single {
+               border: 1px solid #ccc; /* สีขอบ */
+               border-radius: 4px; /* มุมโค้ง */
+               display: flex; /* ใช้ Flexbox */
+               align-items: center; /* จัดให้อยู่กลางแนวตั้ง */
+           }
+   
+   
+           .select2-container .select2-search--dropdown .select2-search__field {
+               height: 40px; /* ความสูงของช่องค้นหา */
+               font-size: 18px; /* ขนาดฟอนต์ */
+               padding: 5px 10px; /* ระยะห่างภายใน */
+               border: 1px solid #ccc; /* ขอบสีเทา */
+               border-radius: 4px; /* มุมโค้ง */
+               outline: none; /* เอาเส้นขอบ Highlight ออก */
+               box-shadow: none; /* ป้องกันเงาเวลาคลิก */
+           }
+   
+           .select2-container .select2-search--dropdown .select2-search__field:focus {
+               border-color: #999; /* เปลี่ยนสีขอบเมื่อโฟกัส */
+           }
+   
+           /* สไตล์สำหรับ overlay */
+           .loading-overlay {
+               position: fixed;
+               top: 0;
+               left: 0;
+               width: 100%;
+               height: 100%;
+               background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
+               display: flex;
+               flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
+               justify-content: center;
+               align-items: center;
+               z-index: 9999; /* อยู่ด้านหน้า */
+           }
+   
+           /* สไตล์สำหรับสปินเนอร์ */
+           .spinner {
+               border: 4px solid rgba(255, 255, 255, 0.3);
+               border-top: 4px solid #ffffff;
+               border-radius: 50%;
+               width: 50px;
+               height: 50px;
+               animation: spin 1s linear infinite;
+           }
+   
+           /* Animation สำหรับการหมุน */
+           @keyframes spin {
+               0% { transform: rotate(0deg); }
+               100% { transform: rotate(360deg); }
+           }
+   
+           /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
+           .loading-text {
+               color: white;
+               font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
+               margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
+               text-align: center;
+           }
+   
+           /* พื้นหลัง Modal */
+           .modal {
+               display: none;
+               position: fixed;
+               z-index: 999;
+               left: 0;
+               top: 0;
+               width: 100%;
+               height: 100%;
+               background-color: rgba(0, 0, 0, 0.5);
+               justify-content: center;
+               align-items: center;
+           }
+   
+           /* กล่อง Modal */
+           .modal-dialog {
+               background: white;
+               padding: 20px;
+               border-radius: 8px;
+               width: 350px;
+               box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+           }
+   
+           /* หัวข้อ Modal */
+           .modal-header {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               /* border-bottom: 1px solid #ddd; */
+               padding-bottom: 5px;
+           }
+   
+           .modal-title
+           {
+               font-size: 20px;
+           }
+   
+           .modal-footer {
+               margin-top: 15px;
+               text-align: right;
+           }
+           /* ปิด Modal */
+           .close {
+               font-size: 20px;
+               cursor: pointer;
+               color: #666;
+           }
+   
+           .close:hover {
+               color: red;
+           }
+   
+           /* ปรับสไตล์ Input */
+           .input-field {
+               width: 95%;
+               padding: 8px;
+               border: 1px solid #ddd;
+               border-radius: 5px;
+               font-size: 16px;
+               outline: none;
+           }
+   
+           .input-field:focus {
+               border-color: #007bff;
+           }
+   
+           /* ปุ่ม */
+           .btn {
+               padding: 10px 15px;
+               border: none;
+               cursor: pointer;
+               border-radius: 5px;
+               font-size: 16px;
+           }
+   
+           .btn-primary {
+               background-color: #1f794f;
+               color: white;
+           }
+   
+           .btn-secondary {
+               background-color: #ccc;
+           }
+   
+           .btn:hover {
+               opacity: 0.8;
+           }
+   
+   
+       </style>
     <script>
         let startX, startWidth, resizingCol;
         let editorId;
@@ -841,7 +841,7 @@
                 <span>เลขที่คำขอ : {{$certi_cb->app_no}}</span>
             </div>
             <div class="header-title">
-                <span>รายงานการตรวจประเมิน ณ สถานประกอบการ (แก้ไข)</span>
+                <span>รายงานการตรวจประเมิน ณ สถานประกอบการ</span>
             </div>
         </div>
         <form id="labMessageForm" method="POST" action="{{ route('save.create_lab_message_record') }}">
@@ -977,7 +977,7 @@
             <div class="section">
                 <div class="label">5. เกณฑ์ที่ใช้ในการตรวจประเมิน: </div>
                 <div class="content">
-                    <div style="margin-top: 10px">
+                    <div style="margin-top: 10px;margin-left:20px">
                         @include('certify.cb.save_assessment_cb.report.editor', ['id' => '1'])
                     </div>
                 </div>
@@ -1100,19 +1100,19 @@
                     <div class="info">
                         <div class="label">10.1 ความเป็นมา </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '2'])
                             </div>
                         </div>
                         <div class="label">10.2 กระบวนการตรวจประเมิน </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '3'])
                             </div>
                         </div>
                         <div class="label">10.3 ประเด็นสำคัญจากการตรวจประเมิน </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '4'])
                             </div>
                         </div>
@@ -1125,7 +1125,7 @@
                                             <tr>
                                                 <th rowspan="2">เกณฑ์ที่ใช้ในการตรวจประเมิน</th>
                                                 <th colspan="2">รายการที่ตรวจ</th>
-                                                <th rowspan="2">หมายเหตุ</th>
+                                                <th rowspan="2" style="width: 150px">หมายเหตุ</th>
                                             </tr>
                                             <tr>
                                                 <th style="width: 110px">ผลการตรวจประเมิน</th>
@@ -1542,7 +1542,7 @@
                         </div>
                         <div class="label" style="margin-top: 10px">10.5 ข้อสังเกต </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '5'])
                             </div>
                         </div>
@@ -1553,7 +1553,7 @@
             <div class="section">
                 <div class="label">11. สรุปผลการตรวจประเมิน: </div>
                 <div class="content">
-                    <div style="margin-top: 10px">
+                    <div style="margin-top: 10px;margin-left:20px">
                         @include('certify.cb.save_assessment_cb.report.editor', ['id' => '6'])
                     </div>
                 </div>
@@ -1562,7 +1562,7 @@
             <div class="section">
                 <div class="label">12. ความเห็น/ข้อเสนอแนะของคณะผู้ตรวจประเมิน: </div>
                 <div class="content">
-                    <div style="margin-top: 10px">
+                    <div style="margin-top: 10px;margin-left:20px">
                         @include('certify.cb.save_assessment_cb.report.editor', ['id' => '7'])
                     </div>
                 </div>
@@ -1954,38 +1954,165 @@ function renderEditorHTML(editorId,html) {
     editorElement.innerHTML = html;
 }
 
-function getEditorHTML(editorId) {
-    let editorElement = document.getElementById("editor-" + editorId);
-    if (!editorElement) {
-        console.warn("Editor not found for ID:", editorId);
-        return "";
+function getEditorHTML2(editorId) 
+{
+    let editorElement = document.getElementById(editorId);
+    let output = document.getElementById("output");
+ 
+
+    let range = document.createRange();
+    let lines = [];
+    let lastTop = null;
+
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            let text = node.textContent;
+            if (text === "") return;
+
+            let tempLine = "";
+            for (let i = 0; i < text.length; i++) {
+                range.setStart(node, i);
+                range.setEnd(node, i + 1);
+                let rects = range.getClientRects();
+                if (rects.length > 0) {
+                    let top = rects[0].top;
+
+                    if (lastTop === null || Math.abs(top - lastTop) > 5) {
+                        if (tempLine !== "") {
+                            lines.push(tempLine);
+                            tempLine = "";
+                        }
+                    }
+
+                    tempLine += text[i];
+                    lastTop = top;
+                }
+            }
+            if (tempLine !== "") lines.push(tempLine);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === "TABLE" || node.tagName === "UL" || node.tagName === "OL" || node.tagName === "B" ) {
+                lines.push(node.outerHTML);
+                return;
+            }
+            else if (node.tagName === "BR") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV" && node.innerHTML.trim() === "<br>") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV") {
+                let childLines = [];
+                node.childNodes.forEach(child => {
+                    processNode(child);
+                });
+                lines.push("<br>"); // ขึ้นบรรทัดใหม่เมื่อจบ <div>
+                return;
+            }
+            node.childNodes.forEach(child => processNode(child));
+        }
     }
 
-    let editorContent = editorElement.innerHTML;
-    return editorContent; // ✅ Return ค่า HTML กลับไป
+    editorElement.childNodes.forEach(node => processNode(node));
+
+    let result = lines.map((line, index) => {
+
+        line = line.replace(/ /g, '&nbsp;');
+        
+        if (line.startsWith("<table") || line.startsWith("<ul") || line.startsWith("<ol") || line === "<br>") {
+            return line;
+        }
+        return line + "<br>";
+    }).join("");
+
+    result = result.replace(/(<br>\s*){2,}/g, "<br>");
+
+    return result
+  
+}
+
+
+function getEditorHTML(editorId) 
+{
+    let editorElement = document.getElementById("editor-" + editorId);
+
+    let range = document.createRange();
+    let lines = [];
+    let lastTop = null;
+
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            let text = node.textContent;
+            if (text === "") return;
+
+            let tempLine = "";
+            for (let i = 0; i < text.length; i++) {
+                range.setStart(node, i);
+                range.setEnd(node, i + 1);
+                let rects = range.getClientRects();
+                if (rects.length > 0) {
+                    let top = rects[0].top;
+
+                    if (lastTop === null || Math.abs(top - lastTop) > 5) {
+                        if (tempLine !== "") {
+                            lines.push(tempLine);
+                            tempLine = "";
+                        }
+                    }
+
+                    tempLine += text[i];
+                    lastTop = top;
+                }
+            }
+            if (tempLine !== "") lines.push(tempLine);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === "TABLE" || node.tagName === "UL" || node.tagName === "OL" || node.tagName === "B") {
+                lines.push(node.outerHTML);
+                return;
+            }
+            else if (node.tagName === "BR") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV" && node.innerHTML.trim() === "<br>") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV") {
+                node.childNodes.forEach(child => {
+                    processNode(child);
+                });
+                lines.push("<br>"); // ขึ้นบรรทัดใหม่เมื่อจบ <div>
+                return;
+            }
+            node.childNodes.forEach(child => processNode(child));
+        }
+    }
+
+    editorElement.childNodes.forEach(node => processNode(node));
+
+    while (lines.length > 0 && lines[lines.length - 1] === "<br>") {
+        lines.pop();
+    }
+
+    return lines.join("");
 }
 
 $('#btn_draft_submit').on('click', function() 
 {
-    submit_form("0");
+    submit_form("1");
 });
 
 $('#btn_submit').on('click', function() 
 {
-    submit_form("1");
+    submit_form("2");
 });
+
 
 
 function submit_form(status) 
 {
-
-    // const positionInput = $(`#position-${index + 1}`); // ดึงค่าจาก input
-    //         if (positionInput.length) {
-    //             item.signer_position = positionInput.val(); // อัปเดต signer_position
-    //         }
-    //     });
-
-    //     console.log()
 
     let isComplete = signer.every(item => item.signer_name);
         console.log(signer);
@@ -2009,16 +2136,14 @@ function submit_form(status)
         return;
     }
 
-    eval_riteria_text = getEditorHTML(1);
-    background_history = getEditorHTML(2);
-    insp_proc = getEditorHTML(3);
-    evaluation_key_point = getEditorHTML(4);
-    observation = getEditorHTML(5);
-    evaluation_result = getEditorHTML(6);
-    auditor_suggestion = getEditorHTML(7);
+    eval_riteria_text = getEditorHTML2("editor-1");
+    background_history = getEditorHTML2("editor-2");
+    insp_proc = getEditorHTML2("editor-3");
+    evaluation_key_point = getEditorHTML2("editor-4");
+    observation = getEditorHTML2("editor-5");
+    evaluation_result = getEditorHTML2("editor-6");
+    auditor_suggestion = getEditorHTML2("editor-7");
     
-    
-    // console.log(eval_riteria_text)
     // console.log(history)
     // console.log(insp_proc)
     // console.log(evaluation_key_point)
@@ -2155,8 +2280,11 @@ function submit_form(status)
     formData.append('data', JSON.stringify(data));  // แปลง data เป็น JSON String
     formData.append('id', $('#assessment_id').val()); 
     formData.append('signer', JSON.stringify(signer));
+    formData.append('status', status);
 
     $('#loadingStatus').show();
+
+    $('#btn_draft_submit, #btn_submit').prop('disabled', true);
     $.ajax({
         type: "POST",
         url: "{{url('/certify/save_assessment-cb/cb-report-store')}}",
@@ -2167,9 +2295,7 @@ function submit_form(status)
         processData: false,
         success: function (data) {
             // $('#loadingStatus').hide();
-
             const baseUrl = "{{ url('/certify/check_certificate-cb') }}";
-
             const token = certi_cb.token;
             const appId = certi_cb.id;
             window.location.href = `${baseUrl}/${token}/show/${appId}`;

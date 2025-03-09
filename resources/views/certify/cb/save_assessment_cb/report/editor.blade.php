@@ -1,8 +1,8 @@
 <div id="toolbar">
     <button class="toolbar" type="button" onclick="formatText('bold')"><i class="fas fa-bold"></i></button>
     <button class="toolbar" type="button" onclick="formatText('italic')"><i class="fas fa-italic"></i></button>
-    <button class="toolbar" type="button" onclick="formatText('insertUnorderedList')"><i class="fas fa-list-ul"></i></button>
-    <button class="toolbar" type="button" onclick="formatText('insertOrderedList')"><i class="fas fa-list-ol"></i></button>
+    {{-- <button class="toolbar" type="button" onclick="formatText('insertUnorderedList')"><i class="fas fa-list-ul"></i></button>
+    <button class="toolbar" type="button" onclick="formatText('insertOrderedList')"><i class="fas fa-list-ol"></i></button> --}}
     <button class="toolbar" type="button" onclick="showTablePopup('editor-{{$id}}')"><i class="fas fa-table"></i></button>
     {{-- <button class="toolbar" type="button" onclick="setHeading(1)">H1</button>
     <button class="toolbar" type="button" onclick="setHeading(2)">H2</button>
@@ -26,11 +26,23 @@
 <script>
     editorId = '{{ $id }}';
     currentEditorId = '';
-    document.getElementById("editor-"+editorId).addEventListener("paste", function (event) {
-        event.preventDefault(); 
-        let text = (event.clipboardData || window.clipboardData).getData("text"); 
-        document.execCommand("insertText", false, text); 
-    });
+    document.getElementById("editor-" + editorId).addEventListener("paste", function (event) {
+            event.preventDefault(); 
+            
+            // ดึงข้อมูลจาก clipboard
+            let text = event.clipboardData.getData("text/plain");
+
+            // ลบแท็ก <br> และแท็ก HTML อื่นๆ (หรือแท็กที่ไม่ต้องการ)
+            text = text
+                .replace(/\n+/g, ' ') // แทนที่ newline ด้วยช่องว่าง
+                .replace(/<br\s*\/?>/gi, ' ') // ลบ <br> หรือแทนที่ด้วยช่องว่าง
+                .replace(/\s{2,}/g, ' ') // ลบช่องว่างเกิน 1 ตัว
+                .trim(); // ตัดช่องว่างที่ส่วนหัวและท้าย
+
+            // แทรกข้อความที่ได้ (ไม่รวมสไตล์หรือแท็ก HTML)
+            document.execCommand("insertText", false, text); 
+        });
+
 
     function formatText(command) {
         document.execCommand(command, false, null);
@@ -248,25 +260,104 @@
     //     });
     // }
 
-    function getEditorHTML(editorId) {
-        let editorElement = document.getElementById("editor-" + editorId);
-        if (!editorElement) {
-            console.warn("Editor not found for ID:", editorId);
-            return "";
+    // function getEditorHTML(editorId) {
+    //     let editorElement = document.getElementById("editor-" + editorId);
+    //     if (!editorElement) {
+    //         console.warn("Editor not found for ID:", editorId);
+    //         return "";
+    //     }
+
+    //     let editorContent = editorElement.innerHTML;
+    //     console.log(editorContent);
+
+    //     // คัดลอกค่า HTML ไปที่ clipboard
+    //     navigator.clipboard.writeText(editorContent).then(() => {
+    //         alert("HTML copied to clipboard!");
+    //     }).catch(err => {
+    //         console.error("Failed to copy:", err);
+    //     });
+
+    //     return editorContent; // ✅ Return ค่า HTML กลับไป
+    // }
+
+    
+    function getEditorHTML(editorId) 
+        {
+            let editorElement = document.getElementById("editor-" + editorId);
+            let output = document.getElementById("output");
+            output.innerHTML = ""; 
+
+            let range = document.createRange();
+            let lines = [];
+            let lastTop = null;
+
+            function processNode(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    let text = node.textContent;
+                    if (text === "") return;
+
+                    let tempLine = "";
+                    for (let i = 0; i < text.length; i++) {
+                        range.setStart(node, i);
+                        range.setEnd(node, i + 1);
+                        let rects = range.getClientRects();
+                        if (rects.length > 0) {
+                            let top = rects[0].top;
+
+                            if (lastTop === null || Math.abs(top - lastTop) > 5) {
+                                if (tempLine !== "") {
+                                    lines.push(tempLine);
+                                    tempLine = "";
+                                }
+                            }
+
+                            tempLine += text[i];
+                            lastTop = top;
+                        }
+                    }
+                    if (tempLine !== "") lines.push(tempLine);
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.tagName === "TABLE" || node.tagName === "UL" || node.tagName === "OL" || node.tagName === "B" ) {
+                        lines.push(node.outerHTML);
+                        return;
+                    }
+                    else if (node.tagName === "BR") {
+                        lines.push("<br>");
+                        return;
+                    }
+                    else if (node.tagName === "DIV" && node.innerHTML.trim() === "<br>") {
+                        lines.push("<br>");
+                        return;
+                    }
+                    else if (node.tagName === "DIV") {
+                        let childLines = [];
+                        node.childNodes.forEach(child => {
+                            processNode(child);
+                        });
+                        lines.push("<br>"); // ขึ้นบรรทัดใหม่เมื่อจบ <div>
+                        return;
+                    }
+                    node.childNodes.forEach(child => processNode(child));
+                }
+            }
+
+            editorElement.childNodes.forEach(node => processNode(node));
+
+            let result = lines.map((line, index) => {
+
+                line = line.replace(/ /g, '&nbsp;');
+                
+                if (line.startsWith("<table") || line.startsWith("<ul") || line.startsWith("<ol") || line === "<br>") {
+                    return line;
+                }
+                return line + "<br>";
+            }).join("");
+
+            result = result.replace(/(<br>\s*){2,}/g, "<br>");
+
+            console.log(result);
+            output.innerHTML = result;
         }
-
-        let editorContent = editorElement.innerHTML;
-        console.log(editorContent);
-
-        // คัดลอกค่า HTML ไปที่ clipboard
-        navigator.clipboard.writeText(editorContent).then(() => {
-            alert("HTML copied to clipboard!");
-        }).catch(err => {
-            console.error("Failed to copy:", err);
-        });
-
-        return editorContent; // ✅ Return ค่า HTML กลับไป
-    }
 
 
 </script>

@@ -150,8 +150,16 @@
                                     <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
                                     <div class="col-md-8">
 
+                                        @php
+                                            $btnStyle = "btn-warning";
+                                            if (isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) {
+                                                $btnStyle = "btn-info";
+                                            }
+                                        @endphp
+                                 
+
                                        @if (isset($assessment))
-                                        <a href="{{route('save_assessment.cb_report_create',['id' => $assessment->id ])}}" title="จัดทำรายงาน" class="btn btn-warning">
+                                        <a href="{{route('save_assessment.cb_report_create',['id' => $assessment->id ])}}" title="จัดทำรายงาน" class="btn {{$btnStyle}}">
                                             <i class="fa fa-book" aria-hidden="true"> </i>
                                         </a>
                                        @endif
@@ -291,7 +299,7 @@
                       </div>
                 </div>
            </div>
-           <div class="row">
+           {{-- <div class="row">
                <div class="col-md-12 ">
                    <div id="other_attach_report">
                        <div class="form-group other_attach_report">
@@ -322,7 +330,7 @@
                         </div>
                       </div>
                 </div>
-           </div>
+           </div> --}}
 
        </div>
    </div>

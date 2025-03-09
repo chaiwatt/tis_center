@@ -107,7 +107,7 @@
 
     .input-no-border {
         width: 100%;
-        font-size: 22px;
+        font-size: 18px !important;
         font-family: 'Sarabun', sans-serif;
         border: none;
         outline: none;
@@ -125,14 +125,14 @@
 
     .text-area-no-border {
         width: 100%;
-        font-size: 18px;
+        font-size: 16px;
         font-family: 'Sarabun', sans-serif;
         border: none;
         outline: none;
         background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
         border-bottom: 1px dotted #000;
         color: #000;
-        padding: 2px 0;
+        padding: 2px;
         transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
     }
 
@@ -284,14 +284,14 @@
 
 
         .editor {
-            width: 780px;
+            width: 740px;
             min-height: 200px;
             max-height: 600px;
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
             font-family: 'Sarabun', sans-serif; /* ใช้ฟอนต์ TH Sarabun */
-            font-size: 18px;
+            font-size: 17px;
             padding: 10px;
             border: 1px solid #ccc;
             overflow: hidden;
@@ -977,7 +977,7 @@
             <div class="section">
                 <div class="label">5. เกณฑ์ที่ใช้ในการตรวจประเมิน: </div>
                 <div class="content">
-                    <div style="margin-top: 10px">
+                    <div style="margin-top: 10px;margin-left:20px">
                         @include('certify.cb.save_assessment_cb.report.editor', ['id' => '1'])
                     </div>
                 </div>
@@ -988,10 +988,11 @@
                     <div class="label">6. วันที่ตรวจประเมิน : </div>
                     @php
                         use Carbon\Carbon;
+                        
                         $startDate = Carbon::parse($assessment->CertiCBAuditorsTo->app_certi_cb_auditors_date->start_date);
                         $endDate = Carbon::parse($assessment->CertiCBAuditorsTo->app_certi_cb_auditors_date->end_date);
-                    
-                        // แปลงเดือนจากภาษาอังกฤษเป็นภาษาไทย
+
+                        // ฟังก์ชันแปลงเดือนเป็นภาษาไทย
                         function getThaiMonth($month) {
                             $months = [
                                 'January' => 'มกราคม', 'February' => 'กุมภาพันธ์', 'March' => 'มีนาคม',
@@ -1001,17 +1002,20 @@
                             ];
                             return $months[$month] ?? $month;
                         }
-                    
+
                         // ดึงวัน เดือน และปี
                         $startDay = $startDate->day;
                         $startMonth = getThaiMonth($startDate->format('F'));
                         $startYear = $startDate->year + 543; // แปลงเป็นปี พ.ศ.
-                    
+
                         $endDay = $endDate->day;
                         $endMonth = getThaiMonth($endDate->format('F'));
                         $endYear = $endDate->year + 543; // แปลงเป็นปี พ.ศ.
-                    
-                        if ($startMonth === $endMonth && $startYear === $endYear) {
+
+                        // ตรวจสอบว่าเป็นวันเดียวกันหรือไม่
+                        if ($startDate->equalTo($endDate)) {
+                            $formattedDate = "{$startDay} {$startMonth} {$startYear}";
+                        } elseif ($startMonth === $endMonth && $startYear === $endYear) {
                             $formattedDate = "{$startDay}-{$endDay} {$startMonth} {$startYear}";
                         } else {
                             $formattedDate = "{$startDay} {$startMonth} {$startYear} - {$endDay} {$endMonth} {$endYear}";
@@ -1100,19 +1104,19 @@
                     <div class="info">
                         <div class="label">10.1 ความเป็นมา </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '2'])
                             </div>
                         </div>
                         <div class="label">10.2 กระบวนการตรวจประเมิน </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '3'])
                             </div>
                         </div>
                         <div class="label">10.3 ประเด็นสำคัญจากการตรวจประเมิน </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '4'])
                             </div>
                         </div>
@@ -1125,7 +1129,7 @@
                                             <tr>
                                                 <th rowspan="2">เกณฑ์ที่ใช้ในการตรวจประเมิน</th>
                                                 <th colspan="2">รายการที่ตรวจ</th>
-                                                <th rowspan="2">หมายเหตุ</th>
+                                                <th rowspan="2" style="width: 150px">หมายเหตุ</th>
                                             </tr>
                                             <tr>
                                                 <th style="width: 110px">ผลการตรวจประเมิน</th>
@@ -1542,7 +1546,7 @@
                         </div>
                         <div class="label" style="margin-top: 10px">10.5 ข้อสังเกต </div> 
                         <div class="content" style="margin-left: -20px">
-                            <div style="margin-top: 10px">
+                            <div style="margin-top: 10px;margin-left:20px">
                                 @include('certify.cb.save_assessment_cb.report.editor', ['id' => '5'])
                             </div>
                         </div>
@@ -1553,7 +1557,7 @@
             <div class="section">
                 <div class="label">11. สรุปผลการตรวจประเมิน: </div>
                 <div class="content">
-                    <div style="margin-top: 10px">
+                    <div style="margin-top: 10px;margin-left:20px">
                         @include('certify.cb.save_assessment_cb.report.editor', ['id' => '6'])
                     </div>
                 </div>
@@ -1562,7 +1566,7 @@
             <div class="section">
                 <div class="label">12. ความเห็น/ข้อเสนอแนะของคณะผู้ตรวจประเมิน: </div>
                 <div class="content">
-                    <div style="margin-top: 10px">
+                    <div style="margin-top: 10px;margin-left:20px">
                         @include('certify.cb.save_assessment_cb.report.editor', ['id' => '7'])
                     </div>
                 </div>
@@ -1657,19 +1661,13 @@ $(document).ready(function()
 {
 
 
-if (cbReportInfo.status !== "1") {
-        $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
-
-        // ปิดการคลิกและโต้ตอบทุกอย่างใน div.wrapper ยกเว้น #files_wrapper
+    if (cbReportInfo.status !== "1") {
+        $('#button_wrapper').hide(); 
         $('.wrapper').css({
-            'pointer-events': 'none', // ปิดการคลิกทั้งหมด
-            'opacity': '0.7' // เพิ่มความโปร่งใส
+            'pointer-events': 'none', 
+            'opacity': '0.7' 
         });
-
-        // เปิดการคลิกสำหรับ #files_wrapper และเนื้อหาภายใน
         $('#files_wrapper').css('pointer-events', 'auto');
-
-        // ซ่อนทุกปุ่มใน .wrapper ยกเว้นปุ่มที่อยู่ใน #files_wrapper
         $('.wrapper button').not('#files_wrapper button').hide();
     }
 
@@ -2001,16 +1999,160 @@ function renderEditorHTML(editorId,html) {
     editorElement.innerHTML = html;
 }
 
-function getEditorHTML(editorId) {
-    let editorElement = document.getElementById("editor-" + editorId);
-    if (!editorElement) {
-        console.warn("Editor not found for ID:", editorId);
-        return "";
+// function getEditorHTML(editorId) {
+//     let editorElement = document.getElementById("editor-" + editorId);
+//     if (!editorElement) {
+//         console.warn("Editor not found for ID:", editorId);
+//         return "";
+//     }
+
+//     let editorContent = editorElement.innerHTML;
+//     return editorContent;
+// }
+function getEditorHTML2(editorId) 
+{
+    let editorElement = document.getElementById(editorId);
+    let output = document.getElementById("output");
+ 
+
+    let range = document.createRange();
+    let lines = [];
+    let lastTop = null;
+
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            let text = node.textContent;
+            if (text === "") return;
+
+            let tempLine = "";
+            for (let i = 0; i < text.length; i++) {
+                range.setStart(node, i);
+                range.setEnd(node, i + 1);
+                let rects = range.getClientRects();
+                if (rects.length > 0) {
+                    let top = rects[0].top;
+
+                    if (lastTop === null || Math.abs(top - lastTop) > 5) {
+                        if (tempLine !== "") {
+                            lines.push(tempLine);
+                            tempLine = "";
+                        }
+                    }
+
+                    tempLine += text[i];
+                    lastTop = top;
+                }
+            }
+            if (tempLine !== "") lines.push(tempLine);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === "TABLE" || node.tagName === "UL" || node.tagName === "OL" || node.tagName === "B" ) {
+                lines.push(node.outerHTML);
+                return;
+            }
+            else if (node.tagName === "BR") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV" && node.innerHTML.trim() === "<br>") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV") {
+                let childLines = [];
+                node.childNodes.forEach(child => {
+                    processNode(child);
+                });
+                lines.push("<br>"); // ขึ้นบรรทัดใหม่เมื่อจบ <div>
+                return;
+            }
+            node.childNodes.forEach(child => processNode(child));
+        }
     }
 
-    let editorContent = editorElement.innerHTML;
-    return editorContent; // ✅ Return ค่า HTML กลับไป
+    editorElement.childNodes.forEach(node => processNode(node));
+
+    let result = lines.map((line, index) => {
+
+        line = line.replace(/ /g, '&nbsp;');
+        
+        if (line.startsWith("<table") || line.startsWith("<ul") || line.startsWith("<ol") || line === "<br>") {
+            return line;
+        }
+        return line + "<br>";
+    }).join("");
+
+    result = result.replace(/(<br>\s*){2,}/g, "<br>");
+
+    return result
+  
 }
+
+function getEditorHTML(editorId) 
+{
+    let editorElement = document.getElementById("editor-" + editorId);
+
+    let range = document.createRange();
+    let lines = [];
+    let lastTop = null;
+
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            let text = node.textContent;
+            if (text === "") return;
+
+            let tempLine = "";
+            for (let i = 0; i < text.length; i++) {
+                range.setStart(node, i);
+                range.setEnd(node, i + 1);
+                let rects = range.getClientRects();
+                if (rects.length > 0) {
+                    let top = rects[0].top;
+
+                    if (lastTop === null || Math.abs(top - lastTop) > 5) {
+                        if (tempLine !== "") {
+                            lines.push(tempLine);
+                            tempLine = "";
+                        }
+                    }
+
+                    tempLine += text[i];
+                    lastTop = top;
+                }
+            }
+            if (tempLine !== "") lines.push(tempLine);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === "TABLE" || node.tagName === "UL" || node.tagName === "OL" || node.tagName === "B") {
+                lines.push(node.outerHTML);
+                return;
+            }
+            else if (node.tagName === "BR") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV" && node.innerHTML.trim() === "<br>") {
+                lines.push("<br>");
+                return;
+            }
+            else if (node.tagName === "DIV") {
+                node.childNodes.forEach(child => {
+                    processNode(child);
+                });
+                lines.push("<br>"); // ขึ้นบรรทัดใหม่เมื่อจบ <div>
+                return;
+            }
+            node.childNodes.forEach(child => processNode(child));
+        }
+    }
+
+    editorElement.childNodes.forEach(node => processNode(node));
+
+    while (lines.length > 0 && lines[lines.length - 1] === "<br>") {
+        lines.pop();
+    }
+
+    return lines.join("");
+}
+
 
 $('#btn_draft_submit').on('click', function() 
 {
@@ -2026,7 +2168,6 @@ $('#btn_submit').on('click', function()
 
 function submit_form(status) 
 {
-
 
     let isComplete = signer.every(item => item.signer_name);
         console.log(signer);
@@ -2050,16 +2191,17 @@ function submit_form(status)
         return;
     }
 
-    eval_riteria_text = getEditorHTML(1);
-    background_history = getEditorHTML(2);
-    insp_proc = getEditorHTML(3);
-    evaluation_key_point = getEditorHTML(4);
-    observation = getEditorHTML(5);
-    evaluation_result = getEditorHTML(6);
-    auditor_suggestion = getEditorHTML(7);
+    eval_riteria_text = getEditorHTML2("editor-1");
+    background_history = getEditorHTML2("editor-2");
+    insp_proc = getEditorHTML2("editor-3");
+    evaluation_key_point = getEditorHTML2("editor-4");
+    observation = getEditorHTML2("editor-5");
+    evaluation_result = getEditorHTML2("editor-6");
+    auditor_suggestion = getEditorHTML2("editor-1");
     
-    
-    // console.log(eval_riteria_text)
+
+    // console.log(getEditorHTML2(1))
+    // return;
     // console.log(history)
     // console.log(insp_proc)
     // console.log(evaluation_key_point)
@@ -2200,7 +2342,7 @@ function submit_form(status)
     
 
     $('#loadingStatus').show();
-
+    $('#btn_draft_submit, #btn_submit').prop('disabled', true);
     $.ajax({
         type: "POST",
         url: "{{url('/certify/save_assessment-cb/cb-report-store')}}",
@@ -2212,7 +2354,6 @@ function submit_form(status)
         success: function (data) {
             // alert('success');
            
-// http://127.0.0.1:8081/certify/check_certificate-cb/H14cbkzCAZxv1oF1/show/237
             const baseUrl = "{{ url('/certify/check_certificate-cb') }}";
 
             const token = certi_cb.token;

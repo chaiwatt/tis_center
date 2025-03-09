@@ -97,7 +97,8 @@ class HP
 
     public static function CancelCertiCb($appCertiCb,$reason)
     {//บันทึกลงตารางข้อมูลบุคคลธรรมดา
-
+       if($appCertiCb != null)
+       {
         $admin = DB::table('user_register')->where('reg_email', 'admin@admin.com')->first();   
         CertificateHistory::create([
             'app_no'=> $appCertiCb->app_no ?? null,
@@ -112,6 +113,8 @@ class HP
         CertiCb::find($appCertiCb->id)->update([
             'status' => 4
         ]);
+       }
+
     }
 
 

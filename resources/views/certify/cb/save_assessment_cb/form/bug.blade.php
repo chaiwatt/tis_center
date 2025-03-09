@@ -260,19 +260,19 @@
                            </div>
                      </div>
                 </div>
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-12 ">
                         <div id="other_attach_report">
                             @if(!is_null($assessment) && (count($assessment->FileAttachAssessment3Many) > 0 ) )
                             @foreach($assessment->FileAttachAssessment3Many as  $key => $item)
                               <p id="remove_attach_all{{$item->id}}">
                  
-                                {{-- @if($item->file !='' && HP::checkFileStorage($attach_path.$item->file)) --}}
+                      
                                     <a href="{{url('certify/check/file_cb_client/'.$item->file.'/'.( !empty($item->file_client_name) ? $item->file_client_name : 'null' ))}}" 
                                         title="{{ !empty($item->file_client_name) ? $item->file_client_name :  basename($item->file) }}" target="_blank">
                                         {!! HP::FileExtension($item->file)  ?? '' !!}
                                     </a>  
-                                {{-- @endif --}}
+                           
                               </p>
                             @endforeach
                           @else 
@@ -306,7 +306,7 @@
 
                            </div>
                      </div>
-                </div>
+                </div> --}}
     
             </div>
         </div>

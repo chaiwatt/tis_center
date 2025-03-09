@@ -11,11 +11,12 @@ use Mpdf\Mpdf;
 use Carbon\Carbon;
 use App\AttachFile;
 use App\CertificateExport;
+use App\Helpers\TextHelper;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Smalot\PdfParser\Parser;
+use App\Certify\CbReportInfo;
 use App\Helpers\EpaymentDemo;
-use App\Helpers\TextHelper;
 use App\Models\Besurv\Signer;
 use Yajra\Datatables\Datatables;
 use App\Mail\Lab\OtpNofitication;
@@ -42,6 +43,7 @@ use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Certify\CertificateHistory;
 use App\Models\Certify\SetStandardUserSub;
 use App\Models\Certify\SignCertificateOtp;
+use App\Services\CreateCbMessageRecordPdf;
 use App\Models\Bcertify\AuditorInformation;
 use App\Models\Certify\ApplicantCB\CertiCb;
 use App\Models\Certify\CertiSettingPayment;
@@ -52,6 +54,7 @@ use App\Models\Certify\Applicant\Assessment;
 use App\Models\Certify\Applicant\NoticeItem;
 use App\Models\Certify\SendCertificateLists;
 use App\Services\CreateTrackingLabReportPdf;
+use App\Services\CreateCbAssessmentReportPdf;
 use App\Models\Certificate\CbDocReviewAuditor;
 use App\Models\Certificate\TrackingAssessment;
 use App\Models\Certificate\TrackingInspection;
@@ -67,6 +70,7 @@ use App\Models\Certify\Applicant\CostCertificate;
 use App\Http\Controllers\API\Checkbill2Controller;
 use App\Models\Bcertify\BoardAuditoExpertTracking;
 use App\Models\Certify\Applicant\CertifyTestScope;
+use App\Models\Certify\ApplicantCB\CertiCBAuditors;
 use App\Services\CreateTrackingLabMessageRecordPdf;
 use App\Models\Bcertify\CalibrationBranchInstrument;
 use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
@@ -1164,7 +1168,7 @@ public function create_bill()
             $labRequest = LabTestRequest::where('app_certi_lab_id',$app_certi_lab->id)->where('type',1)->first();
         }
 
-        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->get();
+        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->get();
 
 
         
@@ -1172,11 +1176,11 @@ public function create_bill()
 
 
        
-        $signer->signer_1 = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->where('signer_order','1')->first();
+        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','1')->first();
 
         
-        $signer->signer_2 = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->where('signer_order','2')->first();
-        $signer->signer_3 = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->where('signer_order','3')->first();
+        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','2')->first();
+        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','3')->first();
 
 
 
@@ -1535,8 +1539,8 @@ public function create_bill()
 
     public function mergePdf()
     {
-        $lab_report_info_id = 11;
-        $pdfService = new CreateLabAssessmentReportPdf($lab_report_info_id,"ia");
+        $report_info_id = 11;
+        $pdfService = new CreateLabAssessmentReportPdf($report_info_id,"ia");
         $pdfContent = $pdfService->generateLabAssessmentReportPdf();
     }
 
@@ -1917,8 +1921,8 @@ public function create_bill()
  
     public function generateScopePDF()
     {
-     $certilab = CertiLab::find(1976);
-     // dd($certilab);
+     $certilab = CertiLab::find(2047);
+    //  dd($certilab);
 
      // dd($certilab->DataEmailDirectorLAB);
 
@@ -2326,8 +2330,8 @@ public function create_bill()
     public function trackingLabReportPdf()
     {
         // dd('ok');
-        $tracking_lab_report_info_id = 3;
-        $pdfService = new CreateTrackingLabReportPdf($tracking_lab_report_info_id,"ia");
+        $tracking_report_info_id = 3;
+        $pdfService = new CreateTrackingLabReportPdf($tracking_report_info_id,"ia");
         $pdfContent = $pdfService->generateTrackingLabReportPdf();
     }
 
@@ -2846,20 +2850,13 @@ public function create_bill()
     public function textSpliter()
     {
         $text = "ลูกชายส่งข้อความถึงพ่อที่ล่วงลับ แต่กลับได้รับคำตอบอย่างไม่คาดคิด เบื้องหลังเรื่องราวนี้ช่างซาบซึ้งเกินบรรยาย
-
-แม้โลกนี้จะเต็มไปด้วยความเจ็บปวด แต่โชคดีที่ความรักยังคงอยู่
-
-ย้อนกลับไปเมื่อวันที่ 26 มีนาคม 2023 นักศึกษาชายคนหนึ่งจากซีอาน มณฑลส่านซี ประเทศจีน ได้ส่งข้อความถึงพ่อที่จากไปเมื่อ 3 ปีก่อน และไม่คาดคิดว่าจะได้รับคำตอบกลับมา
-
-เขากำลังเผชิญกับความยากลำบากในการสอบเข้าปริญญาโท และด้วยความโศกเศร้า คิดถึงพ่อที่ล่วงลับ จึงตัดสินใจส่งข้อความไปยังเบอร์โทรศัพท์เก่าของพ่อ ก่อนจะได้รับกำลังใจจากคนแปลกหน้า
-
-คุณเฉา ผู้รับข้อความ เล่าว่า ตอนแรกเขาคิดว่าเป็นการส่งผิด แต่เมื่ออ่านแล้วกลับรู้สึกว่าลูกชายคนนี้อาจกำลังต้องการกำลังใจ เขาอยากส่งให้พ่อ แต่ผมคิดว่าพ่อของเขาคงจากไปแล้ว อาจเป็นเพราะตอนนี้เขากำลังลำบากและต้องการคำปลอบโยน
-
-หลังจากไตร่ตรอง คุณเฉาตัดสินใจตอบกลับ หวังให้คำพูดของเขาช่วยเติมพลังใจ เสมือนพ่อที่กำลังปลอบโยนลูกให้ก้าวผ่านช่วงเวลาที่ยากลำบาก
-
-เมื่อได้รับข้อความตอบกลับจากเบอร์โทรศัพท์เก่าของพ่อ ผู้เป็นลูกชายถึงกับกลั้นน้ำตาไว้ไม่อยู่ เขาขอบคุณคุณเฉา บอกว่าจะไม่รบกวนอีก พร้อมสารภาพว่าน้ำตาไหล
-
-เหตุการณ์อันแสนอบอุ่นนี้สร้างความประทับใจให้กับทุกคนที่ได้รับรู้";
+        แม้โลกนี้จะเต็มไปด้วยความเจ็บปวด แต่โชคดีที่ความรักยังคงอยู่
+        ย้อนกลับไปเมื่อวันที่ 26 มีนาคม 2023 นักศึกษาชายคนหนึ่งจากซีอาน มณฑลส่านซี ประเทศจีน ได้ส่งข้อความถึงพ่อที่จากไปเมื่อ 3 ปีก่อน และไม่คาดคิดว่าจะได้รับคำตอบกลับมา
+        เขากำลังเผชิญกับความยากลำบากในการสอบเข้าปริญญาโท และด้วยความโศกเศร้า คิดถึงพ่อที่ล่วงลับ จึงตัดสินใจส่งข้อความไปยังเบอร์โทรศัพท์เก่าของพ่อ ก่อนจะได้รับกำลังใจจากคนแปลกหน้า
+        คุณเฉา ผู้รับข้อความ เล่าว่า ตอนแรกเขาคิดว่าเป็นการส่งผิด แต่เมื่ออ่านแล้วกลับรู้สึกว่าลูกชายคนนี้อาจกำลังต้องการกำลังใจ เขาอยากส่งให้พ่อ แต่ผมคิดว่าพ่อของเขาคงจากไปแล้ว อาจเป็นเพราะตอนนี้เขากำลังลำบากและต้องการคำปลอบโยน
+        หลังจากไตร่ตรอง คุณเฉาตัดสินใจตอบกลับ หวังให้คำพูดของเขาช่วยเติมพลังใจ เสมือนพ่อที่กำลังปลอบโยนลูกให้ก้าวผ่านช่วงเวลาที่ยากลำบาก
+        เมื่อได้รับข้อความตอบกลับจากเบอร์โทรศัพท์เก่าของพ่อ ผู้เป็นลูกชายถึงกับกลั้นน้ำตาไว้ไม่อยู่ เขาขอบคุณคุณเฉา บอกว่าจะไม่รบกวนอีก พร้อมสารภาพว่าน้ำตาไหล
+        เหตุการณ์อันแสนอบอุ่นนี้สร้างความประทับใจให้กับทุกคนที่ได้รับรู้";
         $textArray = TextHelper::callLonganTokenizeArrayPost($text);
 
         print($textArray);
@@ -2869,6 +2866,22 @@ public function create_bill()
     {
         return view('demo_html_pdf_editor.initial-message-record');
     }
+
+    public function createCbAssessmentReportPdf()
+    {
+        $lastRecord = CbReportInfo::orderBy('id', 'desc')->first();
+        $pdfService = new CreateCbAssessmentReportPdf($lastRecord->id,"ia");
+        $pdfContent = $pdfService->generateCbAssessmentReportPdf();
+    }
+
+    public function createCbMessageRecordPdf()
+    {
+        $id = 361;
+        $boardAuditor = CertiCBAuditors::find($id);
+        $pdfService = new CreateCbMessageRecordPdf($boardAuditor,"ia");
+        $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
+    }
+
 
 }
 

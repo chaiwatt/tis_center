@@ -33,6 +33,7 @@ use App\Models\Certify\ApplicantCB\CertiCbHistory;
 use App\Models\Certify\ApplicantCB\CertiCBAuditors;
 use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
 use App\Models\Certify\ApplicantCB\CertiCBAuditorsList;
+use App\Models\Certify\SignAssessmentReportTransaction;
 use App\Models\Certify\ApplicantCB\AuditorRepresentative;
 use App\Models\Certify\ApplicantCB\CertiCBSaveAssessment;
 use App\Models\Certify\ApplicantCB\CertiCBSaveAssessmentBug;
@@ -106,7 +107,17 @@ class SaveAssessmentCBController extends Controller
      */
     public function create($id)
     {
-        // dd($id);
+       
+
+
+        // $assessment = CertiCBSaveAssessment::where('auditors_id',$id)->first();
+        // dd($assessment);
+        // if($assessment != null)
+        // {
+        //     return redirect('/certify/save_assessment-cb/assessment/'.$id.'/edit');
+        // }
+        // dd('break');
+
         $model = str_slug('saveassessmentcb','-');
         if(auth()->user()->can('add-'.$model)) {
             $previousUrl = app('url')->previous();
@@ -1220,7 +1231,7 @@ public function copyScopeCbFromAttachement($certiCbId)
             //     $labRequest = LabTestRequest::where('app_certi_lab_id',$app_certi_lab->id)->where('type',1)->first();
             // }
 
-            // $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->get();
+            // $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->get();
             // $approveNoticeItems = NoticeItem::where('app_certi_lab_notice_id', $notice->id)
             //     ->whereNotNull('attachs')
             //     ->where('status',1)
@@ -1258,7 +1269,10 @@ public function copyScopeCbFromAttachement($certiCbId)
                     'referenceDocuments' => $referenceDocuments
                 ]);
             }else{
-                $cbReportInfoSigners = CbReportInfoSigner::where('cb_report_info_id',$cbReportInfo->id)->get();
+
+                $cbReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
+                                    ->where('certificate_type',0)
+                                    ->get();
                 return view('certify.cb.save_assessment_cb.report.view',[
                     'cbReportInfo' => $cbReportInfo,
                     'assessment' => $assessment,
@@ -1271,7 +1285,7 @@ public function copyScopeCbFromAttachement($certiCbId)
         }
         public function storeCbReport(Request $request)
         {
-            // dd($request->status);
+            // dd($request->all());
             $signers = json_decode($request->input('signer'), true);
             // dd($signers);
             $data = json_decode($request->input('data'), true); // แปลง JSON String เป็น Array
@@ -1280,7 +1294,7 @@ public function copyScopeCbFromAttachement($certiCbId)
             CbReportInfo::where('cb_assessment_id',$id)->delete();
 
             $assessment = CertiCBSaveAssessment::find($id);
-
+            
             // สร้าง array สำหรับ insert
             $insertData = [
                 'cb_assessment_id' => $id,
@@ -1305,21 +1319,24 @@ public function copyScopeCbFromAttachement($certiCbId)
 
             $config = HP::getConfig();
             $url  =   !empty($config->url_center) ? $config->url_center : url('');
-            CbReportInfoSigner::where('cb_report_info_id', $cbReportInfo->id)->delete();
+            SignAssessmentReportTransaction::where('report_info_id', $cbReportInfo->id)
+                                            ->where('certificate_type',0)
+                                            ->delete();
+            // dd($signers);
             foreach ($signers as $signer) {
                 // ตรวจสอบความถูกต้องของข้อมูล
                 if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
                     continue; // ข้ามรายการนี้หากข้อมูลไม่ครบถ้วน
                 }
 
-                CbReportInfoSigner::create([
-                    'cb_report_info_id' => $cbReportInfo->id,
+                SignAssessmentReportTransaction::create([
+                    'report_info_id' => $cbReportInfo->id,
                     'signer_id' => $signer['signer_id'],
                     'signer_name' => $signer['signer_name'],
                     'signer_position' => $signer['signer_position'],
                     'signer_order' => $signer['id'],
                     'view_url' => $url . '/certify/save_assessment-cb/cb-report-create/'. $id,
-                    'certificate_type' => 2,
+                    'certificate_type' => 0,
                     'app_id' => $assessment->CertiCBCostTo->app_no,
                 ]);
             }

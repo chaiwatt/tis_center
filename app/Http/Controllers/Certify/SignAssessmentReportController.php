@@ -26,6 +26,7 @@ use App\Models\Certify\SignCertificateOtp;
 use App\Models\Certify\ApplicantCB\CertiCb;
 use App\Models\Certify\ApplicantIB\CertiIb;
 use App\Models\Certify\SendCertificateLists;
+use App\Services\CreateCbAssessmentReportPdf;
 use App\Models\Certify\SendCertificateHistory;
 use App\Services\CreateLabAssessmentReportPdf;
 use App\Models\Certify\SignCertificateConfirms;
@@ -57,7 +58,7 @@ class SignAssessmentReportController extends Controller
 
     public function dataList(Request $request)
     {
-        
+      
         $user = auth()->user();
         if (!$user) {
             return response()->json(['error' => 'ผู้ใช้ไม่ได้เข้าสู่ระบบ'], 401);
@@ -67,29 +68,71 @@ class SignAssessmentReportController extends Controller
         // ดึงข้อมูล signer โดยใช้ user_register_id
         $signer = Signer::where('user_register_id', $userId)->first();
 
-        // dd($signer);
-
         // ตรวจสอบว่าพบข้อมูลหรือไม่
         if ($signer) {
-            // dd(MessageRecordTransaction::where('signer_id',$signer->id)->get());
             $filter_approval = $request->input('filter_state');
             $filter_certificate_type = $request->input('filter_certificate_type');
         
             $query = SignAssessmentReportTransaction::query();
             $query->where('signer_id',$signer->id);
+
+           
         
             if ($filter_approval) {
                 $query->where('approval', $filter_approval);
             }else{
                 $query->where('approval', 0);
             }
+
+            // dd($query->get());
         
             if ($filter_certificate_type !== null) {
                 
                 $query->where('certificate_type', $filter_certificate_type);
             }
+
+            
+
+            // กรองเฉพาะข้อมูลที่ status เป็น 2
+            // $query->where(function ($q) {
+            //     $q->where(function ($subQuery) {
+            //         $subQuery->where('certificate_type', 2)
+            //                 ->whereHas('reportInfo', function ($query) {
+            //                     $query->where('status', 2);
+            //                 });
+            //     })->orWhere(function ($subQuery) {
+            //         $subQuery->where('certificate_type', 0)
+            //                 ->whereHas('reportInfo', function ($query) {
+            //                     $query->where('status', 2);
+            //                 });
+            //     });
+            // });
+
+            // $query->where(function ($q) {
+            //     $q->where(function ($subQuery) {
+            //         $subQuery->where('certificate_type', 2);
+            //     })->orWhere(function ($subQuery) {
+            //         $subQuery->where('certificate_type', 0);
+            //     });
+            // });
+
+            $query->where(function ($q) {
+                $q->where('certificate_type', 2)
+                  ->whereHas('labReportInfo', function ($query) {
+                      $query->where('status', 2);
+                  })
+                  ->orWhere(function ($subQuery) {
+                      $subQuery->where('certificate_type', 0)
+                               ->whereHas('cbReportInfo', function ($query) {
+                                   $query->where('status', 2);
+                               });
+                  });
+            });
+
         
             $data = $query->get();
+
+            // dd($data);
             $data = $data->map(function($item, $index) {
                 $item->DT_Row_Index = $index + 1;
 
@@ -193,75 +236,52 @@ class SignAssessmentReportController extends Controller
 
     public function signDocument(Request $request)
     {
-        // dd($request->all());
+        $signAssessmentReportTransaction = SignAssessmentReportTransaction::find($request->id);
+
         SignAssessmentReportTransaction::find($request->id)->update([
             'approval' => 1
         ]);
 
-        $signAssessmentReportTransaction = SignAssessmentReportTransaction::find($request->id);
-        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('lab_report_info_id',$signAssessmentReportTransaction->lab_report_info_id)
-                                ->whereNotNull('signer_id')
-                                ->where('approval',0)
-                                ->get();           
 
-        if($signAssessmentReportTransactions->count() == 0){
-            $pdfService = new CreateLabAssessmentReportPdf($signAssessmentReportTransaction->lab_report_info_id,"ia");
-            $pdfContent = $pdfService->generateLabAssessmentReportPdf();
+        if($signAssessmentReportTransaction->certificate_type == 2)
+        {
+            // LAB
+            $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+                                    ->whereNotNull('signer_id')
+                                    ->where('certificate_type',2)
+                                    ->where('approval',0)
+                                    ->get();           
+    
+            if($signAssessmentReportTransactions->count() == 0){
+                $pdfService = new CreateLabAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                $pdfContent = $pdfService->generateLabAssessmentReportPdf();
+    
+            }   
+        }
+        else if($signAssessmentReportTransaction->certificate_type == 0)
+        {
+            // CB
+            $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+                        ->whereNotNull('signer_id')
+                        ->where('certificate_type',0)
+                        ->where('approval',0)
+                        ->get();           
+            
+            if($signAssessmentReportTransactions->count() == 0){
+                $pdfService = new CreateCbAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                $pdfContent = $pdfService->generateCbAssessmentReportPdf();
+            } 
+        }
+        else if($signAssessmentReportTransaction->certificate_type == 1)
+        {
+            
+            // IB
+        }
 
-        }                        
+                     
         
     }
 
-    // public function set_mail($signAssessmentReportTransaction) 
-    // {
 
-    //     if(!is_null($certi_lab->email)){
-
-    //         $config = HP::getConfig();
-    //         $url  =   !empty($config->url_acc) ? $config->url_acc : url('');
-    //         $dataMail = ['1804'=> 'lab1@tisi.mail.go.th','1805'=> 'lab2@tisi.mail.go.th','1806'=> 'lab3@tisi.mail.go.th'];
-    //         $EMail =  array_key_exists($certi_lab->subgroup,$dataMail)  ? $dataMail[$certi_lab->subgroup] :'admin@admin.com';
-
-    //         if(!empty($certi_lab->DataEmailDirectorLABCC)){
-    //             $mail_cc = $certi_lab->DataEmailDirectorLABCC;
-    //         }
-           
-    //         $data_app = [
-    //                         'email'=>  'admin@admin.com',
-    //                         'auditors' => $auditors,
-    //                         'certi_lab'=> $certi_lab,
-    //                         'url' => $url.'certify/applicant/auditor/'.$certi_lab->token,
-    //                         'email'=>  !empty($certi_lab->DataEmailCertifyCenter) ? $certi_lab->DataEmailCertifyCenter : $EMail,
-    //                         'email_cc'=>  !empty($mail_cc) ? $mail_cc :  $EMail,
-    //                         'email_reply' => !empty($certi_lab->DataEmailDirectorLABReply) ? $certi_lab->DataEmailDirectorLABReply :  $EMail
-    //                     ];
-        
-    //         $log_email =  HP::getInsertCertifyLogEmail( $certi_lab->app_no,
-    //                                                     $certi_lab->id,
-    //                                                     (new CertiLab)->getTable(),
-    //                                                     $auditors->id,
-    //                                                     (new BoardAuditor)->getTable(),
-    //                                                     1,
-    //                                                     'การแต่งตั้งคณะผู้ตรวจประเมิน',
-    //                                                     view('mail.Lab.mail_board_auditor', $data_app),
-    //                                                     $certi_lab->created_by,
-    //                                                     $certi_lab->agent_id,
-    //                                                     auth()->user()->getKey(),
-    //                                                     !empty($certi_lab->DataEmailCertifyCenter) ?  implode(',',(array)$certi_lab->DataEmailCertifyCenter)  : $EMail,
-    //                                                     $certi_lab->email,
-    //                                                     !empty($mail_cc) ? implode(',',(array)$mail_cc)   :  $EMail,
-    //                                                     !empty($certi_lab->DataEmailDirectorLABReply) ?implode(',',(array)$certi_lab->DataEmailDirectorLABReply)   :  $EMail,
-    //                                                     null
-    //                                                     );
-    
-    //          $html = new  MailBoardAuditor($data_app);
-    //           $mail = Mail::to($certi_lab->email)->send($html);
-
-    //           if(is_null($mail) && !empty($log_email)){
-    //                HP::getUpdateCertifyLogEmail($log_email->id);
-    //           }
-
-    //     }
-    // }
 
 }

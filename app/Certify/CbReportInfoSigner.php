@@ -27,7 +27,7 @@ class CbReportInfoSigner extends Model
     ];
 
 
-    public function cbReportInfo(){
-        return $this->belongsTo(CbReportInfo::class, 'cb_report_info_id', 'id');
-    }
+    // public function cbReportInfo(){
+    //     return $this->belongsTo(CbReportInfo::class, 'cb_report_info_id', 'id');
+    // }
 }

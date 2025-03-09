@@ -35,9 +35,9 @@ class CreateTrackingLabReportPdf
     protected $trackingLabReportInfoId;
     protected $type;
 
-    public function __construct($tracking_lab_report_Info_id,$type)
+    public function __construct($tracking_report_info_id,$type)
     {
-        $this->trackingLabReportInfoId = $tracking_lab_report_Info_id;
+        $this->trackingLabReportInfoId = $tracking_report_info_id;
         $this->type = $type;
     }
 
@@ -204,15 +204,23 @@ class CreateTrackingLabReportPdf
 
         $labInformation = $certi_lab->information;
 
-        $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id',$labReportInfo->id)->get();
+        $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$labReportInfo->id)
+                                    ->where('certificate_type',2)
+                                    ->get();
 
         $signer = new stdClass();
 
-        $signer->signer_1 = SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id',$labReportInfo->id)->where('signer_order','1')->first();
+        $signer->signer_1 = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$labReportInfo->id)->where('signer_order','1')
+                            ->where('certificate_type',2)
+                            ->first();
 
         
-        $signer->signer_2 = SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id',$labReportInfo->id)->where('signer_order','2')->first();
-        $signer->signer_3 = SignAssessmentTrackingReportTransaction::where('tracking_lab_report_info_id',$labReportInfo->id)->where('signer_order','3')->first();
+        $signer->signer_2 = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$labReportInfo->id)->where('signer_order','2')
+                            ->where('certificate_type',2)
+                            ->first();
+        $signer->signer_3 = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$labReportInfo->id)->where('signer_order','3')
+                            ->where('certificate_type',2)
+                            ->first();
 
         
 

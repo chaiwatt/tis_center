@@ -165,46 +165,6 @@
         border-color: #badbcc;
     }
 
-    /* สไตล์สำหรับ overlay */
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
-        display: flex;
-        flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
-        justify-content: center;
-        align-items: center;
-        z-index: 9999; /* อยู่ด้านหน้า */
-    }
-
-    /* สไตล์สำหรับสปินเนอร์ */
-    .spinner {
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid #ffffff;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-    }
-
-    /* Animation สำหรับการหมุน */
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
-    .loading-text {
-        color: white;
-        font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
-        margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
-        text-align: center;
-    }
-
-
     </style>
 </head>
 
@@ -221,14 +181,6 @@
                 </ul>
             </div>
         @endif
-
-        <!-- Div สำหรับสถานะการโหลด -->
-        <div id="loadingStatus" class="loading-overlay" style="display: none;">
-            <div class="spinner"></div>
-            <div class="loading-text">กำลังบันทึก...</div>
-        </div>
-        
-
         <!-- Header Section -->
         <div class="header">
             <div>
@@ -240,22 +192,20 @@
             </div>
         </div>
 
-        <input type="hidden" id="certi_cb_id" value="{{$certi_cb->id}}">
-        <input type="hidden" id="certi_cb_token" value="{{$certi_cb->token}}">
-        <form id="cbMessageForm" method="POST" action="{{ route('save.create_cb_message_record') }}">
-            @csrf
+        {{-- <form method="POST" action="{{ route('save.create_lab_message_record') }}">
+            @csrf --}}
             <!-- ส่วนราชการ -->
             <input type="hidden" name="id" value="{{$id}}">
             <table class="table-section">
                 <tr>
                     <td>ส่วนราชการ</td>
                     <td style="width: 300px;">
-                        <input type="text" class="input-no-border" id="header_text1" name="header_text1" value="สก รป." >
+                        <input type="text" class="input-no-border" id="header_text1" name="header_text1" value="{{$boardAuditorMsRecordInfo->header_text1}}" required readonly>
                     </td>
                     <td style="font-size:22px">โทรศัพท์</td>
                     {{-- <td style="width: 200px;font-size:22px" class="under-line">{{$data->header_text3}}</td> --}}
                     <td style="width: 235px">
-                        <input type="text" class="input-no-border" id="header_text2" name="header_text2" value="{{ old('header_text2') }}" >
+                        <input type="text" class="input-no-border" id="header_text2" name="header_text2" value="{{$boardAuditorMsRecordInfo->header_text2}}" required readonly>
                     </td>
                 </tr>
             </table>
@@ -265,12 +215,12 @@
                 <tr>
                     <td>ที่</td>
                     <td style="width: 380px;">
-                        <input type="text" class="input-no-border" id="header_text3" name="header_text3" value="อก ๐๗๑๔/" >
+                        <input type="text" class="input-no-border" id="header_text3" name="header_text3" value="{{$boardAuditorMsRecordInfo->header_text3}}" required readonly>
                     </td>
                     <td>วันที่</td>
                     {{-- <td style="width: 300px;font-size:22px" class="under-line">{{$data->header_text3}}</td> --}}
                     <td style="width: 300px;">
-                        <input type="text" class="input-no-border" id="header_text4" name="header_text4" value="{{ HP::formatDateThaiFullNumThai(\Carbon\Carbon::now()->format('Y-m-d')) }}" >
+                        <input type="text" class="input-no-border" id="header_text4" name="header_text4" value="{{$boardAuditorMsRecordInfo->header_text4}}" required readonly>
                     </td>
                 </tr>
             </table>
@@ -279,19 +229,21 @@
             <table class="table-section" >
                 <tr>
                     <td>เรื่อง</td>
-                    <td style="width: 700px;font-size:22px" class="under-line">การแต่งตั้งคณะผู้ตรวจหน่วยตรวจ {{$data->name_standard}} (คำขอเลขที่ {{$data->header_text4}})</td>
+                    <td style="width: 700px;font-size:22px" class="under-line">การแต่งตั้งคณะผู้ตรวจหน่วยตรวจ {{$data->name_standard}} (คำขอเลขที่ {{$data->app_no}})</td>
                 </tr>
             </table>
 
             <!-- Main Content -->
             <div class="section">
-                <div>เรียน ผอ.สก. ผ่าน ผก.รต.<input type="text" class="input-no-border" id="body_text1" name="body_text1" value="{{ old('body_text1') }}" style="width:30px" ></div>
+                <div>เรียน ผอ.สก. ผ่าน ผก.รต.<input type="text" class="input-no-border" id="body_text1" name="body_text1" value="{{$boardAuditorMsRecordInfo->body_text1}}" style="width:30px" required readonly></div>
                 <div class="section-title" >๑. เรื่องเดิม</div>
-                <div class="indent" style="text-indent: 125px;" >
+                {{-- <div class="indent">
+                    ห้องปฏิบัติการ {{$data->lab_type}} {{$data->company}}
+                </div> --}}
+                <div class="indent" style="text-indent: 120px;">
                     วันที่ {{$data->register_date}} {{$data->name_standard}} ได้ยื่นคำขอรับใบรับรองหน่วยตรวจ ในระบบ E-Accreditation และสามารถรับคำขอได้เมื่อวันที่ {{$data->get_date}}
                 </div>
             </div>
-            
 
             <div class="section">
                 {!!$data->fix_text1!!}
@@ -299,38 +251,42 @@
 
             <div class="section">
                 {!!$data->fix_text2!!}
+            </div>
 
             <!-- การดำเนินการ -->
             <div class="section">
                 <div class="section-title">๔. การดำเนินการ</div>
                 <div style="text-indent: 137px;margin-top:10px;line-height:34px">
-                    รต.<input type="text" class="input-no-border" id="body_text2" name="body_text2" value="" style="width:30px" required > สก. ได้สรรหาคณะผู้ตรวจประเมินประกอบด้วย หัวหน้าผู้ตรวจประเมิน ผู้ตรวจประเมินและผู้เชี่ยวชาญ
+                    รต.<input type="text" class="input-no-border" id="body_text2" name="body_text2" value="{{$boardAuditorMsRecordInfo->body_text2}}" style="width:30px" required readonly> สก. ได้สรรหาคณะผู้ตรวจประเมินประกอบด้วย หัวหน้าผู้ตรวจประเมิน ผู้ตรวจประเมินและผู้เชี่ยวชาญ
                     เพื่อดำเนินการตรวจประเมินสถานประกอบการ ของ {{$data->name_standard}} ในวันที่ {{$data->date_range}} ดังนี้
                 </div>
                 <div style="margin-top:15px">
+                    @php
+                        $index = 0;
+                    @endphp
+                    <table style="margin-left: 110px">
 
                         @foreach ($boardAuditor->CertiCBAuditorsLists  as $key => $auditor)
                             <tr>
-                                <td style="width: 180px">({{$key+1}}). {{$auditor->temp_users}}</td>
-                                <td style="width: 100px">{{$auditor->StatusAuditorTo->title}}</td>
+                                <td style="width: 280px">({{$key+1}}). {{$auditor->temp_users}}</td>
+                                <td style="width: 200px">{{$auditor->StatusAuditorTo->title}}</td>
                             </tr>
                         @endforeach
                     </table>
-
+              
                 </div>
-
                 <div  style="margin-left: 110px; margin-top:15px">
-                    เอกสารกำหนดการตรวจประเมิน ณ สถานประกอบการ
-                        @if (!is_null($boardAuditor->FileAuditors2) &&  $boardAuditor->FileAuditors2 != '')
-                            <p style="margin-left:15px">
-                               (1). <a style="text-decoration: none" href="{{url('certify/check/file_cb_client/'.$boardAuditor->FileAuditors2->file.'/'.( !empty($boardAuditor->FileAuditors2->file_client_name) ? $boardAuditor->FileAuditors2->file_client_name :  basename($boardAuditor->FileAuditors2->file)   ))}}" target="_blank">
-                                    {{$boardAuditor->FileAuditors2->file_client_name}}
-                                </a>
-                            </p>               
-                        @endif
-                        
+                เอกสารกำหนดการตรวจประเมิน ณ สถานประกอบการ
+                    @if (!is_null($boardAuditor->FileAuditors2) &&  $boardAuditor->FileAuditors2 != '')
+                        <p style="margin-left:15px">
+                           (1). <a style="text-decoration: none" href="{{url('certify/check/file_cb_client/'.$boardAuditor->FileAuditors2->file.'/'.( !empty($boardAuditor->FileAuditors2->file_client_name) ? $boardAuditor->FileAuditors2->file_client_name :  basename($boardAuditor->FileAuditors2->file)   ))}}" target="_blank">
+                                {{$boardAuditor->FileAuditors2->file_client_name}}
+                            </a>
+                        </p>               
+                    @endif
+                    
                 </div>
-        
+       
             </div>
 
             <!-- ข้อปัญหาอุปสรรค -->
@@ -342,108 +298,56 @@
             <!-- ข้อพิจารณา -->
             <div class="section">
                 <div class="section-title">๖. ข้อพิจารณา</div>
-                <div class="indent" style="margin-left:135px">เพื่อโปรดนำเรียน ลมอ. พิจารณาลงนามอนุมัติการแต่งตั้งคณะผู้ตรวจประเมิน</div>           
+                <div class="indent" style="margin-left:135px">นำเรียน ลมอ. พิจารณาลงนามอนุมัติการแต่งตั้งคณะผู้ตรวจประเมิน</div>           
             </div>
 
             <!-- ข้อเสนอ -->
             <div class="section">
                 <div class="section-title">๗. ข้อเสนอ</div>
-                <div style="text-indent: 137px;margin-top:10px;line-height:34px">จึงเรียนมาเพื่อโปรดพิจารณา หากเห็นเป็นการสมควร ขอได้โปรดนำเรียน ลมอ. เพื่ออนุมัติการแต่งตั้งคณะผู้ตรวจประเมินสถานประกอบการ{{$data->name_standard}} ในวันที่ {{$data->date_range}} รายละเอียดดังข้างต้น</div>      
+                <div style="text-indent: 137px;margin-top:10px;line-height:34px">จึงเรียนมาเพื่อโปรดพิจารณา หากเห็นเป็นการสมควร ขอได้โปรดนำเรียน ลมอ. เพื่ออนุมัติการแต่งตั้งคณะผู้ตรวจประเมินสถานประกอบการ{{$data->name_standard}} ในวันที่ {{$data->date_range}} รายละเอียดดังข้างต้น</div>
+      
             </div>
-            <div class="submit-section">
+            {{-- <div class="submit-section">
                 <button type="submit" class="btn-submit" >บันทึก</button>
-            </div>
-        </form>
+            </div> --}}
+        {{-- </form> --}}
     </div>
     
 
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
 
-$(document).ready(function() {
-    const inputFields = $("#header_text1, #header_text2, #header_text3, #header_text4, #body_text1, #body_text2");
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const inputFields = document.querySelectorAll("#header_text1, #header_text2, #header_text3, #header_text4, #body_text1, #body_text2");
 
     // ตรวจสอบสถานะเมื่อเริ่มต้น
-    inputFields.each(function() {
-        toggleBackground($(this));
+    inputFields.forEach(function (input) {
+        toggleBackground(input);
     });
 
-    // ตรวจสอบสถานะเมื่อมีการพิมพ์, focus หรือ blur
-    inputFields.on("input focus blur", function() {
-        toggleBackground($(this));
+    // ตรวจสอบสถานะเมื่อมีการพิมพ์
+    inputFields.forEach(function (input) {
+        input.addEventListener("input", function () {
+            toggleBackground(input);
+        });
+
+        // เมื่อโฟกัสหรือหลุดโฟกัส
+        input.addEventListener("focus", function () {
+            toggleBackground(input);
+        });
+        input.addEventListener("blur", function () {
+            toggleBackground(input);
+        });
     });
 
-    function toggleBackground($input) {
-        if ($input.val().trim() === "") {
-            $input.removeClass("has-value");
+    function toggleBackground(input) {
+        if (input.value.trim() === "") {
+            input.classList.remove("has-value");
         } else {
-            $input.addClass("has-value");
+            input.classList.add("has-value");
         }
     }
-
-    $('#cbMessageForm').on('submit', function(event) {
-        event.preventDefault(); // หยุดการส่งฟอร์มตามปกติ
-
-
-        var isValid = true;
-        var errorField = null; // ตัวแปรเก็บฟิลด์ที่พบว่าเป็นข้อผิดพลาด
-
-        // ตรวจสอบแต่ละฟิลด์
-        $('#header_text1, #header_text2, #header_text3, #header_text4, #body_text1, #body_text2').each(function() {
-            if ($(this).val().trim() === "") {
-                isValid = false; // ถ้าพบฟิลด์ที่ว่าง
-                if (!errorField) { // ถ้าไม่มีฟิลด์ผิดพลาดที่ถูกเก็บไว้
-                    errorField = $(this); // เก็บฟิลด์แรกที่พบข้อผิดพลาด
-                }
-            }
-        });
-
-        if (!isValid) {
-            // แสดง alert เมื่อพบข้อผิดพลาด
-            alert('กรุณากรอกข้อมูลให้ครบ');
-            
-            // Scroll ไปที่ฟิลด์แรกที่พบข้อผิดพลาด
-            $('html, body').animate({
-                scrollTop: errorField.offset().top - 100 // เพิ่ม -100 เพื่อไม่ให้ฟิลด์ซ้อนกับหัว
-            }, 500);
-
-            return; // หยุดการทำงานของฟอร์ม
-        } 
-
-
-
-        // แสดงสถานะการกำลังบันทึก
-        $('#loadingStatus').show();
-
-        var formData = $(this).serialize(); // ดึงข้อมูลฟอร์มทั้งหมด
-
-        $.ajax({
-            url: $(this).attr('action'), // URL ที่จะส่งข้อมูลไป
-            method: 'POST', // วิธีการส่ง
-            data: formData, // ข้อมูลที่ส่งไป
-            success: function(response) {
-                // ลบสถานะการกำลังบันทึก
-                // window.location.href = "{{ route('certify.auditor.index') }}";
-                var certi_cb_id = $('#certi_cb_id').val();
-                var certi_cb_token =  $('#certi_cb_token').val();  // ถ้าคุณมีค่าจาก Blade
-
-                window.location.href = '/certify/check_certificate-cb/' + certi_cb_token + '/show/' + certi_cb_id;
-
-
-                // $('#loadingStatus').hide();
-
-            },
-            error: function(xhr, status, error) {
-                // ลบสถานะการกำลังบันทึก
-                $('#loadingStatus').hide();
-                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-            }
-        });
-    });
 });
-
-
 
 
 

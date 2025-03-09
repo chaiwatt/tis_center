@@ -153,8 +153,16 @@
                                     <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
                                     <div class="col-md-8">
 
+                                        <?php
+                                            $btnStyle = "btn-warning";
+                                            if (isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) {
+                                                $btnStyle = "btn-info";
+                                            }
+                                        ?>
+                                 
+
                                        <?php if(isset($assessment)): ?>
-                                        <a href="<?php echo e(route('save_assessment.cb_report_create',['id' => $assessment->id ])); ?>" title="จัดทำรายงาน" class="btn btn-warning">
+                                        <a href="<?php echo e(route('save_assessment.cb_report_create',['id' => $assessment->id ])); ?>" title="จัดทำรายงาน" class="btn <?php echo e($btnStyle); ?>">
                                             <i class="fa fa-book" aria-hidden="true"> </i>
                                         </a>
                                        <?php endif; ?>
@@ -298,39 +306,7 @@
                       </div>
                 </div>
            </div>
-           <div class="row">
-               <div class="col-md-12 ">
-                   <div id="other_attach_report">
-                       <div class="form-group other_attach_report">
-                           <div class="col-md-4 text-right">
-                               <label class="attach_remove"><!--<span class="text-danger">*</span> -->สรุปรายงานการตรวจทุกครั้ง </label>
-                           </div>
-                           <div class="col-md-6">
-                               <div class="fileinput fileinput-new input-group " data-provides="fileinput">
-                                   <div class="form-control" data-trigger="fileinput">
-                                       <i class="glyphicon glyphicon-file fileinput-exists"></i>
-                                       <span class="fileinput-filename"></span>
-                                   </div>
-                                   <span class="input-group-addon btn btn-default btn-file">
-                                       <span class="fileinput-new">เลือกไฟล์</span>
-                                       <span class="fileinput-exists">เปลี่ยน</span>
-                                       <input type="file"  name="file_report[]" class="check_max_size_file" >
-                                   </span>
-                                   <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
-                               </div>
-                               <?php echo $errors->first('attachs', '<p class="help-block">:message</p>'); ?>
-
-                           </div>
-                           <div class="col-md-2 text-left">
-                               <button type="button" class="btn btn-sm btn-success attach_remove" id="attach_add_report">
-                                   <i class="icon-plus"></i>&nbsp;เพิ่ม
-                               </button>
-                               <div class="button_remove_report"></div>
-                           </div> 
-                        </div>
-                      </div>
-                </div>
-           </div>
+           
 
        </div>
    </div>

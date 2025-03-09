@@ -1369,15 +1369,6 @@ class BoardAuditorController extends Controller
 
     public function viewLabMessageRecord($id)
     {
-
-        // dd($boardAuditorMsRecordInfo);
-
-        // if (!in_array(auth()->user()->role, [6, 7, 11, 28])) {
-        //     abort(403);
-        // }
-
-        // $boardAuditor = BoardAuditor::find($id);
-
         $boardAuditor = BoardAuditor::find($id);
         $boardAuditorMsRecordInfo = $boardAuditor->boardAuditorMsRecordInfos->first();
 
@@ -1404,7 +1395,6 @@ class BoardAuditorController extends Controller
 
         $uniqueAuditorIds = array_unique($auditorIds);
 
-        // dd($uniqueAuditorIds);
 
         $auditorInformations = AuditorInformation::whereIn('id',$uniqueAuditorIds)->get();
 

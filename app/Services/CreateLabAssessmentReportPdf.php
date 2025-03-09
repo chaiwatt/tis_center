@@ -209,15 +209,23 @@ class CreateLabAssessmentReportPdf
             $labRequest = LabTestRequest::where('app_certi_lab_id',$app_certi_lab->id)->where('type',1)->first();
         }
 
-        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->get();
+        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)
+                                        ->where('certificate_type',2)
+                                        ->get();
 
         $signer = new stdClass();
 
-        $signer->signer_1 = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->where('signer_order','1')->first();
+        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','1')
+                                                        ->where('certificate_type',2)
+                                                        ->first();
 
         
-        $signer->signer_2 = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->where('signer_order','2')->first();
-        $signer->signer_3 = SignAssessmentReportTransaction::where('lab_report_info_id',$labReportInfo->id)->where('signer_order','3')->first();
+        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','2')
+                                                        ->where('certificate_type',2)
+                                                        ->first();
+        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','3')
+                                                        ->where('certificate_type',2)
+                                                        ->first();
 
         $attach1 = !empty($signer->signer_1->signer->AttachFileAttachTo) ? $signer->signer_1->signer->AttachFileAttachTo : null;
         $attach2 = !empty($signer->signer_2->signer->AttachFileAttachTo) ? $signer->signer_2->signer->AttachFileAttachTo : null;

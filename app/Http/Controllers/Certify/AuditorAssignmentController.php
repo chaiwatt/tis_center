@@ -12,9 +12,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Certify\Applicant\CertiLab;
+use App\Services\CreateCbMessageRecordPdf;
 use App\Services\CreateLabMessageRecordPdf;
 use App\Models\Certify\Applicant\CheckExaminer;
 use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Certify\ApplicantCB\CertiCBAuditors;
 use App\Models\Certify\LabMessageRecordTransaction;
 
 class AuditorAssignmentController extends Controller
@@ -49,11 +51,10 @@ class AuditorAssignmentController extends Controller
             $filter_certificate_type = $request->input('filter_certificate_type');
         
             $query = MessageRecordTransaction::query();
-            $query->where('signer_id',$signer->id)
-            ->whereHas('boardAuditor', function ($query) {
-                $query->where('message_record_status', 2);
-                // dd($query->get());
-            });
+            $query->where('signer_id',$signer->id);
+            // ->whereHas('boardAuditor', function ($query) {
+            //     $query->where('message_record_status', 2);
+            // });
         
             if ($filter_approval) {
                 $query->where('approval', $filter_approval);
@@ -161,32 +162,51 @@ class AuditorAssignmentController extends Controller
 
     public function signDocument(Request $request)
     {
+        
         MessageRecordTransaction::find($request->id)->update([
             'approval' => 1
         ]);
 
         $messageRecordTransaction = MessageRecordTransaction::find($request->id);
-        $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$messageRecordTransaction->board_auditor_id)
-                                ->whereNotNull('signer_id')
-                                ->where('approval',0)
-                                ->get();           
 
-        if($messageRecordTransactions->count() == 0){
-            $board = BoardAuditor::find($messageRecordTransaction->board_auditor_id);
+        if ($messageRecordTransaction->certificate_type == 2)
+        {
+            // LAB
+            $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$messageRecordTransaction->board_auditor_id)
+                    ->whereNotNull('signer_id')
+                    ->where('certificate_type',2)
+                    ->where('approval',0)
+                    ->get();           
 
-            $this->set_mail($board,$board->CertiLabs);
-            $pdfService = new CreateLabMessageRecordPdf($board,"ia");
-            $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
+            if($messageRecordTransactions->count() == 0){
+                $board = BoardAuditor::find($messageRecordTransaction->board_auditor_id);
 
-            // $board = BoardAuditor::find($messageRecordTransaction->board_auditor_id);
-            // $examiner =  CheckExaminer::where('app_certi_lab_id', $board->app_certi_lab_id)->first();
-            // if($examiner !== null){
-            //     $examinerUser = User::find($examiner->user_id);
-            // }else{
-            //     $examinerUser =null;
-            // }
-        }                        
-        
+                $this->set_mail($board,$board->CertiLabs);
+                $pdfService = new CreateLabMessageRecordPdf($board,"ia");
+                $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
+            }                        
+
+        }else if($messageRecordTransaction->certificate_type == 0)
+        {
+            // CB
+            $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$messageRecordTransaction->board_auditor_id)
+                    ->whereNotNull('signer_id')
+                    ->where('certificate_type',0)
+                    ->where('approval',0)
+                    ->get();           
+            // dd($messageRecordTransactions->count());
+            if($messageRecordTransactions->count() == 0){
+                // dd('okdd');
+                $board = CertiCBAuditors::find($messageRecordTransaction->board_auditor_id);
+                // $board = BoardAuditor::find($messageRecordTransaction->board_auditor_id);
+
+                // $this->set_mail($board,$board->CertiLabs);
+                $pdfService = new CreateCbMessageRecordPdf($board,"ia");
+                $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
+            }    
+        }
+
+
     }
 
     public function set_mail($auditors,$certi_lab) 

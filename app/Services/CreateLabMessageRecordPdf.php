@@ -216,10 +216,18 @@ class CreateLabMessageRecordPdf
 
 
        
-        $signer->signer_1 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature1')->first();
-        $signer->signer_2 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature2')->first();
-        $signer->signer_3 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature3')->first();
-        $signer->signer_4 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature4')->first();
+        $signer->signer_1 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature1')
+        ->where('certificate_type',2)
+        ->first();
+        $signer->signer_2 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature2')
+        ->where('certificate_type',2)
+        ->first();
+        $signer->signer_3 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature3')
+        ->where('certificate_type',2)
+        ->first();
+        $signer->signer_4 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature4')
+        ->where('certificate_type',2)
+        ->first();
 
 
         $attach1 = !empty($signer->signer_1->signer->AttachFileAttachTo) ? $signer->signer_1->signer->AttachFileAttachTo : null;

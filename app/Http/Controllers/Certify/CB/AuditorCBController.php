@@ -24,13 +24,15 @@ use App\Models\Bcertify\AuditorInformation;
 use App\Models\Certify\ApplicantCB\CertiCb; 
 use App\Models\Certify\Applicant\CostDetails;
 use App\Models\Certificate\CbDocReviewAuditor;
+use App\Models\Bcertify\HtmlCbMemorandumRequest;
 use App\Models\Certify\ApplicantCB\CertiCBCost; 
 use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Bcertify\BoardAuditorMsRecordInfo;
+
+use App\Models\Bcertify\HtmlLabMemorandumRequest;
+
 use App\Models\Certify\ApplicantCB\CertiCBCheck; 
-
 use App\Models\Certify\ApplicantCB\CertiCBReview;
-
 use App\Models\Bcertify\CbBoardAuditorMsRecordInfo;
 use App\Models\Bcertify\CbMessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCbHistory; 
@@ -168,9 +170,9 @@ class AuditorCBController extends Controller
                 $requestData['vehicle'] = isset($request->vehicle) ? 1 : null ;
                 $auditors =  CertiCBAuditors::create($requestData);
               // ไฟล์แนบ
-                  if ($request->other_attach){
-                    $this->set_attachs($request->other_attach, $auditors,"1");
-                  }
+                  // if ($request->other_attach){
+                  //   $this->set_attachs($request->other_attach, $auditors,"1");
+                  // }
                   if ($request->attach){
                     $this->set_attachs($request->attach, $auditors,"2");
                   }
@@ -595,7 +597,7 @@ class AuditorCBController extends Controller
              'message_record_status' => 1
          ]);
  
-         $check = CbMessageRecordTransaction::where('board_auditor_id',$baId)->get();
+         $check = MessageRecordTransaction::where('board_auditor_id',$baId)->get();
          if($check->count() == 0){
              $signatures = json_decode($request->input('signaturesJson'), true);
              $viewUrl = url('/certify/auditor/view-cb-message-record/'.$baId);
@@ -603,10 +605,10 @@ class AuditorCBController extends Controller
                  foreach ($signatures as $signatureId => $signature) {
                      try {
                          // ลองสร้างข้อมูลในฐานข้อมูล
-                         CbMessageRecordTransaction::create([
+                         MessageRecordTransaction::create([
                              'board_auditor_id' => $baId,
                              'signer_id' => $signature['signer_id'],
-                             'certificate_type' => 2,
+                             'certificate_type' => 0,
                              'app_id' => $app->app_no,
                              'view_url' => $viewUrl,
                              'signature_id' => $signature['id'],
@@ -630,7 +632,7 @@ class AuditorCBController extends Controller
                  } 
              }
          }else{
-             CbMessageRecordTransaction::where('board_auditor_id',$baId)->update([
+            MessageRecordTransaction::where('board_auditor_id',$baId)->update([
                  'approval' => 0
              ]);
          }
@@ -1001,7 +1003,6 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
           }
       }
       
-      
 
 
       $data = new stdClass();
@@ -1011,8 +1012,8 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
       $data->header_text3 = '';
       $data->header_text4 = $certi_cb->app_no;
       $data->lab_type = $certi_cb->lab_type == 3 ? 'ทดสอบ' : ($certi_cb->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
-      $data->lab_name = $certi_cb->lab_name;
-      $data->app_np = 'ทดสอบ ๑๖๗๑';
+      $data->name_standard = $certi_cb->name_standard;
+      $data->app_no =  $certi_cb->app_no;
       $data->certificate_no = '13-LB0037';
       $data->register_date = HP::formatDateThaiFullNumThai($certi_cb->created_at);
       $data->get_date = HP::formatDateThaiFullNumThai($certi_cb->get_date);
@@ -1034,11 +1035,119 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
               HTML;
       
       // dd($certi_cb,$boardAuditor,$boardAuditorDate->start_date,$dateRange);
+      // $boardAuditorMsRecordInfo = $boardAuditor->cbBoardAuditorMsRecordInfos->first();
+
       return view('certify.cb.auditor_cb.initial-message-record', [
           'data' => $data,
-          'id' => $id
+          'id' => $id,
+          'certi_cb' => $certi_cb,
+          'boardAuditor' => $boardAuditor,
       ]);
   }
-   
+
+  public function SaveCbMessageRecord(Request $request)
+  {
+     // สร้างและบันทึกข้อมูลโดยตรง
+     $record = new CbBoardAuditorMsRecordInfo([
+        'board_auditor_id' => $request->id,
+        'header_text1' => $request->header_text1,
+        'header_text2' => $request->header_text2,
+        'header_text3' => $request->header_text3,
+        'header_text4' => $request->header_text4,
+        'body_text1'   => $request->body_text1,
+        'body_text2'   => $request->body_text2,
+    ]);
+
+
+    // บันทึกลงฐานข้อมูล
+    $record->save();
+
+    CertiCBAuditors::find($request->id)->update([
+        'message_record_status' => 2
+    ]);
+    $auditor = CertiCBAuditors::find($request->id);
+
+    return response()->json([
+      'auditor'=> $auditor
+    ]);
+  }
+
+  public function viewCbMessageRecord($id)
+  {
+
+      $boardAuditor = CertiCBAuditors::find($id);
+      $boardAuditorMsRecordInfo = $boardAuditor->cbBoardAuditorMsRecordInfos->first();
+
+      $auditorIds = []; // สร้าง array ว่างเพื่อเก็บ auditor_id
+
+      $statusAuditorMap = []; // สร้าง array ว่างสำหรับเก็บข้อมูล
+
+
+      $uniqueAuditorIds = array_unique($auditorIds);
+
+      $auditorInformations = AuditorInformation::whereIn('id',$uniqueAuditorIds)->get();
+
+      $certi_cb = CertiCb::find($boardAuditor->app_certi_cb_id);
+
+
+      
+      $boardAuditorDate = CertiCBAuditorsDate::where('auditors_id',$id)->first();
+      $dateRange = "";
+
+      
+
+      if (!empty($boardAuditorDate->start_date) && !empty($boardAuditorDate->end_date)) {
+          if ($boardAuditorDate->start_date == $boardAuditorDate->end_date) {
+              // ถ้าเป็นวันเดียวกัน
+              $dateRange = "ในวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date);
+          } else {
+              // ถ้าเป็นคนละวัน
+              $dateRange = "ตั้งแต่วันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date) . 
+                          " ถึงวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->end_date);
+          }
+      }
+      
+
+
+    $data = new stdClass();
+
+    // dd($certi_cb);
+
+    $data->header_text1 = '';
+    $data->header_text2 = '';
+    $data->header_text3 = '';
+    $data->header_text4 = $certi_cb->app_no;
+    $data->name_standard = $certi_cb->name_standard;
+    $data->app_no = $certi_cb->app_no;
+    $data->certificate_no = '13-LB0037';
+    $data->register_date = HP::formatDateThaiFullNumThai($certi_cb->created_at);
+    $data->get_date = HP::formatDateThaiFullNumThai($certi_cb->get_date);
+
+    $data->date_range = $dateRange;
+    $data->statusAuditorMap = $statusAuditorMap;
+
+
+
+      $htmlLabMemorandumRequest = HtmlCbMemorandumRequest::where('type',"ia")->first();
+
+      $data->fix_text1 = <<<HTML
+             $htmlLabMemorandumRequest->text1
+          HTML;
+
+      $data->fix_text2 = <<<HTML
+             $htmlLabMemorandumRequest->text2
+          HTML;
+
+
+
+      return view('certify.cb.auditor_cb.view-message-record', [
+          'data' => $data,
+          'id' => $id,
+          'boardAuditorMsRecordInfo' => $boardAuditorMsRecordInfo,
+          'boardAuditor' =>  $boardAuditor
+      ]);
+  }
+
+  //  certify.cb.auditor_cb.initial-message-record
   
 }

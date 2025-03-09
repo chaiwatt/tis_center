@@ -53,8 +53,15 @@ class TrackingLabReportInfo extends Model
         return $this->belongsTo(TrackingAssessment::class,'tracking_assessment_id');
     }
 
+    // public function signAssessmentTrackingReportTransactions()
+    // {
+    //     return $this->hasMany(SignAssessmentTrackingReportTransaction::class,'tracking_report_info_id');
+    // }
+
     public function signAssessmentTrackingReportTransactions()
     {
-        return $this->hasMany(SignAssessmentTrackingReportTransaction::class,'tracking_lab_report_info_id');
+        return $this->hasMany(SignAssessmentTrackingReportTransaction::class, 'tracking_report_info_id')
+                    ->where('certificate_type', 2);
     }
+
 }

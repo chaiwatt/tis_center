@@ -557,6 +557,7 @@ class CertificateExportLABController extends Controller
                 }
                 // $files = CertLabsFileAll::
            
+                // dd($export_lab->status);
 
             $attach_path  = $this->attach_path;
             return view('certify.certificate_export_lab.edit', compact('export_lab','cert_labs_file_all','attach_path'));

@@ -102,18 +102,18 @@
                 <div class="col-md-7">
                     @if (!is_null($auditorcb->FileAuditors1) &&  $auditorcb->FileAuditors1 != '')
                         <p id="deleteFlieOtherAttach">
-                            {{-- @if($auditorcb->FileAuditors1->file !='' && HP::checkFileStorage($attach_path.$auditorcb->FileAuditors1->file)) --}}
+                          
                             <a href="{{url('certify/check/file_cb_client/'.$auditorcb->FileAuditors1->file.'/'.( !empty($auditorcb->FileAuditors1->file_client_name) ? $auditorcb->FileAuditors1->file_client_name :  basename($auditorcb->FileAuditors1->file) ))}}" target="_blank">
                                 {!! HP::FileExtension($auditorcb->FileAuditors1->file)  ?? '' !!}
                             </a>
-                            {{-- @endif --}}
-                            <button class="btn btn-danger btn-xs deleteFlie  {{ ($auditorcb->vehicle == 1 || $auditorcb->status_cancel == 1) ? 'hide' : ''}}" type="button" onclick="deleteFlieOtherAttach({{ $auditorcb->FileAuditors1->id}})">
+                            
+                            {{-- <button class="btn btn-danger btn-xs deleteFlie  {{ ($auditorcb->vehicle == 1 || $auditorcb->status_cancel == 1) ? 'hide' : ''}}" type="button" onclick="deleteFlieOtherAttach({{ $auditorcb->FileAuditors1->id}})">
                                 <i class="icon-close"></i>
-                            </button>   
+                            </button>    --}}
                         </p> 
-                        <div id="AddOtherAttach"></div>           
+                        {{-- <div id="AddOtherAttach"></div>            --}}
                     @else
-                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                        {{-- <div class="fileinput fileinput-new input-group" data-provides="fileinput">
                             <div class="form-control" data-trigger="fileinput">
                                 <i class="glyphicon glyphicon-file fileinput-exists"></i>
                                 <span class="fileinput-filename"></span>
@@ -124,7 +124,7 @@
                                 <input type="file" name="other_attach" required class="check_max_size_file">
                             </span>
                             <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
-                        </div>
+                        </div> --}}
                     @endif
                 </div>
             </div>
@@ -243,12 +243,41 @@
             </div>
 
 
+            <div class="form-group {{ $errors->has('auditor') ? 'has-error' : '' }}">
+                <label for="auditor" class="col-md-5 control-label">
+                    <span class="text-danger">*</span> บันทึกแต่งตั้ง
+                </label>
+                <div class="col-md-7">
+                    {{-- <a href="{{route('certify.create_cb_message_record',['id' => $auditorcb->id])}}"
+                        title="บันทึกแต่งตั้ง" class="btn btn-warning ">
+                        <i class="fa fa-book" aria-hidden="true"> </i>
+                    </a> --}}
+                    @if ($auditorcb->messageRecordTransactions()->count() != 0)
+                        @if ($auditorcb->message_record_status == 1)
+                                <a href="{{route('certify.create_cb_message_record',['id' => $auditorcb->id])}}"
+                                    title="บันทึกแต่งตั้ง" class="btn btn-warning ">
+                                    <i class="fa fa-book" aria-hidden="true"> </i>
+                                </a>
+                            @elseif($auditorcb->message_record_status == 2)
 
+                                <a href="{{route('view.create_cb_message_record',['id' => $auditorcb->id])}}"
+                                    title="บันทึกแต่งตั้ง" class="btn btn-info ">
+                                    <i class="fa fa-book" aria-hidden="true"> </i>
+                                </a>
+                        @endif
+                        
+                    @endif
+                </div>
+            </div>
 
 
             <div class="form-group {{ $errors->has('other_attach') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('other_attach', '<span class="text-danger">*</span> บันทึก ลมอ. แต่งตั้งคณะผู้ตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
+
+
+
+                    
 
                     {{-- @if (!is_null($ba->file) &&  $ba->file != '')
 

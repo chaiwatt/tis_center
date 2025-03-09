@@ -2,9 +2,11 @@
 
 namespace App\Models\Certify\ApplicantCB;
 
-use Illuminate\Database\Eloquent\Model;
-use App\User;
 use HP;
+use App\User;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Bcertify\CbBoardAuditorMsRecordInfo;
 
 class CertiCBAuditors  extends Model
 {
@@ -162,6 +164,13 @@ class CertiCBAuditors  extends Model
         return CertiCBSaveAssessment::where('auditors_id',$this->id)->first();
     }
 
-
+    public function cbBoardAuditorMsRecordInfos()
+    {
+        return $this->hasOne(CbBoardAuditorMsRecordInfo::class,'board_auditor_id');
+    }
+    public function messageRecordTransactions()
+    {
+        return $this->hasMany(MessageRecordTransaction::class, 'board_auditor_id')->where('certificate_type',0);
+    }
     
 }
