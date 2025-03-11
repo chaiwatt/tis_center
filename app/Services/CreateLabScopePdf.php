@@ -680,8 +680,8 @@ class CreateLabScopePdf
           $mpdf->showWatermarkImage = true; // เปิดใช้งาน watermark
   
           // เพิ่ม Text Watermark
-          $mpdf->SetWatermarkText('Confidential', 0.1); // ระบุข้อความและ opacity
-          $mpdf->showWatermarkText = true; // เปิดใช้งาน text watermark
+        //   $mpdf->SetWatermarkText('Confidential', 0.1); // ระบุข้อความและ opacity
+        //   $mpdf->showWatermarkText = true; // เปิดใช้งาน text watermark
               
           $signImage = public_path('images/sign.jpg');
           $sign1Image = public_path('images/sign1.png');

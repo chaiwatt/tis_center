@@ -114,10 +114,13 @@
     // dump($querystringArray);
 @endphp
 @section('content')
+
     <div class="container-fluid" id="app_check_certificate_index">
         <!-- .row -->
         <div class="row">
             <div class="col-sm-12">
+                <button type="button" class="btn btn-primary" id="microservice_simulation" > จำลอง Micro Service 🐆
+                </button>
                 <div class="white-box">
                     <h3 class="box-title pull-left">ระบบตรวจสอบคำขอใบรับรองห้องปฏิบัติการ (LAB)</h3>
 
@@ -756,6 +759,19 @@
                      )
                 }
         }
+
+        $('#microservice_simulation').click(function() {
+            $.ajax({
+                type: 'GET',
+                url: "{{ url('run-all-schedule') }}",
+                success: function(response) {
+                    alert(response.message);
+                },
+                error: function(xhr, status, error) {
+                    alert('เกิดข้อผิดพลาด: ' + xhr.responseText);
+                }
+            });
+        });
 
     </script>
 

@@ -68,6 +68,8 @@ Route::get('/demo_html_pdf_editor','MyTestController@demo_html_pdf_editor');
 Route::get('/create-cb-assessment-report-pdf','MyTestController@createCbAssessmentReportPdf');
 Route::get('/create-cb-message-record-pdf','MyTestController@createCbMessageRecordPdf');
 
+Route::get('/run-all-schedule','MyTestController@runAllSchedules');
+
 
 
 

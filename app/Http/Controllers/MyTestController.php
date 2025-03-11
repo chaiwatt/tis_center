@@ -31,6 +31,7 @@ use App\Models\Bcertify\LabCalRequest;
 use App\Models\Bcertify\SettingConfig;
 use App\Models\Bcertify\LabTestRequest;
 use App\Models\Certify\SetStandardUser;
+use Illuminate\Support\Facades\Artisan;
 use App\Mail\CB\CbDocReviewAuditorsMail;
 use App\Models\Certify\Applicant\Notice;
 use App\Models\Certify\BoardAuditorDate;
@@ -2373,121 +2374,120 @@ public function create_bill()
                                                     ->where( function($query) {
                                                         $query->whereNull('app_certi_tracking.id');
                                                     })
-                                                    ->where('certificate_no','25-LB0003')
+                                                    ->where('certificate_no','25-LB0003')->get();
                                                     
-            // dd($certificate_exports->first(),$certificate_exports->first()->CertiLabTo,$certificate_exports->first()->CertiLabTo->certi_auditors,$certificate_exports->first()->board_auditors);
+            dd($certificate_exports->first(),$certificate_exports->first()->CertiLabTo,$certificate_exports->first()->CertiLabTo->certi_auditors,$certificate_exports->first()->board_auditors);
           
-                                                    ->where( function($query)  use($userLogIn, $roles, $app_certi_lab_id ) {
-                                                        if( in_array( 22 , $roles ) && Auth::check() && in_array( $userLogIn->IsGetIdRoles() , ['false'] )   ){ //ไม่ใช่ admin , ผอ , ลท ที่มี Role 22
+                                                    // ->where( function($query)  use($userLogIn, $roles, $app_certi_lab_id ) {
+                                                    //     if( in_array( 22 , $roles ) && Auth::check() && in_array( $userLogIn->IsGetIdRoles() , ['false'] )   ){ //ไม่ใช่ admin , ผอ , ลท ที่มี Role 22
     
-                                                            $scope_ids =  CertificateExport::leftJoin( (new CertifyTestScope)->getTable()." AS test_scope", 'test_scope.app_certi_lab_id','certificate_exports.certificate_for')
-                                                                                            ->leftJoin((new SetStandardUserSub)->getTable().' AS user_sub','user_sub.test_branch_id','test_scope.branch_id')
-                                                                                            ->leftJoin((new SetStandardUser)->getTable().' AS user_set','user_set.id','user_sub.standard_user_id')
-                                                                                            ->where('user_set.sub_department_id', $userLogIn->reg_subdepart  )
-                                                                                            ->select('certificate_exports.id');
+                                                    //         $scope_ids =  CertificateExport::leftJoin( (new CertifyTestScope)->getTable()." AS test_scope", 'test_scope.app_certi_lab_id','certificate_exports.certificate_for')
+                                                    //                                         ->leftJoin((new SetStandardUserSub)->getTable().' AS user_sub','user_sub.test_branch_id','test_scope.branch_id')
+                                                    //                                         ->leftJoin((new SetStandardUser)->getTable().' AS user_set','user_set.id','user_sub.standard_user_id')
+                                                    //                                         ->where('user_set.sub_department_id', $userLogIn->reg_subdepart  )
+                                                    //                                         ->select('certificate_exports.id');
     
                                                                                             
-                                                            $calibrate_ids =  CertificateExport::leftJoin( (new CertifyLabCalibrate)->getTable()." AS calibrate", 'calibrate.app_certi_lab_id','certificate_exports.certificate_for')
-                                                                                            ->leftJoin((new SetStandardUserSub)->getTable().' AS user_sub','user_sub.items_id','calibrate.branch_id')
-                                                                                            ->leftJoin((new SetStandardUser)->getTable().' AS user_set','user_set.id','user_sub.standard_user_id')
-                                                                                            ->where('user_set.sub_department_id', $userLogIn->reg_subdepart  )
-                                                                                            ->select('certificate_exports.id');
+                                                    //         $calibrate_ids =  CertificateExport::leftJoin( (new CertifyLabCalibrate)->getTable()." AS calibrate", 'calibrate.app_certi_lab_id','certificate_exports.certificate_for')
+                                                    //                                         ->leftJoin((new SetStandardUserSub)->getTable().' AS user_sub','user_sub.items_id','calibrate.branch_id')
+                                                    //                                         ->leftJoin((new SetStandardUser)->getTable().' AS user_set','user_set.id','user_sub.standard_user_id')
+                                                    //                                         ->where('user_set.sub_department_id', $userLogIn->reg_subdepart  )
+                                                    //                                         ->select('certificate_exports.id');
     
-                                                            $query->whereIn('certificate_exports.id',$scope_ids)->OrwhereIn('certificate_exports.id',$calibrate_ids);
+                                                    //         $query->whereIn('certificate_exports.id',$scope_ids)->OrwhereIn('certificate_exports.id',$calibrate_ids);
     
-                                                        }else if( in_array( $userLogIn->IsGetIdRoles() , ['false'] ) ){
-                                                            $query->whereIn('certificate_exports.certificate_for',$app_certi_lab_id);
-                                                        }
-                                                    } )
+                                                    //     }else if( in_array( $userLogIn->IsGetIdRoles() , ['false'] ) ){
+                                                    //         $query->whereIn('certificate_exports.certificate_for',$app_certi_lab_id);
+                                                    //     }
+                                                    // } )
                                            
-                                                    ->when($setting_config, function ($query) use ($from_filed, $condition_check, $warning_day, $check_first){
-                                                        switch ( $from_filed ):
-                                                            case "1": //วันที่ออกใบรับรอง
-                                                                if($check_first == 1){//ตรวจติดตามครั้งแรก 6 เดือน
-                                                                    return $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(certificate_exports.certificate_date_start), INTERVAL 6 MONTH),CURDATE())' ), '<=', $warning_day);
-                                                                }else{
-                                                                    return $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(certificate_exports.certificate_date_start), INTERVAL '.$condition_check.' MONTH),CURDATE())' ), '<=', $warning_day);
-                                                                }
-                                                                break;
-                                                            case "3": //วันที่ตรวจล่าสุด
-                                                                if($check_first == 1){//ตรวจติดตามครั้งแรก 6 เดือน
-                                                                    return  $query->whereHas('board_auditors', function($query)use ($warning_day){
-                                                                                $query->whereHas('board_auditors_date', function($query) use ($warning_day){
-                                                                                    $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(end_date), INTERVAL 6 MONTH),CURDATE())'), '<=', $warning_day);
-                                                                                });
-                                                                    });
-                                                                }else{
-                                                                    return  $query->whereHas('board_auditors', function($query)use ($condition_check, $warning_day){
-                                                                                $query->whereHas('board_auditors_date', function($query) use ( $condition_check, $warning_day){
-                                                                                    $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(end_date), INTERVAL '.$condition_check.' MONTH),CURDATE())'), '<=', $warning_day);
-                                                                                });
-                                                                    });
-                                                                }
-                                                                break;
-                                                        endswitch;
-                                                    })
+                                                    // ->when($setting_config, function ($query) use ($from_filed, $condition_check, $warning_day, $check_first){
+                                                    //     switch ( $from_filed ):
+                                                    //         case "1": //วันที่ออกใบรับรอง
+                                                    //             if($check_first == 1){//ตรวจติดตามครั้งแรก 6 เดือน
+                                                    //                 return $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(certificate_exports.certificate_date_start), INTERVAL 6 MONTH),CURDATE())' ), '<=', $warning_day);
+                                                    //             }else{
+                                                    //                 return $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(certificate_exports.certificate_date_start), INTERVAL '.$condition_check.' MONTH),CURDATE())' ), '<=', $warning_day);
+                                                    //             }
+                                                    //             break;
+                                                    //         case "3": //วันที่ตรวจล่าสุด
+                                                    //             if($check_first == 1){//ตรวจติดตามครั้งแรก 6 เดือน
+                                                    //                 return  $query->whereHas('board_auditors', function($query)use ($warning_day){
+                                                    //                             $query->whereHas('board_auditors_date', function($query) use ($warning_day){
+                                                    //                                 $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(end_date), INTERVAL 6 MONTH),CURDATE())'), '<=', $warning_day);
+                                                    //                             });
+                                                    //                 });
+                                                    //             }else{
+                                                    //                 return  $query->whereHas('board_auditors', function($query)use ($condition_check, $warning_day){
+                                                    //                             $query->whereHas('board_auditors_date', function($query) use ( $condition_check, $warning_day){
+                                                    //                                 $query->Where(DB::raw('DATEDIFF(DATE_ADD(DATE(end_date), INTERVAL '.$condition_check.' MONTH),CURDATE())'), '<=', $warning_day);
+                                                    //                             });
+                                                    //                 });
+                                                    //             }
+                                                    //             break;
+                                                    //     endswitch;
+                                                    // })
                                                    
-                                                    // //filter
-                                                    ->when($filter_search, function ($query, $filter_search){
-                                                        $search_full = str_replace(' ', '', $filter_search );
-                                                        $query->where( function($query) use($search_full) {
-                                                            $query->where(DB::Raw("REPLACE(certificate_exports.certificate_no ,' ','')"),  'LIKE', "%$search_full%")
-                                                                    ->OrWhere(DB::raw("REPLACE(app_certi_tracking.reference_refno,' ','')"), 'LIKE', "%".$search_full."%")
-                                                                    ->OrWhere(DB::raw("REPLACE(certi_labs.name,' ','')"), 'LIKE', "%".$search_full."%")
-                                                                    ->OrWhere(DB::raw("REPLACE(certi_labs.lab_name,' ','')"), 'LIKE', "%".$search_full."%");
-                                                                });
-                                                    })
+                                                    // // //filter
+                                                    // ->when($filter_search, function ($query, $filter_search){
+                                                    //     $search_full = str_replace(' ', '', $filter_search );
+                                                    //     $query->where( function($query) use($search_full) {
+                                                    //         $query->where(DB::Raw("REPLACE(certificate_exports.certificate_no ,' ','')"),  'LIKE', "%$search_full%")
+                                                    //                 ->OrWhere(DB::raw("REPLACE(app_certi_tracking.reference_refno,' ','')"), 'LIKE', "%".$search_full."%")
+                                                    //                 ->OrWhere(DB::raw("REPLACE(certi_labs.name,' ','')"), 'LIKE', "%".$search_full."%")
+                                                    //                 ->OrWhere(DB::raw("REPLACE(certi_labs.lab_name,' ','')"), 'LIKE', "%".$search_full."%");
+                                                    //             });
+                                                    // })
                                                    
-                                                    ->when($filter_certificate_no, function ($query, $filter_certificate_no){
-                                                        return $query->where('certificate_exports.certificate_no', $filter_certificate_no);
-                                                    })
+                                                    // ->when($filter_certificate_no, function ($query, $filter_certificate_no){
+                                                    //     return $query->where('certificate_exports.certificate_no', $filter_certificate_no);
+                                                    // })
                                                     
-                                                    ->when($filter_status_id, function ($query, $filter_status_id){
-                                                        return $query->where('app_certi_tracking.status_id', $filter_status_id);
-                                                    })
+                                                    // ->when($filter_status_id, function ($query, $filter_status_id){
+                                                    //     return $query->where('app_certi_tracking.status_id', $filter_status_id);
+                                                    // })
 
                                                    
                                               
-                                                    ->when($filter_start_date, function ($query, $filter_start_date) use($filter_end_date, $from_filed){
+                                                    // ->when($filter_start_date, function ($query, $filter_start_date) use($filter_end_date, $from_filed){
     
-                                                        $start_date =  $this->config_date($filter_start_date);
-                                                        $end_date   =  $this->config_date($filter_end_date);
-                                                        if($from_filed == 1){
-                                                            if(!is_null($filter_start_date) && !is_null($filter_end_date) ){
-                                                                return $query->whereBetween('certificate_exports.certificate_date_start',[$start_date,$end_date]);
-                                                            }else if(!is_null($filter_start_date) && is_null($filter_end_date)){
-                                                                return $query->whereDate('certificate_exports.certificate_date_start',$start_date);
-                                                            }
-                                                        }else if($from_filed == 3){
-                                                            if(!is_null($filter_start_date) && !is_null($filter_end_date) ){
-                                                                $auditors_id = BoardAuditorDate::whereBetween('end_date',[$start_date,$end_date])->select('board_auditors_id');
-                                                                $app_certi_lab_id = BoardAuditor::whereIn('id',$auditors_id)->select('app_certi_lab_id');
-                                                                return $query->whereIn('certi_labs.id', $app_certi_lab_id);
+                                                    //     $start_date =  $this->config_date($filter_start_date);
+                                                    //     $end_date   =  $this->config_date($filter_end_date);
+                                                    //     if($from_filed == 1){
+                                                    //         if(!is_null($filter_start_date) && !is_null($filter_end_date) ){
+                                                    //             return $query->whereBetween('certificate_exports.certificate_date_start',[$start_date,$end_date]);
+                                                    //         }else if(!is_null($filter_start_date) && is_null($filter_end_date)){
+                                                    //             return $query->whereDate('certificate_exports.certificate_date_start',$start_date);
+                                                    //         }
+                                                    //     }else if($from_filed == 3){
+                                                    //         if(!is_null($filter_start_date) && !is_null($filter_end_date) ){
+                                                    //             $auditors_id = BoardAuditorDate::whereBetween('end_date',[$start_date,$end_date])->select('board_auditors_id');
+                                                    //             $app_certi_lab_id = BoardAuditor::whereIn('id',$auditors_id)->select('app_certi_lab_id');
+                                                    //             return $query->whereIn('certi_labs.id', $app_certi_lab_id);
                                     
-                                                            }else if(!is_null($filter_start_date) && is_null($filter_end_date)){
-                                                                $auditors_id = BoardAuditorDate::whereDate('end_date',$start_date)->select('board_auditors_id');
-                                                                $app_certi_ib_id = BoardAuditor::whereIn('id',$auditors_id)->select('app_certi_lab_id');
-                                                                return $query->whereIn('certi_labs.id', $app_certi_ib_id);
-                                                            }
-                                                        }
-                                                    })
+                                                    //         }else if(!is_null($filter_start_date) && is_null($filter_end_date)){
+                                                    //             $auditors_id = BoardAuditorDate::whereDate('end_date',$start_date)->select('board_auditors_id');
+                                                    //             $app_certi_ib_id = BoardAuditor::whereIn('id',$auditors_id)->select('app_certi_lab_id');
+                                                    //             return $query->whereIn('certi_labs.id', $app_certi_ib_id);
+                                                    //         }
+                                                    //     }
+                                                    // })
 
-                                                    // ->get();
-                                                    // dd($certificate_exports);
 
-                                                    ->select(
-                                                        DB::raw('"1" AS type'),
-                                                        DB::raw('certificate_exports.id                       AS id'),
-                                                        DB::raw('certificate_exports.certificate_no           AS certificate_no'),
-                                                        DB::raw('certificate_exports.certificate_date_start   AS date_start'),
-                                                        DB::raw('app_certi_tracking.reference_refno           AS reference_refno'),
-                                                        DB::raw('app_certi_tracking.status_id                 AS status_id'),
-                                                        DB::raw('app_certi_tracking_status.title              AS status_title'),
-                                                        DB::raw('certi_labs.name                              AS org_name'),
-                                                        DB::raw('certi_labs.id                                AS certi_labs_id'),
-                                                        DB::raw('certi_labs.lab_name                          AS lab_name'),
-                                                        DB::raw('certificate_exports.updated_at               AS update_date')
-                                                    );
+
+                                                    // ->select(
+                                                    //     DB::raw('"1" AS type'),
+                                                    //     DB::raw('certificate_exports.id                       AS id'),
+                                                    //     DB::raw('certificate_exports.certificate_no           AS certificate_no'),
+                                                    //     DB::raw('certificate_exports.certificate_date_start   AS date_start'),
+                                                    //     DB::raw('app_certi_tracking.reference_refno           AS reference_refno'),
+                                                    //     DB::raw('app_certi_tracking.status_id                 AS status_id'),
+                                                    //     DB::raw('app_certi_tracking_status.title              AS status_title'),
+                                                    //     DB::raw('certi_labs.name                              AS org_name'),
+                                                    //     DB::raw('certi_labs.id                                AS certi_labs_id'),
+                                                    //     DB::raw('certi_labs.lab_name                          AS lab_name'),
+                                                    //     DB::raw('certificate_exports.updated_at               AS update_date')
+                                                    // );
                 
                 $app_certi_tracking = Tracking::LeftJoin((new CertificateExport)->getTable()." AS certificate_exports", 'certificate_exports.id', '=', 'app_certi_tracking.ref_id')
                                                 ->LeftJoin((new CertiLab)->getTable()." AS certi_labs", 'certi_labs.id', '=', 'certificate_exports.certificate_for')
@@ -2882,6 +2882,12 @@ public function create_bill()
         $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
     }
 
+
+    public function runAllSchedules()
+    {
+        Artisan::call('run:all-schedules');
+        return response()->json(['message' => 'All schedules have been run successfully']);
+    }
 
 }
 
