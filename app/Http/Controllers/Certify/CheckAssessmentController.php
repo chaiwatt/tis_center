@@ -299,7 +299,7 @@ class CheckAssessmentController extends Controller
 
     public function showCertificateLabDetail(CertiLab $certilab)
     {
-
+        // dd('ok');
         $previousUrl = app('url')->previous();
         $certi_lab = $certilab;
         $certi_information = Information::where('app_certi_lab_id',$certi_lab->id)->first();

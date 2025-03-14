@@ -1922,7 +1922,7 @@ public function create_bill()
  
     public function generateScopePDF()
     {
-     $certilab = CertiLab::find(2047);
+     $certilab = CertiLab::find(2055);
     //  dd($certilab);
 
      // dd($certilab->DataEmailDirectorLAB);

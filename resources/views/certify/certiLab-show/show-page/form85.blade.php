@@ -12,10 +12,14 @@ $labRequestBranchs = [];
 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 <div class="white-box"style="border: 2px solid #e5ebec;">
     <div class="box-title">
-        <legend><h3>รายละเอียดที่อยู่ห้องปฏิบัติการ
+        <legend><h3>รายละเอียดที่อยู่ห้องปฏิบัติการ landing
         
-        @if ($labRequestBranchs->count()  != 0)
+        {{-- @if ($labRequestBranchs->count()  != 0)
          (สถานปฏิบัติการหลายสถานที่)
+        @endif --}}
+
+        @if (!empty($labRequestBranchs) && $labRequestBranchs->count() != 0)
+            (สถานปฏิบัติการหลายสถานที่)
         @endif
     </h3>
         </legend>    
@@ -385,10 +389,9 @@ $labRequestBranchs = [];
         </div>
     </div>
 
-    {{-- {{$labRequestBranchs}} --}}
 
 
-@if ($labRequestBranchs->count() != 0)
+@if (!empty($labRequestBranchs) && $labRequestBranchs->count() != 0)
 <hr>
     @foreach ($labRequestBranchs as $labRequestBranch)
     <div class="box-title">

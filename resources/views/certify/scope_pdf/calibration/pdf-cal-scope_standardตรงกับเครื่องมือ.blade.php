@@ -68,7 +68,7 @@
                 <td style="vertical-align: top;width:28.33%">
                     <table class="table-one" cellspacing="0" width="100%"  style="padding-right: 1px">
                         <tr>
-                            <td style="padding-left: 5px">
+                            <td style="padding-left: 0px">
                                 <span style="margin-top:5px">{!! $item->instrument !!} </span><span style="font-size:1px;visibility: hidden">*{{$key}}*</span>
                                 @if ($item->instrument !== "")
                                     <span><br>{!! $item->instrument_two !!} </span>
@@ -193,16 +193,9 @@
                 <td style="vertical-align: top;width:28.33%">
                     <table class="table-one" cellspacing="0" width="100%"  style="padding-right: 1px">
                         <tr>
-                            <td style="padding-left: 10px">
-                                {{-- <span style="visibility: hidden;margin-top:5px">{!! $item->instrument !!}</span><span style="font-size:1px;visibility: hidden">*{{$key}}*</span>
-                                @if ($item->instrument !== "")
-                                    <span style="visibility: hidden;"><br>{!! $item->instrument_two !!} </span>
-                                @endif --}}
-                                <div><span style="visibility: hidden;margin-top:5px">{!! $item->instrument !!}</span><span style="font-size:1px;visibility: hidden">*{{$key}}*</span></div>
-                                @if (count($item->measurement_edit) == 0)
-                                    <div>{!! $item->standard !!}</div>
-                                @endif
-
+                            <td style="padding-left: 0px">
+                                {{-- <span style="visibility: hidden;margin-top:5px">{!! $item->instrument !!}</span><span style="font-size:1px;visibility: hidden">*{{$key}}*</span> --}}
+                                <span>{!! $item->standard !!}</span><span style="font-size:1px;visibility: hidden">*{{$key}}*</span>
                                 @if ($item->instrument !== "")
                                     <span style="visibility: hidden;"><br>{!! $item->instrument_two !!} </span>
                                 @endif
@@ -220,15 +213,9 @@
                                                 @foreach ($item->measurement_edit as $k => $measurement)
                                                     <tr>
                                                        
-                                                        @if ($k == 0)
-                                                                <td style="@if ($k > 0) padding-top: 15px; @endif">
-                                                                    <span >{!! $item->standard !!}</span>
-                                                                </td>
-                                                            @else
-                                                            <td style="@if ($k > 0) padding-top: 15px; @endif">
-                                                                <span >{!! $item->standard !!}</span>
-                                                            </td>
-                                                        @endif
+                                                        <td>
+                                                            <span style="visibility: hidden;">{!! $item->standard !!}</span>
+                                                        </td>
 
                                                     </tr>
                                                     <tr>
