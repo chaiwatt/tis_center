@@ -35,9 +35,6 @@
                       <i class="fa fa-search" aria-hidden="true"></i> คำขอ
                     </a>
 
-
-                  
-
                     <!-- START  admin , ผอ , ผก , เจ้าหน้าที่ IB -->
                     @if(auth()->user()->SetRolesLicenseCertify() == "true" ||  in_array("27",auth()->user()->RoleListId))  
                         @if($certi_ib->status >= 6 && !is_null($certi_ib->CertiIBCostTo))
@@ -59,7 +56,7 @@
                                     $cost_btn = 'btn-warning'; 
                                 }
                             @endphp
-                            <a  class="form_group btn {{$cost_btn}}" href="{{  url('certify/estimated_cost-ib/'.$Cost->id.'/edit') }}" >
+                            <a  class="form_group btn {{$cost_btn}}" href="{{  url('certify/estimated_cost-ib/'.$Cost->id.'/edit') }}" target="_blank">
                                 {!! $cost_icon  !!}     ค่าใช้จ่าย
                             </a>
                         @endif 
@@ -87,7 +84,7 @@
 
                                 <div class="form_group btn-group">
                                     <div class="btn-group">
-                                        <a  class="btn  {{$auditors_btn}} " href="{{ url("certify/auditor-ib")}}" >
+                                        <a  class="btn  {{$auditors_btn}} " href="{{ url("certify/auditor-ib")}}" target="_blank">
                                             {!! $auditors_icon  !!}    แต่งตั้งคณะฯ
                                         </a>
 
@@ -121,7 +118,7 @@
                                     </div>
                                 </div>
                             @else 
-                                <a  class="form_group btn btn-warning" href="{{ url("certify/auditor-ib")}}" >
+                                <a  class="form_group btn btn-warning" href="{{ url("certify/auditor-ib")}}" target="_blank">
                                     แต่งตั้งคณะฯ
                                 </a>
                             @endif
@@ -215,8 +212,8 @@
 
                             <div class="form_group btn-group">
                                 <div class="btn-group">
-                                    <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-ib")}}" >
-                                        {!! $assessment_icon  !!}    ผลการตรวจประเมิน 
+                                    <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-ib")}}" target="_blank">
+                                        {!! $assessment_icon  !!}    ผลการตรวจประเมิน
                                     </a>
                                     <button type="button" class="btn  {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
                                         <span class="caret"></span>
@@ -246,7 +243,7 @@
 
                                             @endphp
                                             <a  class="btn {{$assessment_btn}}"  href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
-                                             ครั้งที่ {{ count($certi_ib->CertiIBSaveAssessmentMany) - ($key) }} :  
+                                                ครั้งที่ {{ count($certi_ib->CertiIBSaveAssessmentMany) - ($key) }} :  
                                                 {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}
                                             </a> 
                                             <br>
@@ -256,14 +253,11 @@
                             </div>
 
                         @else 
-                            <a  class="form_group btn btn-warning" href="{{ url("certify/save_assessment-ib")}}" >
+                            <a  class="form_group btn btn-warning" href="{{ url("certify/save_assessment-ib")}}" target="_blank">
                                 ผลการตรวจประเมิน
                             </a>
                         @endif
-{{-- 
-                        {{$certi_ib->status}}
-                        {{count($certi_ib->CertiIBSaveAssessmentMany)}}
-                        {{$certi_ib->CertiIBSaveAssessmentStatus}} --}}
+
                         {{-- ทบทวน --}}
                         @if( $certi_ib->status >= 11 && count($certi_ib->CertiIBSaveAssessmentMany) > 0   && $certi_ib->CertiIBSaveAssessmentStatus == "statusInfo")
 
@@ -347,17 +341,12 @@
 
                         @if($certi_ib->status >= 17)
 
+                            {{-- <button type="button" class="form_group btn btn-info" data-toggle="modal" data-target="#exampleModalExport">
+                                แนบท้าย
+                            </button>
+                            @include ('certify/ib/check_certificate_ib/modal.modalstatus22',['file_all'=> $certi_ib->CertiIBFileAlls,  'certi_ib' => $certi_ib   ]) --}}
 
-
-                            
-                            {{-- @if (!empty($certi_ib->certi_ib_export_mapreq_to))
-                                aa แนบท้าย
-                            @endif --}}
-
- 
-
-                            {{$certi_ib->CertiIBExportTo}}
-      
+                            {{-- @if($certi_ib->standard_change == 1  || is_null($certi_ib->app_certi_ib_export)) --}}
                             @if(!empty($certi_ib->CertiIBExportTo) && !in_array($certi_ib->CertiIBExportTo->status,[99]))
                                     @php 
                                         $export =  $certi_ib->CertiIBExportTo;
@@ -378,31 +367,16 @@
                                     }
                                 @endphp
 
-                                <a href="{{ url('certify/certificate-export-ib/'.$export->id.'/edit') }}" class="form_group btn  {{$export_btn}}"  >
-                                        {!! $export_icon !!}    ออกใบรับรอง จุดที่1
+                                <a href="{{ url('certify/certificate-export-ib/'.$export->id.'/edit') }}" class="form_group btn  {{$export_btn}}"  target="_blank">
+                                        {!! $export_icon !!}    ออกใบรับรอง
                                 </a>
-                            {{-- 
-                                                            {{$certi_ib->certi_ib_export_mapreq_to}}
-
-                            @if ($certi_ib->certi_ib_export_mapreq_to !== null)
-                            <a  class="form_group btn  btn-info " href="{{ url("certify/certificate_detail-ib/".$certi_ib->token)}}" >
-                                <i class="fa fa-paperclip"></i>  แนบท้าย
-                            </a> 
-                            @endif
-                            @elseif($certi_ib->certi_ib_export_mapreq_to !== null)
-                            <a  class="form_group btn  btn-info " href="{{ url("certify/certificate_detail-ib/".$certi_ib->token)}}" >
-                                <i class="fa fa-paperclip"></i>  แนบท้าย
-                            </a> 
-                            @else  --}}
-
-
                             @elseif(!empty($certi_ib->certi_ib_export_mapreq_to))
                                 <a  class="form_group btn  btn-info " href="{{ url("certify/certificate_detail-ib/".$certi_ib->token)}}" >
                                     <i class="fa fa-paperclip"></i>  แนบท้าย
                                 </a> 
                             @else 
                                 <div class="btn-group form_group">
-                                    <form action="{{ url('/certify/certificate-export-ib/create')}}" method="POST" style="display:inline"  > 
+                                    <form action="{{ url('/certify/certificate-export-ib/create')}}" method="POST" style="display:inline"  target="_blank"> 
                                         {{ csrf_field() }}
                                         {!! Form::hidden('app_token', (!empty($certi_ib->token) ? $certi_ib->token  : null) , ['id' => 'app_token', 'class' => 'form-control' ]); !!}
                                         <button class=" btn btn-warning" type="submit" >
@@ -712,7 +686,7 @@
                     heading: 'Success!',
                     position: 'top-center',
                     text: '{{session()->get('flash_message')}}',
-                    loaderBg: '#70b7d6',
+                    loaderBg: '#33ff33',
                     icon: 'success',
                     hideAfter: 3000,
                     stack: 6

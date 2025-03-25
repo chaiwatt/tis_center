@@ -226,9 +226,58 @@
                         
                         <div class="col-md-8">
                             <button type="button" class="btn btn-info" id="show-modal-email-to-expert"><i class="fa fa-envelope"></i> อีเมล</button>
-                    </div>
+                        </div>
                     </div>
                 @endif
+
+                {{-- {{$find_notice->submit_type}} --}}
+                {{-- @if ($find_notice->submit_type == 'confirm' || $find_notice->submit_type == null)
+                        <a href="{{ route('save_assessment.assess_edit', ['notice' => $find_notice, 'app' => $app ? $app->id : '']) }}" class="btn btn-info">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </a>
+                @elseif($find_notice->submit_type == 'save')
+                    <a href="{{ route('save_assessment.create',['board_auditor_id' => $find_notice->assessment->board_auditor_to->id]) }}" class="btn btn-info">
+                        <i class="fa fa-pencil-square-o"></i>
+                    </a>
+                @endif --}}
+                    <div class="col-md-6">
+                        <label class="col-md-4 text-right">รายงานการตรวจประเมิน : </label>
+                        
+                        <div class="col-md-8 mt-5" style="margin-top:5px">
+                            {{-- <a type="button" href="{{ route('save_assessment.create',['board_auditor_id' => $find_notice->assessment->board_auditor_to->id]) }}" class="btn btn-info mt-5" >รายงานที่1</a>
+                            <a type="button" class="btn btn-info mt-5" >รายงานที่2 (ปิดcar)</a> --}}
+
+                            @if ($find_notice->labReportInfo !== null)
+                                {{-- รายงานที่1 --}}
+                                @if ($find_notice->labReportInfo->status === "1")
+                                        <a href="{{route('save_assessment.view_lab_info',['id' => $find_notice->id])}}"
+                                            title="จัดทำรายงาน" class="btn btn-warning">
+                                            รายงานที่1
+                                        </a>
+                                    @else
+                                        <a href="{{route('save_assessment.view_lab_info',['id' => $find_notice->id])}}"
+                                            title="จัดทำรายงาน" class="btn btn-info">
+                                            รายงานที่1
+                                        </a>
+                                @endif 
+                                {{-- รายงาน2 --}}
+                                {{-- @if ($find_notice->labReportInfo->status === "1")
+                                        <a href="{{route('save_assessment.view_lab_info',['id' => $find_notice->id])}}"
+                                            title="จัดทำรายงาน" class="btn btn-warning">
+                                            รายงานที่2(ปิดcar) ซ่อนรอจนกว่าลูกค้าส่งแนวทางมา
+                                        </a>
+                                    @else
+                                        <a href="{{route('save_assessment.view_lab_info',['id' => $find_notice->id])}}"
+                                            title="จัดทำรายงาน" class="btn btn-info">
+                                            รายงานที่2(ปิดcar) ซ่อนรอจนกว่าลูกค้าส่งแนวทางมา
+                                        </a>
+                                @endif  --}}
+                            @endif
+                        </div>
+                    </div>
+
+        
+              
             @endif
             {{-- @endif --}}
 
@@ -330,44 +379,16 @@
             <thead>
             <tr>
                 <th class="text-center" width="1%">ลำดับ</th>
-                <th class="text-center" width="13%">รายงานที่</th>
-                <th class="text-center" width="20%">ข้อบกพร่อง/ข้อสังเกต</th>
-                <th class="text-center" width="12%">มอก. 17025 : ข้อ</th>
-                <th class="text-center" width="6%">ประเภท</th>
+                <th class="text-center" width="10%">รายงานที่</th>
+                <th class="text-center" width="25%">ข้อบกพร่อง/ข้อสังเกต</th>
+                <th class="text-center" width="10%">มอก. 17025 : ข้อ</th>
+                <th class="text-center" width="8%">ประเภท</th>
                 {{-- <th class="text-center" width="10%">ผู้พบ</th> --}}
                 <th class="text-center" width="3%"> <i class="fa fa-pencil-square-o"></i></th>
             </tr>
             </thead>
             <tbody id="table-body">
                 @foreach($NoticeItem as $key => $item)
-                {{-- <tr>
-                    <td class="text-center">
-                        1
-                    </td>
-                    <td>
-                        {!! Form::hidden('id[]',!empty($item->id)?$item->id:null, ['class' => 'form-control '])  !!}
-                        {!! Form::text('report[]', $item->report ?? null,  ['class' => 'form-control input_required','required'=>true])!!}
-                    </td>
-                    <td>
-                        {!! Form::text('notice[]', $item->remark ?? null,  ['class' => 'form-control input_required','required'=>true])!!}
-                    </td>
-                    <td>
-                        {!! Form::text('nok[]',  $item->no ?? null,  ['class' => 'form-control input_required','required'=>true])!!}
-                    </td>
-                    <td>
-                        {!! Form::select('type[]',
-                          ['1'=>'ข้อบกพร่อง','2'=>'ข้อสังเกต'],
-                            $item->type ?? null,
-                            ['class' => 'form-control type input_required  select2',
-                            'required'=>true,
-                            'placeholder'=>'-เลือกประเภท-'])
-                        !!}
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-danger btn-sm remove-row" ><i class="fa fa-trash"></i></button>
-                    </td>
-                </tr> --}}
-                {{-- <table style="border-spacing: 0; width: 100%;"> --}}
                     <tr>
                         <td class="text-center" style="padding: 0px;">1</td>
                         <td style="padding: 0px;">
@@ -391,12 +412,6 @@
                             <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>
                         </td>
                     </tr>
-                    
-                    
-                {{-- </table> --}}
-                
-                
-                
                 @endforeach
             </tbody>
         </table>
@@ -468,9 +483,15 @@
     <div class="col-md-offset-4 col-md-6 m-t-15">
          <input type="hidden" id="submit_type" name="submit_type">
         <div id="degree_btn"></div>
+{{-- 
         <button class="btn btn-success " type="button"  id="confirm" onclick="submit_form('1','confirm');return false;" style="visibility: hidden">
             <i class="fa fa-save"></i><span id="confirm_text" style="padding-left:5px">ยืนยัน</span>
+        </button>  --}}
+
+        <button class="btn btn-success" type="button" id="confirm" onclick="submit_form('1','confirm');return false;" style="display: none">
+            <i class="fa fa-save"></i><span id="confirm_text" style="padding-left:5px">ยืนยัน</span>
         </button>
+
         <button class="btn btn-primary " type="button" id="save"  onclick="submit_form('1','save');return false;">
             <i class="fa fa-paper-plane"></i><span id="save_text" style="padding-left:5px">บันทึก</span> 
         </button>
@@ -490,14 +511,39 @@
        <script src="{{asset('js/jasny-bootstrap.js')}}"></script>
        <script>
           var id = @json($board_auditor_id);
+          var notice_id = $('#notice_id').val();
+
+
+            if (notice_id) {
+                document.getElementById('confirm').style.display = '';
+            }
+
+           
+            // $('#confirm').css('display', 'block');
          function  submit_form(degree,submit_type){ 
+           
+
+            // console.log("id ",id );
+            // วิธีที่ 1: ตรวจสอบ undefined หรือ empty string
+            // if (typeof notice_id === 'undefined' || notice_id === '') {
+            //     console.log('no report1');
+            // }
+
+            // หรือ วิธีที่ 2: ใช้การตรวจสอบที่สั้นกว่า
+
+            // return;
                 $('#submit_type').val(submit_type);
-                // return;
+
+
                 var report_status = $("input[name=report_status]:checked").val(); 
        
                 var main_state =  $("input[name=main_state]:checked").val();
 
+                // console.log(submit_type,report_status);
+                // return;
+
                     if(report_status == 2){
+                        //ไม่มีข้อบกพร่อง
                         let i = 4;
                         Swal.fire({
                                 title:"ยืนยันทำรายการ !",
@@ -516,8 +562,8 @@
               
                     }else{
                 
-                        if(degree == 0){  // ฉบับร่าง
-                            
+                        if(degree == 0){  
+                            //มีข้อบกพร่อง ฉบับร่าง
                             Swal.fire({
                                 title:'ยืนยันทำฉบับร่างรายงานข้อบกพร่อง !',
                                 icon: 'warning',
@@ -539,15 +585,16 @@
                                 title =  'ยืนยันปิดผลการตรวจประเมิน !';
                                 l = 8;
                             }else{
-                        
-                                // title =  'ยืนยันทำรายงานข้อบกพร่อง !';
+                                //มีข้อบกพร่อง บันทึก
                                 title = 'ยืนยันทำรายงานข้อบกพร่อง<span style="color: #f39c12;">ฉบับร่าง</span> และ<br><span style="color: #f39c12;">อนุญาตให้ผู้ประกอบการยืนยันรายการข้อบกพร่อง</span>'
                                 if(submit_type == 'confirm'){
                                     title = 'ยืนยันทำรายงานข้อบกพร่องและ<br><span style="color: #f39c12;">อนุญาตผู้ประกอบการส่งรายงานแนวทางแก้ไข</span>'
                                 }
                                 l = 1;
                             }
-                        
+                            const _token = $('input[name="_token"]').val();
+                            
+                            
                             Swal.fire({
                                 title: title,
                                 icon: 'warning',
@@ -561,13 +608,46 @@
                                 }
                             }).then((result) => {
                                 if (result.value) {
-                                    $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
-                                    $('#form_assessment').submit();
+                                    if(submit_type == 'confirm'){
+                                        $.ajax({
+                                            url: "{{route('save_assessment.check_complete_report_one_sign')}}",
+                                            method: "POST",
+                                            data: {
+                                                _token: _token,
+                                                notice_id:notice_id
+                                            },
+                                            success: function(result) {
+                                                console.log(result);
+                                                if (result.message == true) {
+                                                    $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                                    $('#form_assessment').submit();
+                                                }else{
+                                                    
+                                                    if (result.record_count == 0) {
+                                                        alert('ยังไม่ได้สร้างรายงานการตรวจประเมิน(รายงานที่1)');
+                                                       
+                                                        if (!notice_id) {
+                                                            window.location.href = window.location.origin + '/certify/save_assessment/create/' + id;
+                                                        }else{
+                                                            window.location.href = window.location.origin + '/certify/save_assessment/view-lab-info/' + notice_id;
+                                                        }
+                                                    }else{
+                                                        alert('อยู่ระหว่างการลงนามรายงานการตรวจประเมิน(รายงานที่1)');
+                                                    }
+                                                }
+                                                // $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                                // $('#form_assessment').submit();
+                                            }
+                                        });
+
+                                    }else if(submit_type == 'save'){
+                                            $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                            $('#form_assessment').submit();
+                                    }
+
                                 }
                             });
-
                         }   
-                
                     } 
        }
 
@@ -791,7 +871,12 @@
                     $('#div_file_scope').hide(400); 
                     $('.file_scope_required').prop('required', false);
                     $('#confirm').css('visibility', 'visible');
-                    $('#save_text').html('ฉบับร่าง');
+                    
+                    if (notice_id) {
+                        $('#save_text').html('ฉบับร่าง');
+                    }else{
+                        $('#save_text').html('บันทึก');
+                    }
                     
                 } else{
                     $('.status_report_status').hide(400);

@@ -27,7 +27,8 @@ class CertiCBAuditors  extends Model
                             'created_cancel',
                             'date_cancel',
                             'is_review_state',
-                            'message_record_status'
+                            'message_record_status',
+                            'cb_auditor_team_id'
                           ];
    
  public function CertiCbCostTo()

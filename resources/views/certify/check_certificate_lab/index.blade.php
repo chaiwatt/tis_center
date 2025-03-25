@@ -434,6 +434,7 @@
 
                                             @endif
                                             @if ($app->check)
+                                            {{-- {{dd($app->check)}} --}}
                                                 <a href="{{ route('check_certificate.show', ['cc' => $app->check->id]) }}" class="btn btn-xs btn-info">
                                                     <i class="fa fa-search"></i>
                                                 </a>

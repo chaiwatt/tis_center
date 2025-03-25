@@ -23,7 +23,7 @@
 
                     {!! Form::open(['url' => '/certify/auditor-cb', 'class' => 'form-horizontal', 'files' => true,'id'=>'form_auditor']) !!}
 
-                    @include ('certify/cb.auditor_cb.form')
+                    @include ('certify.cb.auditor_cb.form')
 
                     {!! Form::close() !!}
 

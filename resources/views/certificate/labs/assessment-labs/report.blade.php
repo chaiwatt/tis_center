@@ -359,11 +359,11 @@
     <div class="wrapper">
         <div class="container">
             <div class="left-text">คำขอที่ {{$certi_lab->app_no}}</div>
-            <div class="right-box">รายงานที่ 1</div>
+            <div class="right-box">รายงานที่ </div>
         </div>
         <div class="header">
             รายงานการตรวจประเมินความสามารถของห้องปฏิบัติการทดสอบ/สอบเทียบ<br>
-            ตามมาตรฐานเลขที่ มอก. 17025-2561
+            ตามมาตรฐานเลขที่ มอก. 17025-2561 
         </div>
 
         <div class="checkbox-section">

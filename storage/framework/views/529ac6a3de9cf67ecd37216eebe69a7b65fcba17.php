@@ -461,6 +461,7 @@
 
                                             <?php endif; ?>
                                             <?php if($app->check): ?>
+                                            
                                                 <a href="<?php echo e(route('check_certificate.show', ['cc' => $app->check->id])); ?>" class="btn btn-xs btn-info">
                                                     <i class="fa fa-search"></i>
                                                 </a>

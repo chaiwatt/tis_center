@@ -341,6 +341,8 @@ Route::group(['prefix' => 'certify'], function () {
         Route::get('/api/get/notices/{ca}','Certify\SaveAssessmentController@apiGetNotices')->name('save_assessment.api.get.notices');
 
         Route::post('/email-to-expert','Certify\SaveAssessmentController@emailToExpert')->name('save_assessment.email_to_expert');
+        Route::post('/check-complete-report-one-sign','Certify\SaveAssessmentController@checkCompleteReportOneSign')->name('save_assessment.check_complete_report_one_sign');
+        Route::post('/check-complete-report-two-sign','Certify\SaveAssessmentController@checkCompleteReportTwoSign')->name('save_assessment.check_complete_report_two_sign');
 
         Route::get('/{notice}/assess_edit/{app?}','Certify\SaveAssessmentController@assess_edit')->name('save_assessment.assess_edit');
         Route::put('/assess_update/{notice}/{app?}','Certify\SaveAssessmentController@assess_update')->name('save_assessment.assess_update');
@@ -357,6 +359,10 @@ Route::group(['prefix' => 'certify'], function () {
 
         Route::get('/view-lab-info/{id?}','Certify\SaveAssessmentController@viewLabInfo')->name('save_assessment.view_lab_info');
         Route::post('/update-lab-info','Certify\SaveAssessmentController@updateLabInfo')->name('save_assessment.update_lab_info');
+
+
+        Route::get('/view-lab-report2-info/{id?}', 'Certify\SaveAssessmentController@viewLabReportTwoInfo')->name('save_assessment.view_lab_report2_info');
+        Route::post('/update-report2-lab-info', 'Certify\SaveAssessmentController@updateLabReportTwoInfo')->name('save_assessment.update_lab_report2_info');
 
 
         Route::post('/api/request-edit-scope','Certify\SaveAssessmentController@apiRequestEditScope')->name('save_assessment.api.request_edit_scope');
@@ -619,6 +625,8 @@ Route::group(['prefix' => 'certify'], function () {
 
 
      // สรุปรายงานและเสนออนุกรรมการฯ
+    Route::post('/check_certificate-cb/save-review/{id?}', 'Certify\CB\\CheckCertificateCBController@SaveReview');
+    Route::post('/check_certificate-cb/ask-to-edit-cb-scope', 'Certify\CB\\CheckCertificateCBController@askToEditCbScope');
     Route::post('/check_certificate-cb/report/{id?}', 'Certify\CB\\CheckCertificateCBController@UpdateReport');
     // แนบใบ Pay-in ครั้งที่ 2
     Route::get('/check_certificate-cb/Pay_In2/{id?}/{token?}', 'Certify\CB\\CheckCertificateCBController@GetCBPayInTwo');

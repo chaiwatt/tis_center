@@ -38,7 +38,7 @@
 <div class="row">
     <div class="col-sm-12 ">
 
-
+{{-- {{$certi_cb->report_to}} --}}
                 <a class="form_group btn {{ ($certi_cb->status >= 6) ? 'btn-info' : 'btn-warning'  }} "   href="{{ url('certify/check_certificate-cb/show/'.$certi_cb->app_no) }}" >
                     <i class="fa fa-search" aria-hidden="true"></i> คำขอ
                 </a>
@@ -225,7 +225,7 @@
                                         @endphp
                                         @if ($item->status   != 3) 
                                             <a  class="btn {{$payin1_btn}} " href="{{ url("certify/check_certificate-cb/Pay_In1/".$item->id."/".$certi_cb->token)}}" style="width:750px;text-align: left">
-                                                ครั้งที่ {{  ($key_payin_one +1) }} :  
+                                                {{-- ครั้งที่ห {{  ($key_payin_one +1) }} :   --}}
                                                 {{ $item->CertiCBAuditorsTo->auditor ?? '-'}}
                                             </a> 
                                             <br>
@@ -245,7 +245,7 @@
                 <!-- START  admin , ผอ , ผก ,เจ้าหน้าที่ CB  -->
                 @if((auth()->user()->SetRolesLicenseCertify() == "true" ||  in_array("29",auth()->user()->RoleListId)) && count($certi_cb->CertiCBPayInOneStatusMany)  > 0 )  
 
-                    @if(count($certi_cb->CertiCBSaveAssessmentMany) > 0 ) 
+                    {{-- @if(count($certi_cb->CertiCBSaveAssessmentMany) > 0 )  --}}
                         @php 
                             $assessment_btn =  '';
                             $assessment_icon =  '';
@@ -266,7 +266,7 @@
                             }
                         @endphp
 
-                        <div class="form_group btn-group">
+                        {{-- <div class="form_group btn-group">
                             <div class="btn-group">
                                 <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-cb")}}" >
                                     {!! $assessment_icon  !!}    ผลการตรวจประเมิน
@@ -306,13 +306,13 @@
                                     @endforeach
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
 
                         <div class="form_group btn-group">
                             <div class="btn-group">
                                 <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-cb")}}" >
-                                    {!! $assessment_icon  !!}    ผลการตรวจประเมิน ทั้งหมด
+                                    {!! $assessment_icon  !!}    ผลการตรวจประเมิน
                                 </a>
                                 <button type="button" class="btn  {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
                                     <span class="caret"></span>
@@ -346,6 +346,9 @@
 
 
                                         @endphp
+                                       {{-- @php
+                                           dd($assessment)
+                                       @endphp --}}
                                         @if ($assessment != null)
                                                 {{-- <a  class="btn btn-info  " href=""  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                                     ครั้งที่ {{ $key + 1 }} :  
@@ -402,13 +405,15 @@
                                 </div>
                             </div>
                         </div>
-                    @else 
+                    {{-- @else 
                         <a  class="form_group btn btn-warning" href="{{ url("certify/save_assessment-cb")}}" >
-                            ผลการตรวจประเมิน
+                            ผลการตรวจประเมิน 
                         </a>
-                    @endif
+                    @endif --}}
 
                     {{-- ทบทวน --}}
+                    {{-- {{$certi_cb->fullyApproveReport()}} --}}
+                   
                     @if( $certi_cb->status >= 11  && count($certi_cb->CertiCBSaveAssessmentMany) > 0   && $certi_cb->CertiCBSaveAssessmentStatus == "statusInfo")
                         @php 
                             $review =  $certi_cb->CertiCBReviewTo;
@@ -423,10 +428,17 @@
                             }
                         @endphp
 
-                        <button type="button" class="form_group btn {{$review_btn}}"  data-toggle="modal" data-target="#ReviewModal">
-                            {!! $review_icon !!} ทบทวนฯ
-                        </button>
-                        @include ('certify/cb/check_certificate_cb/modal.modalreview',['review' => $review,'certi_cb'=> $certi_cb])
+                        @if ($certi_cb->fullyApproveReport())
+                            <button type="button" class="form_group btn {{$review_btn}}"  data-toggle="modal" data-target="#ReviewModal">
+                                {!! $review_icon !!} ทบทวนฯ
+                            </button>
+                        @else
+                        อนุมัติรายงานยังไม่ครบ
+                        @endif
+
+
+
+                        @include ('certify.cb.check_certificate_cb.modal.modalreview',['review' => $review,'certi_cb'=> $certi_cb])
                     @endif
 
                     @if($certi_cb->status >= 12)
@@ -450,17 +462,27 @@
 
                         <!-- Button trigger modal     	สรุปรายงานและเสนออนุกรรมการฯ  -->
                         @if( !is_null($report) )
-                            <button type="button" class="form_group btn {{$report_btn}}" data-toggle="modal" data-target="#exampleModalReport">
-                                {!! $report_icon !!} สรุปรายงาน
-                            </button>
-                            @include ('certify/cb/check_certificate_cb/modal.modalstatus17',['report' => $report ])
+                       
+                            @if ($report->review_approve == null || $report->review_approve == "2")
+                                <button type="button" class="form_group btn {{$report_btn}}" data-toggle="modal" data-target="#exampleModalReport">
+                                    {!! $report_icon !!} สรุปรายงาน
+                                </button>
+                                @include ('certify/cb/check_certificate_cb/modal.modalstatus17',['report' => $report ])
+                            @else
+                                <button type="button" class="form_group btn {{$report_btn}}" data-toggle="modal" data-target="#exampleModalReviewResult">
+                                    {!! $report_icon !!} บันทึกผลทบทวน
+                                 
+                                </button>
+                                @include ('certify/cb/check_certificate_cb/modal.modal_review_result',['report' => $report ])
+                            @endif
+
+                           
+                            
                         @endif
                         <!-- Button trigger modal    	สรุปรายงานและเสนออนุกรรมการฯ  -->
 
                     @endif
-       
                 @endif
-
 
                 <!-- START  admin , ผอ , ผก , เจ้าหน้าที่ ลท. -->
                 @if(auth()->user()->SetRolesLicenseCertify() == "true" ||  in_array("26",auth()->user()->RoleListId))   
@@ -526,22 +548,29 @@
                             @endphp
 
                             <a href="{{ url('certify/certificate-export-cb/'.$export->id.'/edit') }}" class="form_group btn  {{$export_btn}}" >
-                                    {!! $export_icon !!}    ออกใบรับรอง
+                                    {!! $export_icon !!}    ออกใบรับรอง 
                             </a>
                         @elseif(!empty($certi_cb->certi_cb_export_mapreq_to))
                             <a  class="form_group btn  btn-info " href="{{ url("certify/certificate_detail-cb/".$certi_cb->token)}}" >
                                 <i class="fa fa-paperclip"></i>  แนบท้าย
                             </a> 
                         @else 
-                            <div class="btn-group form_group">
-                                <form action="{{ url('/certify/certificate-export-cb/create')}}" method="POST" style="display:inline" > 
-                                    {{ csrf_field() }}
-                                    {!! Form::hidden('app_token', (!empty($certi_cb->token) ? $certi_cb->token  : null) , ['id' => 'app_token', 'class' => 'form-control' ]); !!}
-                                    <button class=" btn btn-warning" type="submit" >
-                                        ออกใบรับรอง
-                                    </button>
-                                </form>
-                            </div>
+                            
+                                {{-- {{ $report->ability_confirm}} --}}
+                                @if ($report->ability_confirm !== null)
+                                <div class="btn-group form_group">
+                                    <form action="{{ url('/certify/certificate-export-cb/create')}}" method="POST" style="display:inline" > 
+                                        {{ csrf_field() }}
+                                        {!! Form::hidden('app_token', (!empty($certi_cb->token) ? $certi_cb->token  : null) , ['id' => 'app_token', 'class' => 'form-control' ]); !!}
+                                        <button class=" btn btn-warning" type="submit" >
+                                            ออกใบรับรอง 
+                                        </button>
+                                    </form>
+                                </div>
+                                @else
+                                <span class="text-warning">รอยืนยันความสามารถ</span>
+                                @endif
+                                
                         @endif 
                   
                          

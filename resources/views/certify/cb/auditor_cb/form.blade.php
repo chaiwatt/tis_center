@@ -10,11 +10,18 @@
             border-radius: 4px;
             padding: 5px;
         }
+
+        /* ปิด hover สำหรับตารางนี้ */
+        .table.color-bordered-table tbody tr:hover,
+        .table.primary-bordered-table tbody tr:hover {
+            background-color: transparent !important;
+        }
     </style>
 @endpush
 
 
 <div class="row">
+
     <input type="hidden" name="signaturesJson" id="signaturesJson">
     <div class="col-md-12">
         <div class="col-md-9">
@@ -131,80 +138,123 @@
 
             @if (!isset($messageRecordTransactions))
 
-            <div class="form-group">
-                {!! HTML::decode(Form::label('select_user_id', '<span class="text-danger">*</span> ผู้ลงนามท้ายขอบข่าย', ['class' => 'col-md-5 control-label'])) !!}
-                <div class="col-md-7">
-                    <select name="select_user_id" id="select_user_id" class="form-control" required>
-                        <option value="" selected>- ผู้ลงนามท้ายขอบข่าย -</option>
-                        @foreach ($signers as $id => $signer)
+                <div class="form-group">
+                    {!! HTML::decode(Form::label('select_user_id', '<span class="text-danger">*</span> ผู้ลงนามท้ายขอบข่าย', ['class' => 'col-md-5 control-label'])) !!}
+                    <div class="col-md-7">
+                        <select name="select_user_id" id="select_user_id" class="form-control" required>
+                            <option value="" selected>- ผู้ลงนามท้ายขอบข่าย -</option>
+                            @foreach ($signers as $id => $signer)
+                                <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {!! HTML::decode(Form::label('signer_1', '<span class="text-danger">*</span> เจ้าหน้าที่ผู้รับผิดชอบ', ['class' => 'col-md-5 control-label'])) !!}
+                    <div class="col-md-7">
+                        <select name="signer_1" id="signer_1" class="form-control" required>
+                            <option value="" selected>- เจ้าหน้าที่ผู้รับผิดชอบ -</option>
+                            @foreach ($signers as $signer)
+                                <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                            @endforeach
+                            
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {!! HTML::decode(Form::label('signer_2', '<span class="text-danger">*</span> ผู้ลงนาม (ผก.)', ['class' => 'col-md-5 control-label'])) !!}
+                    <div class="col-md-7">
+                        <select name="signer_2" id="signer_2" class="form-control" required>
+                            <option value="" selected>- ผู้ลงนาม -</option>
+                            @foreach ($signers as $signer)
+                                <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {!! HTML::decode(Form::label('signer_3', '<span class="text-danger">*</span> ผู้ลงนาม (ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
+                    <div class="col-md-7">
+                        <select name="signer_3" id="signer_3" class="form-control" required>
+                            <option value="" selected>- ผู้ลงนาม -</option>
+                            @foreach ($signers as $signer)
+                                <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    {!! HTML::decode(Form::label('signer_4', '<span class="text-danger">*</span> ผู้ลงนาม (ลมอ. / ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
+                    <div class="col-md-7">
+                        <select name="signer_4" id="signer_4" class="form-control" required>
+                            <option value="" selected>- ผู้ลงนาม -</option>
+                            @foreach ($signers as $signer)
                             <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
-                        @endforeach
-                    </select>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                {!! HTML::decode(Form::label('signer_1', '<span class="text-danger">*</span> เจ้าหน้าที่ผู้รับผิดชอบ', ['class' => 'col-md-5 control-label'])) !!}
-                <div class="col-md-7">
-                    <select name="signer_1" id="signer_1" class="form-control" required>
-                        <option value="" selected>- เจ้าหน้าที่ผู้รับผิดชอบ -</option>
-                        @foreach ($signers as $signer)
-                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
-                        @endforeach
-                        
-                    </select>
-                </div>
-            </div>
 
-            <div class="form-group">
-                {!! HTML::decode(Form::label('signer_2', '<span class="text-danger">*</span> ผู้ลงนาม (ผก.)', ['class' => 'col-md-5 control-label'])) !!}
-                <div class="col-md-7">
-                    <select name="signer_2" id="signer_2" class="form-control" required>
-                        <option value="" selected>- ผู้ลงนาม -</option>
-                        @foreach ($signers as $signer)
-                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
-                        @endforeach
-                    </select>
+                <div class="form-group">
+                    
+                        {!! HTML::decode(Form::label('cbAuditorTeam', '<span class="text-danger">*</span> คณะตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                        <div class="col-md-7">
+                            <select name="cbAuditorTeam" id="cbAuditorTeam" class="form-control" required>
+                                <option value="" selected>- คณะตรวจประเมิน -</option>
+                                @foreach ($cbAuditorTeams as $cbAuditorTeam)
+                                <option value="{{ $cbAuditorTeam->id }}" >{{ $cbAuditorTeam->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                
+    
                 </div>
-            </div>
-
-            <div class="form-group">
-                {!! HTML::decode(Form::label('signer_3', '<span class="text-danger">*</span> ผู้ลงนาม (ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
-                <div class="col-md-7">
-                    <select name="signer_3" id="signer_3" class="form-control" required>
-                        <option value="" selected>- ผู้ลงนาม -</option>
-                        @foreach ($signers as $signer)
-                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                {!! HTML::decode(Form::label('signer_4', '<span class="text-danger">*</span> ผู้ลงนาม (ลมอ. / ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
-                <div class="col-md-7">
-                    <select name="signer_4" id="signer_4" class="form-control" required>
-                        <option value="" selected>- ผู้ลงนาม -</option>
-                        @foreach ($signers as $signer)
-                        <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                {!! HTML::decode(Form::label('cbAuditorTeam', '<span class="text-danger">*</span> คณะตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
-                <div class="col-md-7">
-                    <select name="cbAuditorTeam" id="cbAuditorTeam" class="form-control" required>
-                        <option value="" selected>- คณะตรวจประเมิน -</option>
-                        @foreach ($cbAuditorTeams as $cbAuditorTeam)
-                        <option value="{{ $cbAuditorTeam->id }}" >{{ $cbAuditorTeam->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
 
             @endif
+
+            <div class="form-group">
+                @if (!is_null($auditorcb->id) != null)
+                    @if ($auditorcb->cb_auditor_team_id)
+                        {!! HTML::decode(Form::label('cbAuditorTeam', '<span class="text-danger">*</span> คณะตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                        <div class="col-md-7">
+                            <select name="cbAuditorTeam" id="cbAuditorTeam" class="form-control" required>
+                                <option value="" selected>- คณะตรวจประเมิน -</option>
+                                @foreach ($cbAuditorTeams as $cbAuditorTeam)
+                                <option value="{{ $cbAuditorTeam->id }}" @if ($auditorcb->cb_auditor_team_id == $cbAuditorTeam->id )
+                                    selected
+                                @endif >{{ $cbAuditorTeam->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="row">
+                            <label for="cbAuditorTeam" class="col-md-5 control-label"><span class="text-danger">*</span> รายการ</label>
+                            <div class="col-md-7 offset-md-2" > <!-- เพิ่ม offset-md-2 -->
+                                <table class="table color-bordered-table primary-bordered-table"  style="margin-top: 15px">
+                                    <thead>
+                                        <tr>
+                                            <td>ชื่อ-สกุล</td>
+                                            <td>ตำแหน่ง</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($auditorcb->CertiCBAuditorsLists as $CertiCBAuditorsList)
+                                            <tr>
+                                                <td>{{$CertiCBAuditorsList->auditorInformation->title_th}}{{$CertiCBAuditorsList->auditorInformation->fname_th}} {{$CertiCBAuditorsList->auditorInformation->lname_th}}</td>
+                                                <td>{{$CertiCBAuditorsList->auditorInformation->position}}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
+            </div>
             
              
             

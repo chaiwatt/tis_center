@@ -902,6 +902,7 @@ public function getCertiAuditorsStatusAttribute() {
     {
         $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('app_id',$this->app_no)
         ->where('certificate_type',2)
+        ->where('report_type',1)
         ->where('approval',0)
         ->get();     
         return $signAssessmentReportTransactions;

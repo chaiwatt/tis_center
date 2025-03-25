@@ -388,6 +388,10 @@
                     $('#signerModal').modal('hide');
                     // location.reload(); // ทำการ reload หน้าเว็บ
                     table.draw();
+                    if (response.success == false)
+                    {
+                        alert("ผิดพลาด ยังไม่ได้สร้างรายการบันทึกแต่งตั้ง")
+                    }
                 },
                 error: function(xhr, status, error) {
                     // ซ่อนข้อความระหว่างรอเมื่อมีข้อผิดพลาด

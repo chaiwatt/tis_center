@@ -108,7 +108,7 @@ class SaveAssessmentCBController extends Controller
     public function create($id)
     {
        
-
+        // dd('ok');
 
         // $assessment = CertiCBSaveAssessment::where('auditors_id',$id)->first();
         // dd($assessment);
@@ -166,6 +166,8 @@ class SaveAssessmentCBController extends Controller
              }
 
             $certiCBAuditorsLists = CertiCBAuditors::find($id)->CertiCBAuditorsLists;
+            $auditor = CertiCBAuditors::find($id);
+            // $certiCb= CertiCb::where('CertiCbCostTo')
 
             
             // foreach($certiCBAuditorsLists as $certiCBAuditorsList)
@@ -173,13 +175,14 @@ class SaveAssessmentCBController extends Controller
             //     dd($certiCBAuditorsList->auditorInformation);
             // }
 
-            // dd($assessment);
+            // dd($auditor->CertiCbCostTo);
 
             return view('certify/cb/save_assessment_cb.create',['app_no'=> $app_no,
                                                                 'assessment'=>$assessment,
                                                                 'bug'=>$bug,
                                                                 'previousUrl'=> $previousUrl,
                                                                 'auditorId'=> $id,
+                                                                'auditor'=> $auditor,
                                                                 'certiCBAuditorsLists'=> $certiCBAuditorsLists,
                                                                 ]);
         }
@@ -196,11 +199,11 @@ class SaveAssessmentCBController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
+        
         $model = str_slug('saveassessmentcb','-');
         if(auth()->user()->can('add-'.$model)) 
         {
-            
+            // dd($request->all());
             $request->validate([
                 'app_certi_cb_id' => 'required',
                 'auditors_id' => 'required',
@@ -1272,6 +1275,7 @@ public function copyScopeCbFromAttachement($certiCbId)
 
                 $cbReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
                                     ->where('certificate_type',0)
+                                    ->where('report_type',1)
                                     ->get();
                 return view('certify.cb.save_assessment_cb.report.view',[
                     'cbReportInfo' => $cbReportInfo,
@@ -1321,6 +1325,7 @@ public function copyScopeCbFromAttachement($certiCbId)
             $url  =   !empty($config->url_center) ? $config->url_center : url('');
             SignAssessmentReportTransaction::where('report_info_id', $cbReportInfo->id)
                                             ->where('certificate_type',0)
+                                            ->where('report_type',1)
                                             ->delete();
             // dd($signers);
             foreach ($signers as $signer) {
@@ -1337,6 +1342,7 @@ public function copyScopeCbFromAttachement($certiCbId)
                     'signer_order' => $signer['id'],
                     'view_url' => $url . '/certify/save_assessment-cb/cb-report-create/'. $id,
                     'certificate_type' => 0,
+                    'report_type' => 1,
                     'app_id' => $assessment->CertiCBCostTo->app_no,
                 ]);
             }

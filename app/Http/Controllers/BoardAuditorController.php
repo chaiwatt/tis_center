@@ -495,7 +495,9 @@ class BoardAuditorController extends Controller
             'message_record_status' => 1
         ]);
 
-        $check = MessageRecordTransaction::where('board_auditor_id',$baId)->get();
+        $check = MessageRecordTransaction::where('board_auditor_id',$baId)
+        ->where('certificate_type',2)
+        ->get();
         if($check->count() == 0){
             $signatures = json_decode($request->input('signaturesJson'), true);
             // $viewUrl = url('/certify/auditor/'.$baId.'/edit/'.$request->app_certi_lab_id);
@@ -534,7 +536,9 @@ class BoardAuditorController extends Controller
                 } 
             }
         }else{
-            MessageRecordTransaction::where('board_auditor_id',$baId)->update([
+            MessageRecordTransaction::where('board_auditor_id',$baId)
+            ->where('certificate_type',2)
+            ->update([
                 'approval' => 0
             ]);
         }
@@ -734,8 +738,10 @@ class BoardAuditorController extends Controller
     public function edit(BoardAuditor $ba, CertiLab $app = null)
     {
         
-        $messageRecordTransaction = MessageRecordTransaction::where('board_auditor_id',$ba->id)->first();
-        $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$ba->id)->get();
+        $messageRecordTransaction = MessageRecordTransaction::where('board_auditor_id',$ba->id)
+        ->where('certificate_type',2)->first();
+        $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$ba->id)
+        ->where('certificate_type',2)->get();
         // dd($messageRecordTransactions);
         $model = str_slug('board-auditor','-');
         if(auth()->user()->can('edit-'.$model)) {
@@ -1108,12 +1114,7 @@ class BoardAuditorController extends Controller
                                                             !empty($certi_lab->DataEmailDirectorLABReply) ?implode(',',(array)$certi_lab->DataEmailDirectorLABReply)   :  $EMail,
                                                             null
                                                             );
-                // $signerEmails = ['signer_one@gmail.com', 'signer_two@gmail.com'];
-                // $messageRecordTransactionIds = MessageRecordTransaction::where('board_auditor_id', $board->id)->pluck('signer_id')->toArray();
-                // $sigerIds = Signer::whereIn('id', $messageRecordTransactionIds)->pluck('user_register_id')->toArray();
-                // $signerEmails = User::whereIn('id', $sigerIds)->pluck('reg_email')->unique()->toArray();
-
-
+  
                 $signerEmails = $board->messageRecordTransactions()
                 ->with('signer.user')
                 ->get()
@@ -1175,19 +1176,7 @@ class BoardAuditorController extends Controller
                                                             !empty($certi_lab->DataEmailDirectorLABReply) ?implode(',',(array)$certi_lab->DataEmailDirectorLABReply)   :  $EMail,
                                                             null
                                                             );
-                // $signerEmails = ['signer_one@gmail.com', 'signer_two@gmail.com'];
-                // $messageRecordTransactionIds = MessageRecordTransaction::where('board_auditor_id', $board->id)->pluck('signer_id')->toArray();
-                // $sigerIds = Signer::whereIn('id', $messageRecordTransactionIds)->pluck('user_register_id')->toArray();
-                // $signerEmails = User::whereIn('id', $sigerIds)->pluck('reg_email')->unique()->toArray();
 
-
-                // $signerEmails = $board->messageRecordTransactions()
-                // ->with('signer.user')
-                // ->get()
-                // ->pluck('signer.user.reg_email')
-                // ->filter() // กรองค่า null ออก
-                // ->unique()
-                // ->toArray();
 
                 $examinerEmails = $certi_lab->EmailStaff;
 

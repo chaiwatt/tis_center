@@ -113,6 +113,7 @@ class CreateCbAssessmentReportPdf
                 
         $cbReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
                                 ->where('certificate_type',0)
+                                ->where('report_type',1)
                                 ->get();
 
               
@@ -133,6 +134,7 @@ class CreateCbAssessmentReportPdf
         
         $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
                                             ->where('certificate_type',0)
+                                            ->where('report_type',1)
                                             ->get();
 
 
@@ -141,14 +143,17 @@ class CreateCbAssessmentReportPdf
 
         $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','1')
                                                         ->where('certificate_type',0)
+                                                        ->where('report_type',1)
                                                         ->first();
 
         
         $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','2')
                                                         ->where('certificate_type',0)
+                                                        ->where('report_type',1)
                                                         ->first();
         $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','3')
                                                         ->where('certificate_type',0)
+                                                        ->where('report_type',1)
                                                         ->first();
        
         

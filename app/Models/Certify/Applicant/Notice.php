@@ -2,14 +2,16 @@
 
 namespace App\Models\Certify\Applicant;
 
-use Illuminate\Database\Eloquent\Model;
-use Kyslik\ColumnSortable\Sortable;
-use  App\Models\Certify\BoardAuditor;
- 
-use App\Models\Certify\CertificateHistory;
-use App\Models\Certify\LabReportInfo;
-use App\User;
 use HP;
+use App\User;
+use Kyslik\ColumnSortable\Sortable;
+ 
+use  App\Models\Certify\BoardAuditor;
+use App\Models\Certify\LabReportInfo;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\CertificateHistory;
+use App\Models\Certificate\LabReportTwoInfo;
+
 class Notice extends Model
 {
     use Sortable;
@@ -117,13 +119,19 @@ class Notice extends Model
       }
 
 
-      public function labReportInfos(){
-        return $this->hasMany(LabReportInfo::class, 'app_certi_lab_notice_id', 'id');
-    }
 
+
+    public function labReportTwoInfos(){
+        return $this->hasMany(LabReportTwoInfo::class, 'app_certi_lab_notice_id', 'id');
+    }
     
     public function getLabReportInfoAttribute() {
         $labReportInfo = LabReportInfo::where('app_certi_lab_notice_id',$this->id)->first();
         return $labReportInfo;
+    }
+
+    public function getLabReportTwoInfoAttribute() {
+        $labReportTwoInfo = LabReportTwoInfo::where('app_certi_lab_notice_id',$this->id)->first();
+        return $labReportTwoInfo;
     }
 }

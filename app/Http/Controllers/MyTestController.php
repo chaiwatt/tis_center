@@ -68,10 +68,12 @@ use App\Models\Certify\Applicant\CostAssessment;
 use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Certify\Applicant\CertLabsFileAll;
 use App\Models\Certify\Applicant\CostCertificate;
+use App\Services\CreateLabAssessmentReportTwoPdf;
 use App\Http\Controllers\API\Checkbill2Controller;
 use App\Models\Bcertify\BoardAuditoExpertTracking;
 use App\Models\Certify\Applicant\CertifyTestScope;
 use App\Models\Certify\ApplicantCB\CertiCBAuditors;
+use App\Models\Certify\ApplicantCB\CertiCBPayInTwo;
 use App\Services\CreateTrackingLabMessageRecordPdf;
 use App\Models\Bcertify\CalibrationBranchInstrument;
 use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
@@ -142,11 +144,6 @@ class MyTestController extends Controller
     public function getmaillist()
     {
         $board = BoardAuditor::find(1712);
-        // $messageRecordTransactionIds = MessageRecordTransaction::where('board_auditor_id', $board->id)->pluck('signer_id')->toArray();
-        
-        // $sigerIds = Signer::whereIn('id', $messageRecordTransactionIds)->pluck('user_register_id')->toArray();
-        
-        // $userEmails = User::whereIn('runrecno', $sigerIds)->pluck('reg_email')->unique()->toArray();
 
         $signerEmails = $board->messageRecordTransactions()
                       ->with('signer.user')
@@ -1177,11 +1174,11 @@ public function create_bill()
 
 
        
-        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','1')->first();
+        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('report_type',1)->where('signer_order','1')->first();
 
         
-        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','2')->first();
-        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','3')->first();
+        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('report_type',1)->where('signer_order','2')->first();
+        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('report_type',1)->where('signer_order','3')->first();
 
 
 
@@ -1305,7 +1302,7 @@ public function create_bill()
     public function CreateLabMessageRecordPdfDemo()
     {
         // http://127.0.0.1:8081/certify/auditor/create-lab-message-record-pdf/1754
-        $boardAuditor = BoardAuditor::find(1768);
+        $boardAuditor = BoardAuditor::find(1850);
         // dd( $boardAuditor);
         $pdfService = new CreateLabMessageRecordPdf($boardAuditor,"ia");
         $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
@@ -2876,8 +2873,9 @@ public function create_bill()
 
     public function createCbMessageRecordPdf()
     {
-        $id = 361;
+        $id = 365;
         $boardAuditor = CertiCBAuditors::find($id);
+        // dd($boardAuditor);
         $pdfService = new CreateCbMessageRecordPdf($boardAuditor,"ia");
         $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
     }
@@ -2887,6 +2885,107 @@ public function create_bill()
     {
         Artisan::call('run:all-schedules');
         return response()->json(['message' => 'All schedules have been run successfully']);
+    }
+
+    public function check_payin2_cb()
+    {
+    // การทดสอบต้องลด invoiceStartDate ลง 1 วัน
+      $today = Carbon::today(); // กำหนดวันปัจจุบัน
+  
+      $transactionPayIns = TransactionPayIn::where('invoiceStartDate', '<=', $today)
+      ->where('invoiceEndDate', '>=', $today)
+      ->whereNull('status_confirmed')
+      ->where('state',2)
+      ->where('count','<=',3)
+      ->where(function ($query) {
+          $query->where('ref1', 'like', 'CB%');
+      })
+      ->get();
+    //   dd($transactionPayIns);
+      
+      
+      foreach ($transactionPayIns as $transactionPayIn) {
+        $ref1 = $transactionPayIn->ref1;
+        $result = $this->callCheckBill($ref1); // เรียกฟังก์ชัน
+        
+        // ตรวจสอบว่า $result เป็น JsonResponse หรือไม่
+        if ($result instanceof \Illuminate\Http\JsonResponse) {
+            // แปลง JsonResponse เป็น array
+            $resultArray = $result->getData(true);
+            // dd($resultArray);
+            // ตรวจสอบค่า message
+            if (!empty($resultArray['message']) && $resultArray['message'] === true) {
+                // ดึงค่าทั้งหมดจาก response
+                $response = $resultArray['response'] ?? null;
+    
+                // ตรวจสอบว่า response เป็น array หลายรายการหรือไม่
+                if (is_array($response) && count($response) > 0) {
+                    // ใช้ array_map เพื่อดึง ref1
+                    $ref1List = array_map(function ($item) {
+                        return isset($item['ref1']) ? $item['ref1'] : null;
+                    }, $response);
+    
+                    // กรองเฉพาะ ref1 ที่ไม่เป็น null
+                    $validRef1 = array_filter($ref1List);
+                    $tb = new CertiCBPayInTwo;
+
+                    // $appCertiLabCostCertificateId = $transactionPayIn->ref_id;
+                    $PayIn = CertiCBPayInTwo::findOrFail($transactionPayIn->ref_id);
+                    $certi_cb = CertiCb::findOrFail($PayIn->app_certi_cb_id);
+                    $certiCBAttachAll = CertiCBAttachAll::where('table_name', $tb->getTable())
+                        ->where('app_certi_cb_id', $PayIn->app_certi_cb_id)
+                        ->where('ref_id', $PayIn->id)
+                        ->orderBy('created_at', 'desc') // หรือกรณีที่ใช้ฟิลด์อื่นในการจัดลำดับ
+                        ->first();
+
+
+                    $certi_cb = CertiCb::findOrFail($PayIn->app_certi_cb_id);
+                    $certi_cb_attach_more                    = new CertiCBAttachAll();
+                    $certi_cb_attach_more->app_certi_cb_id   = $certi_cb->id;
+                    $certi_cb_attach_more->ref_id            = $PayIn->id;
+                    $certi_cb_attach_more->table_name        = $tb->getTable();
+                    $certi_cb_attach_more->file              = $certiCBAttachAll->file;
+                    $certi_cb_attach_more->file_client_name  = $certiCBAttachAll->file_client_name;
+                    $certi_cb_attach_more->file_section      = '2';
+                    $certi_cb_attach_more->token             = str_random(16);
+                    $certi_cb_attach_more->save();
+
+                    $PayIn->degree = 3 ; 
+                    $PayIn->status = null ; 
+                    $PayIn->report_date = null ; 
+                    $PayIn->status = 2 ; 
+                    $PayIn->condition_pay = null ; 
+                    $PayIn->save();
+
+                    $certi_cb->status = 17;
+                    $certi_cb->save();
+
+                    $transaction_payin  =  TransactionPayIn::where('ref_id',$PayIn->id)->where('table_name', (new CertiCBPayInTwo)->getTable())->orderby('id','desc')->first();
+                    if(!is_null($transaction_payin)){
+                        $transaction_payin->ReceiptCreateDate     =  Carbon::now(); 
+                        $transaction_payin->ReceiptCode           =  '123456' ; 
+                        $transaction_payin->save();
+                    }
+                        
+
+                } else {
+                    dd("Response is empty or not an array.");
+                }
+            } else {
+                dd("No valid message or response.");
+            }
+        } else {
+            dd("Invalid response type. Expected JsonResponse.");
+        }
+    }
+    
+    }
+
+    public function createLabAssessmentReportTwoPdf()
+    {
+
+        $pdfService = new CreateLabAssessmentReportTwoPdf(2,"ia");
+        $pdfContent = $pdfService->generateLabReportTwoPdf();
     }
 
 }

@@ -4,7 +4,12 @@
     <div class="modal-dialog  modal-xl" role="document">
     <div class="modal-content">
         <div class="modal-header">
-        <h4 class="modal-title" id="exampleModalReportLabel">สรุปรายงานและเสนอคณะกรรมการฯ 
+        <h4 class="modal-title" id="exampleModalReportLabel">สรุปรายงานและเสนอคณะกรรมการฯ  
+
+            @if ($report->CertiCBCostTo->require_scope_update == "1")
+            
+            <span class="text-danger">อยู่ระหว่างการแก้ไขขอบข่าย</span>
+        @endif
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -66,6 +71,12 @@
                                     title="{{  !empty($report->FileAttachReport1To->file_client_name) ? $report->FileAttachReport1To->file_client_name : basename($report->FileAttachReport1To->file) }}" target="_blank">
                                     {!! HP::FileExtension($report->FileAttachReport1To->file)  ?? '' !!}
                                 </a>
+                                @if ($report->CertiCBCostTo->require_scope_update != "1")
+                                    <button type="button" class="btn btn-sm btn-success" id="ask_to_edit_scope">
+                                        ขอให้แก้ไข
+                                    </button>
+                                @endif
+                               
                             </p> 
                     @else 
                             <div class="fileinput fileinput-new input-group m-t-10" data-provides="fileinput">
@@ -81,6 +92,7 @@
                                 <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
                             </div>
                      @endif
+                 
                    </div>
                </div>
              </div>
@@ -199,12 +211,17 @@
         <div class="modal-footer data_hide">
             
             <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
-            <button type="submit" class="btn btn-primary" onclick="submit_form_report();return false">บันทึก</button>
+            @if ($report->CertiCBCostTo->require_scope_update != "1")
+                <button type="submit" class="btn btn-primary" onclick="submit_form_report();return false">บันทึก</button>
+            @endif
+            
         </div>
         {!! Form::close() !!}
     </div>
     </div>
 </div>
+
+@include ('certify/cb/check_certificate_cb/modal.modal_review_edit_scope',['report' => $report ])
 
 @push('js')
  
@@ -267,6 +284,11 @@
         });
 
         ShowHideRemoveBtn94();
+
+        
+        $('#ask_to_edit_scope').click(function(event) {
+            $('#exampleModaEditCbScope').modal('show');
+        });
 
     });
 

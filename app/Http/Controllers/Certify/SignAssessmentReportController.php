@@ -33,6 +33,7 @@ use App\Models\Certify\SignCertificateConfirms;
 use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
+use App\Services\CreateLabAssessmentReportTwoPdf;
 use App\Models\Certify\SignAssessmentReportTransaction;
 
 class SignAssessmentReportController extends Controller
@@ -84,42 +85,36 @@ class SignAssessmentReportController extends Controller
                 $query->where('approval', 0);
             }
 
-            // dd($query->get());
+           
         
             if ($filter_certificate_type !== null) {
                 
                 $query->where('certificate_type', $filter_certificate_type);
             }
 
-            
-
-            // กรองเฉพาะข้อมูลที่ status เป็น 2
-            // $query->where(function ($q) {
-            //     $q->where(function ($subQuery) {
-            //         $subQuery->where('certificate_type', 2)
-            //                 ->whereHas('reportInfo', function ($query) {
-            //                     $query->where('status', 2);
-            //                 });
-            //     })->orWhere(function ($subQuery) {
-            //         $subQuery->where('certificate_type', 0)
-            //                 ->whereHas('reportInfo', function ($query) {
-            //                     $query->where('status', 2);
-            //                 });
-            //     });
-            // });
 
             // $query->where(function ($q) {
-            //     $q->where(function ($subQuery) {
-            //         $subQuery->where('certificate_type', 2);
-            //     })->orWhere(function ($subQuery) {
-            //         $subQuery->where('certificate_type', 0);
-            //     });
+            //     $q->where('certificate_type', 2)
+            //       ->whereHas('labReportInfo', function ($query) {
+            //           $query->where('status', 2);
+            //       })
+            //       ->orWhere(function ($subQuery) {
+            //           $subQuery->where('certificate_type', 0)
+            //                    ->whereHas('cbReportInfo', function ($query) {
+            //                        $query->where('status', 2);
+            //                    });
+            //       });
             // });
 
             $query->where(function ($q) {
                 $q->where('certificate_type', 2)
-                  ->whereHas('labReportInfo', function ($query) {
-                      $query->where('status', 2);
+                  ->where(function ($subQ) {  // เพิ่ม where เพื่อรวม whereHas และ orWhereHas
+                      $subQ->whereHas('labReportInfo', function ($query) {
+                          $query->where('status', 2);
+                      })
+                      ->orWhereHas('labReportTwoiInfo', function ($query) {  // เพิ่ม orWhereHas
+                          $query->where('status', 2);
+                      });
                   })
                   ->orWhere(function ($subQuery) {
                       $subQuery->where('certificate_type', 0)
@@ -128,8 +123,8 @@ class SignAssessmentReportController extends Controller
                                });
                   });
             });
-
         
+            // dd($query->get());
             $data = $query->get();
 
             // dd($data);
@@ -236,6 +231,7 @@ class SignAssessmentReportController extends Controller
 
     public function signDocument(Request $request)
     {
+        // dd('ok');
         $signAssessmentReportTransaction = SignAssessmentReportTransaction::find($request->id);
 
         SignAssessmentReportTransaction::find($request->id)->update([
@@ -245,18 +241,36 @@ class SignAssessmentReportController extends Controller
 
         if($signAssessmentReportTransaction->certificate_type == 2)
         {
+            if($signAssessmentReportTransaction->report_type == 1){
+                $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+                                ->whereNotNull('signer_id')
+                                ->where('certificate_type',2)
+                                ->where('report_type',1)
+                                ->where('approval',0)
+                                ->get();           
+
+                if($signAssessmentReportTransactions->count() == 0){
+                    $pdfService = new CreateLabAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                    $pdfContent = $pdfService->generateLabAssessmentReportPdf();
+
+                }   
+            }else if($signAssessmentReportTransaction->report_type == 2)
+            {
+                $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+                                ->whereNotNull('signer_id')
+                                ->where('certificate_type',2)
+                                ->where('report_type',2)
+                                ->where('approval',0)
+                                ->get();           
+
+                if($signAssessmentReportTransactions->count() == 0){
+                    $pdfService = new CreateLabAssessmentReportTwoPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                    $pdfContent = $pdfService->generateLabReportTwoPdf();
+
+                }   
+            }
             // LAB
-            $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
-                                    ->whereNotNull('signer_id')
-                                    ->where('certificate_type',2)
-                                    ->where('approval',0)
-                                    ->get();           
-    
-            if($signAssessmentReportTransactions->count() == 0){
-                $pdfService = new CreateLabAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
-                $pdfContent = $pdfService->generateLabAssessmentReportPdf();
-    
-            }   
+
         }
         else if($signAssessmentReportTransaction->certificate_type == 0)
         {
@@ -264,6 +278,7 @@ class SignAssessmentReportController extends Controller
             $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
                         ->whereNotNull('signer_id')
                         ->where('certificate_type',0)
+                        ->where('report_type',1)
                         ->where('approval',0)
                         ->get();           
             

@@ -48,6 +48,8 @@ use App\Models\Certify\ApplicantCB\CertiCBPayInOne;
 use App\Models\Certify\ApplicantCB\CertiCBPayInTwo;
 use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
 use App\Models\Certify\ApplicantCB\CertiCbExportMapreq;
+use App\Models\Certify\ApplicantCB\CertiCBSaveAssessment;
+use App\Models\Certify\ApplicantCB\CertiCBSaveAssessmentBug;
 
 class CheckCertificateCBController extends Controller
 {
@@ -908,6 +910,82 @@ class CheckCertificateCBController extends Controller
        }
     }
 
+
+    
+    public function SaveReview(Request $request, $id){
+        // dd($request->all());
+        $report = CertiCBReport::findOrFail($id);
+        $certi_cb = CertiCb::findOrFail($report->app_certi_cb_id);
+        if($request->report_status == "2"){
+            $certiCBSaveAssessmentIds = CertiCBSaveAssessment::where('app_certi_cb_id',$report->app_certi_cb_id)->pluck('id')->toArray();
+            CertiCBSaveAssessmentBug::whereIn('assessment_id',$certiCBSaveAssessmentIds)->delete();
+            CertiCBSaveAssessment::where('app_certi_cb_id',$report->app_certi_cb_id)->delete();
+            CertiCb::findOrFail($report->app_certi_cb_id)->update([
+                'status' => 10
+            ]);
+            CertiCbHistory::create([
+                'app_certi_cb_id'      => $report->app_certi_cb_id ?? null,
+                'system'               => 9,
+                'table_name'           => (new CertiCBReport)->getTable(),
+                'ref_id'               => $report->id,
+                'details_one'          =>  null,
+                'details_two'          =>  $report->details ?? null,
+                'status'               => null,
+                'file'                 => null,
+                'file_client_name'     =>  null,
+                'attachs'              => null,
+                'created_by'           =>  auth()->user()->runrecno
+         ]);
+        }else{
+            CertiCBReport::findOrFail($id)->update([
+                'review_approve' => 2
+            ]);
+        }
+
+        
+        $json = $this->copyScopeCbFromAttachement($report->app_certi_cb_id);
+        $copiedScopes = json_decode($json, true);
+
+        $tb = new CertiCBReport;
+        $certi_cb_attach_more = new CertiCBAttachAll();
+        $certi_cb_attach_more->app_certi_cb_id      = $report->app_certi_cb_id ?? null;
+        $certi_cb_attach_more->ref_id               = $report->id;
+        $certi_cb_attach_more->table_name           = $tb->getTable();
+        $certi_cb_attach_more->file_section         = '1';
+        $certi_cb_attach_more->file                 = $copiedScopes[0]['attachs'];
+        $certi_cb_attach_more->file_client_name     = $copiedScopes[0]['file_client_name'];
+        $certi_cb_attach_more->token                = str_random(16);
+        $certi_cb_attach_more->save();
+
+        if(isset($certi_cb->token)){
+            return redirect('certify/check_certificate-cb/'.$certi_cb->token.'/show/'.$certi_cb->id)->with('flash_message', 'เรียบร้อยแล้ว');
+         }else{
+            return redirect('certify/check_certificate-cb')->with('flash_message', 'เรียบร้อยแล้ว');
+        }
+
+    }
+
+    public function askToEditCbScope(Request $request)
+    {
+
+        $report = CertiCBReport::findOrFail($request->reportId);
+        CertiCb::findOrFail($report->app_certi_cb_id)->update([
+            'require_scope_update' => 1
+        ]);
+        $certi_cb = CertiCb::findOrFail($report->app_certi_cb_id);
+        $tb = new CertiCb;
+            CertiCbHistory::create([
+                                    'app_certi_cb_id'   => $certi_cb->id ?? null,
+                                    'system'            => isset($system) ? $system : null,
+                                    'table_name'        => $tb->getTable(),
+                                    'status'            => $certi_cb->status ?? null,
+                                    'ref_id'            => $certi_cb->id,
+                                    'details_one'       => null,
+                                    'details_two'       => $request->details,
+                                    'attachs'           => null,
+                                    'created_by'        =>  auth()->user()->runrecno
+                                  ]);
+    }
       // สรุปรายงานและเสนออนุกรรมการฯ
         public function UpdateReport(Request $request, $id){
 
@@ -1041,13 +1119,61 @@ class CheckCertificateCBController extends Controller
  
              }
 
+            // if(isset($certi_cb->token)){
+            //     return redirect('certify/check_certificate-cb/'.$certi_cb->token)->with('flash_message', 'เรียบร้อยแล้ว');
+            // }else{
+            //     return redirect('certify/check_certificate-cb')->with('flash_message', 'เรียบร้อยแล้ว');
+            // }
+
             if(isset($certi_cb->token)){
-                return redirect('certify/check_certificate-cb/'.$certi_cb->token)->with('flash_message', 'เรียบร้อยแล้ว');
-            }else{
+                return redirect('certify/check_certificate-cb/'.$certi_cb->token.'/show/'.$certi_cb->id)->with('flash_message', 'เรียบร้อยแล้ว');
+             }else{
                 return redirect('certify/check_certificate-cb')->with('flash_message', 'เรียบร้อยแล้ว');
             }
 
     }
+
+
+    
+public function copyScopeCbFromAttachement($certiCbId)
+{
+    $copiedScoped = null;
+    $fileSection = null;
+
+    $app = CertiCb::find($certiCbId);
+
+    $latestRecord = CertiCBAttachAll::where('app_certi_cb_id', $certiCbId)
+    ->where('file_section', 3)
+    ->where('table_name', 'app_certi_cb')
+    ->orderBy('created_at', 'desc') // เรียงลำดับจากใหม่ไปเก่า
+    ->first();
+
+    $existingFilePath = 'files/applicants/check_files_cb/' . $latestRecord->file ;
+
+    // ตรวจสอบว่าไฟล์มีอยู่ใน FTP และดาวน์โหลดลงมา
+    if (HP::checkFileStorage($existingFilePath)) {
+        $localFilePath = HP::getFileStoragePath($existingFilePath); // ดึงไฟล์ลงมาที่เซิร์ฟเวอร์
+        $no  = str_replace("RQ-","",$app->app_no);
+        $no  = str_replace("-","_",$no);
+        $dlName = 'scope_'.basename($existingFilePath);
+        $attach_path  =  'files/applicants/check_files_cb/'.$no.'/';
+
+        if (file_exists($localFilePath)) {
+            $storagePath = Storage::putFileAs($attach_path, new \Illuminate\Http\File($localFilePath),  $dlName );
+            $filePath = $attach_path . $dlName;
+            if (Storage::disk('ftp')->exists($filePath)) {
+                $list  = new  stdClass;
+                $list->attachs =  $no.'/'.$dlName;
+                $list->file_client_name =  $dlName;
+                $scope[] = $list;
+                $copiedScoped = json_encode($scope);
+            } 
+            unlink($localFilePath);
+        }
+    }
+
+    return $copiedScoped;
+}
 
     public function GetCBPayInTwo($id = null,$token = null)
      {
@@ -1075,7 +1201,7 @@ class CheckCertificateCBController extends Controller
 
     // แนบใบ Pay-in ครั้งที่ 2
      public function CreatePayInTwo(Request $request, $id){
-
+    //    dd('create',$request->all());
             $arrContextOptions=array();
 
          $PayIn = CertiCBPayInTwo::findOrFail($id);
@@ -1102,8 +1228,26 @@ class CheckCertificateCBController extends Controller
                                                             "verify_peer_name" => false,
                                                         );
                         }
-                        $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$certi_cb->app_no", false, stream_context_create($arrContextOptions));
+
+
+                        $timestamp = Carbon::now()->timestamp;
+                        $refNo = $certi_cb->app_no.'-'.$timestamp;
+
+                        // $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$certi_cb->app_no", false, stream_context_create($arrContextOptions));
+                        $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo", false, stream_context_create($arrContextOptions));
                         $api = json_decode($content);
+
+
+                        // if(strpos($setting_payment->data, '127.0.0.1')===0){
+                        if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
+                        
+                            $payInfile            =   $this->storeFilePayin($setting_payment,$certi_cb->app_no);
+                        }else{//ถ้าเป็น 127.0.0 (การทดสอบ)
+                            
+                            $payInfile             =   $this->storeFilePayinDemo($setting_payment,$certi_cb->app_no);
+                        }
+    
+
                         $PayIn->amount_fixed    = 1000;
                         $PayIn->amount          = !empty(str_replace(",","",$api->app_check))?str_replace(",","",$api->app_check):null;
                         $PayIn->amount_fee      = !empty(str_replace(",","",$api->AmountCert))?str_replace(",","",$api->AmountCert):null;
@@ -1115,16 +1259,22 @@ class CheckCertificateCBController extends Controller
                         $certi_cb_attach_more->ref_id               = $PayIn->id;
                         $certi_cb_attach_more->file_section         = '1';
                         $certi_cb_attach_more->file_desc            = 'เรียกเก็บค่าธรรมเนียม';
-                        $certi_cb_attach_more->file                 =  $this->storeFilePayin($setting_payment,$certi_cb->app_no);
+                        // $certi_cb_attach_more->file                 =  $this->storeFilePayin($setting_payment,$certi_cb->app_no);
+                        $certi_cb_attach_more->file                 =  $payInfile;
                         $certi_cb_attach_more->file_client_name     =  isset($certi_cb_attach_more->file) ? basename($certi_cb_attach_more->file)  : null;
                         $certi_cb_attach_more->token                =  str_random(16);
                         $certi_cb_attach_more->save();
+
+                        
         
-                        $transaction = HP::TransactionPayIn2($id,$tb->getTable(),'3','2',$api);
+                        $transaction = HP::TransactionPayIn2($id,$tb->getTable(),'3','2',$api,$timestamp);
+                       
                       
                          $file =  $PayIn->FileAttachPayInTwo1To->file ?? null;
+                         
                          if(!is_null($file) && HP::checkFileStorage($attach_path.$file)){
-                             HP::getFileStoragePath($attach_path.$file);
+                             $path = HP::getFileStoragePath($attach_path.$file);
+                            //  dd($path);
                          }
                    }
                 }else  if($PayIn->conditional_type == 2){  // ยกเว้นค่าธรรมเนียม
@@ -1238,7 +1388,7 @@ class CheckCertificateCBController extends Controller
                       $Report->update(['status_alert' => 2]);
                    }
 
-           return redirect('certify/check_certificate-cb/'.$certi_cb->token)->with('flash_message', 'เรียบร้อยแล้ว');
+        return redirect('certify/check_certificate-cb/'.$certi_cb->token.'/show/'.$certi_cb->id)->with('flash_message', 'เรียบร้อยแล้ว');
          }
     } catch (\Exception $e) {
         return redirect('certify/check_certificate-cb')->with('message_error', 'เกิดข้อผิดพลาดในการบันทึก');
@@ -1278,109 +1428,108 @@ class CheckCertificateCBController extends Controller
         }
 
   public function UpdatePayInTwo(Request $request, $id){
-                 $requestData = $request->all();
-                $PayIn = CertiCBPayInTwo::findOrFail($id);
-                $certi_cb = CertiCb::findOrFail($PayIn->app_certi_cb_id);
+    $requestData = $request->all();
+    $PayIn = CertiCBPayInTwo::findOrFail($id);
+    $certi_cb = CertiCb::findOrFail($PayIn->app_certi_cb_id);
      try {
-
-
-                $tb = new CertiCBPayInTwo;
-                if($request->status_confirmed == 1){
-                    $requestData['degree'] = 3;
-                    if($certi_cb->standard_change == 1  || is_null($certi_cb->certificate_export_to2)){ // ขอใบรับรอง
-                        $certi_cb->update([ 'status' =>17 ]);   // ยืนยันการชำระเงินค่าใบรับรอง
-                    }else{
-                        $certi_cb->update([ 'status' =>18 ]);   // ออกใบรับรอง และ ลงนาม
-                    }
-
-                    // เงื่อนไขเช็คมีใบรับรอง 
-                    $this->save_certicb_export_mapreq( $certi_cb );
-                    
+            $tb = new CertiCBPayInTwo;
+            if($request->status_confirmed == 1){
+                $requestData['degree'] = 3;
+                if($certi_cb->standard_change == 1  || is_null($certi_cb->certificate_export_to2)){ // ขอใบรับรอง
+                    $certi_cb->update([ 'status' =>17 ]);   // ยืนยันการชำระเงินค่าใบรับรอง
                 }else{
-                    $requestData['degree'] = 1;
-                    $requestData['detail'] = $request->detail ?? null ;
-                    $certi_cb->update(['status' => 15]); //แจ้งรายละเอียดการชำระค่าใบรับรอง
-
+                    $certi_cb->update([ 'status' =>18 ]);   // ออกใบรับรอง และ ลงนาม
                 }
-                $requestData['report_date'] = @$PayIn->report_date ?? null;
-                $requestData['status']      = $request->status_confirmed ?? 2 ;
-                $requestData['condition_pay'] =  !empty($request->condition_pay) ?  $request->condition_pay : null ; 
-                $PayIn->update($requestData);
 
-                if(!empty($request->ReceiptCreateDate)){
-                    $transaction_payin  =  TransactionPayIn::where('ref_id',$PayIn->id)->where('table_name', (new CertiCBPayInTwo)->getTable())->orderby('id','desc')->first();
-                    if(!is_null($transaction_payin)){
-                        $transaction_payin->ReceiptCreateDate     =  !empty($request->ReceiptCreateDate) ?  HP::convertDate($request->ReceiptCreateDate,true) : null ; 
-                        $transaction_payin->ReceiptCode           =  !empty($request->ReceiptCode) ?  $request->ReceiptCode : null ; 
-                        $transaction_payin->save();
-                    }
+                // เงื่อนไขเช็คมีใบรับรอง 
+                $this->save_certicb_export_mapreq( $certi_cb );
+                
+            }else{
+                $requestData['degree'] = 1;
+                $requestData['detail'] = $request->detail ?? null ;
+                $certi_cb->update(['status' => 15]); //แจ้งรายละเอียดการชำระค่าใบรับรอง
+
+            }
+            $requestData['report_date'] = @$PayIn->report_date ?? null;
+            $requestData['status']      = $request->status_confirmed ?? 2 ;
+            $requestData['condition_pay'] =  !empty($request->condition_pay) ?  $request->condition_pay : null ; 
+            $PayIn->update($requestData);
+
+            if(!empty($request->ReceiptCreateDate)){
+                $transaction_payin  =  TransactionPayIn::where('ref_id',$PayIn->id)->where('table_name', (new CertiCBPayInTwo)->getTable())->orderby('id','desc')->first();
+                if(!is_null($transaction_payin)){
+                    $transaction_payin->ReceiptCreateDate     =  !empty($request->ReceiptCreateDate) ?  HP::convertDate($request->ReceiptCreateDate,true) : null ; 
+                    $transaction_payin->ReceiptCode           =  !empty($request->ReceiptCode) ?  $request->ReceiptCode : null ; 
+                    $transaction_payin->save();
                 }
+            }
+
+
+
+                    $data = CertiCBPayInTwo::select('report_date', 'amount', 'amount_fee', 'degree','status','detail')
+                                    ->where('id',$id)
+                                    ->first();
+                    CertiCbHistory::create([
+                                        'app_certi_cb_id'   => $PayIn->app_certi_cb_id ?? null,
+                                        'system'            => 10,
+                                        'table_name'        => $tb->getTable(),
+                                        'ref_id'            => $PayIn->id,
+                                        'status'            => $PayIn->status ?? null,
+                                        'details_one'       =>  json_encode($data) ?? null,
+                                        'attachs'           =>  !empty($PayIn->FileAttachPayInTwo1To->file) ? $PayIn->FileAttachPayInTwo1To->file : null,
+                                        'attach_client_name'=>   !empty($PayIn->FileAttachPayInTwo1To->file_client_name) ? $PayIn->FileAttachPayInTwo1To->file_client_name : null,
+                                        'attachs_file'      =>  !empty($PayIn->FileAttachPayInTwo2To->file) ? $PayIn->FileAttachPayInTwo2To->file : null,
+                                        'evidence'          =>   !empty($PayIn->FileAttachPayInTwo2To->file_client_name) ? $PayIn->FileAttachPayInTwo2To->file_client_name : null,
+                                        'created_by'        =>  auth()->user()->runrecno
+                                        ]);
+
+            //Mail
+            if(!is_null($certi_cb->email)  && $PayIn->status == 2 ){
+
+                $config = HP::getConfig();
+                $url  =   !empty($config->url_acc) ? $config->url_acc : url('');
+
+                $data_app =[
+                            'PayIn'         => $PayIn,
+                            'certi_cb'      => $certi_cb,
+                            'attachs'       => !empty($PayIn->FileAttachPayInTwo1To->file) ? $PayIn->FileAttachPayInTwo1To->file : null,
+                            'full_name'     => $certi_cb->FullRegName ?? '-',
+                            'url'           => $url.'certify/applicant-cb' ?? '-',
+                            'email'         =>  !empty($certi_cb->DataEmailCertifyCenter) ? $certi_cb->DataEmailCertifyCenter : 'cb@tisi.mail.go.th',
+                            'email_cc'      =>  !empty($certi_cb->DataEmailDirectorCBCC) ? $certi_cb->DataEmailDirectorCBCC : 'cb@tisi.mail.go.th',
+                            'email_reply'   => !empty($certi_cb->DataEmailDirectorCBReply) ? $certi_cb->DataEmailDirectorCBReply : 'cb@tisi.mail.go.th'
+                            ];
+
+                $log_email =  HP::getInsertCertifyLogEmail($certi_cb->app_no,
+                                                        $certi_cb->id,
+                                                        (new CertiCb)->getTable(),
+                                                        $PayIn->id,
+                                                        (new CertiCBPayInTwo)->getTable(),
+                                                        3,
+                                                        'แจ้งตรวจสอบการชำระค่าธรรมเนียมคำขอ และค่าธรรมเนียมใบรับรอง',
+                                                        view('mail.CB.pay_in_two', $data_app),
+                                                        $certi_cb->created_by,
+                                                        $certi_cb->agent_id,
+                                                        auth()->user()->getKey(),
+                                                        !empty($certi_cb->DataEmailCertifyCenter) ?  implode(',',(array)$certi_cb->DataEmailCertifyCenter)  :  'cb@tisi.mail.go.th',
+                                                        $certi_cb->email,
+                                                        !empty($certi_cb->DataEmailDirectorCBCC) ? implode(',',(array)$certi_cb->DataEmailDirectorCBCC)   :   'cb@tisi.mail.go.th',
+                                                        !empty($certi_cb->DataEmailDirectorCBReply) ?implode(',',(array)$certi_cb->DataEmailDirectorCBReply)   :   'cb@tisi.mail.go.th',
+                                                        !empty($PayIn->FileAttachPayInTwo1To->file) ?  'certify/check/file_cb_client/'.$PayIn->FileAttachPayInTwo1To->file.'/'.( !empty($PayIn->FileAttachPayInTwo1To->file_client_name) ? $PayIn->FileAttachPayInTwo1To->file_client_name :   basename($PayIn->FileAttachPayInTwo1To->file) ) : null
+                                                        );
+
+                $html = new CBPayInTwoMail($data_app);
+                $mail =  Mail::to($certi_cb->email)->send($html);
     
-
-
-                     $data = CertiCBPayInTwo::select('report_date', 'amount', 'amount_fee', 'degree','status','detail')
-                                      ->where('id',$id)
-                                      ->first();
-                     CertiCbHistory::create([
-                                            'app_certi_cb_id'   => $PayIn->app_certi_cb_id ?? null,
-                                            'system'            => 10,
-                                            'table_name'        => $tb->getTable(),
-                                            'ref_id'            => $PayIn->id,
-                                            'status'            => $PayIn->status ?? null,
-                                            'details_one'       =>  json_encode($data) ?? null,
-                                            'attachs'           =>  !empty($PayIn->FileAttachPayInTwo1To->file) ? $PayIn->FileAttachPayInTwo1To->file : null,
-                                            'attach_client_name'=>   !empty($PayIn->FileAttachPayInTwo1To->file_client_name) ? $PayIn->FileAttachPayInTwo1To->file_client_name : null,
-                                            'attachs_file'      =>  !empty($PayIn->FileAttachPayInTwo2To->file) ? $PayIn->FileAttachPayInTwo2To->file : null,
-                                            'evidence'          =>   !empty($PayIn->FileAttachPayInTwo2To->file_client_name) ? $PayIn->FileAttachPayInTwo2To->file_client_name : null,
-                                            'created_by'        =>  auth()->user()->runrecno
-                                          ]);
-
-                //Mail
-                if(!is_null($certi_cb->email)  && $PayIn->status == 2 ){
-
-                    $config = HP::getConfig();
-                    $url  =   !empty($config->url_acc) ? $config->url_acc : url('');
-
-                    $data_app =[
-                                'PayIn'         => $PayIn,
-                                'certi_cb'      => $certi_cb,
-                                'attachs'       => !empty($PayIn->FileAttachPayInTwo1To->file) ? $PayIn->FileAttachPayInTwo1To->file : null,
-                                'full_name'     => $certi_cb->FullRegName ?? '-',
-                                'url'           => $url.'certify/applicant-cb' ?? '-',
-                                'email'         =>  !empty($certi_cb->DataEmailCertifyCenter) ? $certi_cb->DataEmailCertifyCenter : 'cb@tisi.mail.go.th',
-                                'email_cc'      =>  !empty($certi_cb->DataEmailDirectorCBCC) ? $certi_cb->DataEmailDirectorCBCC : 'cb@tisi.mail.go.th',
-                                'email_reply'   => !empty($certi_cb->DataEmailDirectorCBReply) ? $certi_cb->DataEmailDirectorCBReply : 'cb@tisi.mail.go.th'
-                             ];
-
-                    $log_email =  HP::getInsertCertifyLogEmail($certi_cb->app_no,
-                                                            $certi_cb->id,
-                                                            (new CertiCb)->getTable(),
-                                                            $PayIn->id,
-                                                            (new CertiCBPayInTwo)->getTable(),
-                                                            3,
-                                                            'แจ้งตรวจสอบการชำระค่าธรรมเนียมคำขอ และค่าธรรมเนียมใบรับรอง',
-                                                            view('mail.CB.pay_in_two', $data_app),
-                                                            $certi_cb->created_by,
-                                                            $certi_cb->agent_id,
-                                                            auth()->user()->getKey(),
-                                                            !empty($certi_cb->DataEmailCertifyCenter) ?  implode(',',(array)$certi_cb->DataEmailCertifyCenter)  :  'cb@tisi.mail.go.th',
-                                                            $certi_cb->email,
-                                                            !empty($certi_cb->DataEmailDirectorCBCC) ? implode(',',(array)$certi_cb->DataEmailDirectorCBCC)   :   'cb@tisi.mail.go.th',
-                                                            !empty($certi_cb->DataEmailDirectorCBReply) ?implode(',',(array)$certi_cb->DataEmailDirectorCBReply)   :   'cb@tisi.mail.go.th',
-                                                            !empty($PayIn->FileAttachPayInTwo1To->file) ?  'certify/check/file_cb_client/'.$PayIn->FileAttachPayInTwo1To->file.'/'.( !empty($PayIn->FileAttachPayInTwo1To->file_client_name) ? $PayIn->FileAttachPayInTwo1To->file_client_name :   basename($PayIn->FileAttachPayInTwo1To->file) ) : null
-                                                            );
-
-                    $html = new CBPayInTwoMail($data_app);
-                    $mail =  Mail::to($certi_cb->email)->send($html);
-        
-                    if(is_null($mail) && !empty($log_email)){
-                        HP::getUpdateCertifyLogEmail($log_email->id);
-                    } 
+                if(is_null($mail) && !empty($log_email)){
+                    HP::getUpdateCertifyLogEmail($log_email->id);
+                } 
 
                
                 }
         if(isset($certi_cb->token)){
-            return redirect('certify/check_certificate-cb/'.$certi_cb->token)->with('flash_message', 'เรียบร้อยแล้ว');
+            // return redirect('certify/check_certificate-cb/'.$certi_cb->token)->with('flash_message', 'เรียบร้อยแล้ว');
+            return redirect('certify/check_certificate-cb/'.$certi_cb->token.'/show/'.$certi_cb->id)->with('flash_message', 'เรียบร้อยแล้ว');
         }else{
             return redirect('certify/check_certificate-cb')->with('flash_message', 'เรียบร้อยแล้ว');
         }
@@ -1422,8 +1571,10 @@ class CheckCertificateCBController extends Controller
 
   //แต่งตั้งคณะทบทวนฯ
     public function UpdateReview(Request $request, $id){
+        // dd($request->all());
         $review = CertiCBReview::findOrFail($id);
         $certi_cb = CertiCb::findOrFail($review->app_certi_cb_id);
+        // dd($review);
         if(!is_null($review)){
             $tb = new CertiCBReview;
              //คณะผู้ตรวจประเมิน
@@ -1471,12 +1622,14 @@ class CheckCertificateCBController extends Controller
                    $certi_cb->update(['review' => 2,'status' => 12]);  // สรุปรายงานและเสนออนุกรรมการฯ
                    $report = new CertiCBReport;  //สรุปรายงานและเสนออนุกรรมการฯ
                    $report->app_certi_cb_id =  $certi_cb->id;
+                   $report->review_approve = "1";
                    $report->save();
                 }
             }
         }
+        // dd($certi_cb->id);
         if(isset($certi_cb->token)){
-            return redirect('certify/check_certificate-cb/'.$certi_cb->token)->with('flash_message', 'เรียบร้อยแล้ว');
+            return redirect('certify/check_certificate-cb/'.$certi_cb->token. '/show/'. $certi_cb->id)->with('flash_message', 'เรียบร้อยแล้ว');
         }else{
                 return redirect('certify/check_certificate-cb')->with('flash_message', 'เรียบร้อยแล้ว');
         }
@@ -1648,6 +1801,7 @@ class CheckCertificateCBController extends Controller
 
    public function check_pay_in_cb(Request $request)
    {
+    
         $arrContextOptions = array();
            $id =   $request->input('id');
            $payin =   $request->input('payin');
@@ -1706,32 +1860,36 @@ class CheckCertificateCBController extends Controller
        }else{
             $pay_in = CertiCBPayInTwo::findOrFail($id);
             $setting_payment = CertiSettingPayment::where('certify',3)->where('payin',2)->where('type',1)->first();
-        if(!is_null($setting_payment)){
-            $certi_cb = CertiCb::findOrFail($pay_in->app_certi_cb_id);
-            if(strpos($setting_payment->data, 'https')===0){//ถ้าเป็น https
-                $arrContextOptions["ssl"] = array(
-                                        "verify_peer" => false,
-                                        "verify_peer_name" => false,
-                                  );
-            }
-            $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$certi_cb->app_no", false, stream_context_create($arrContextOptions));
 
-                $api = json_decode($content);
-                if(!is_null($api) && $api->returnCode != '000'){
-                    return response()->json([
-                                            'message'      =>  false,
-                                            'status_error' => HP::getErrorCode($api->returnCode)
-                                            ]);
-                }else{
-                    return response()->json([
-                                            'message' =>  true
-                                            ]);
+            // dd($setting_payment);
+
+            if(!is_null($setting_payment)){
+                $certi_cb = CertiCb::findOrFail($pay_in->app_certi_cb_id);
+                if(strpos($setting_payment->data, 'https')===0){//ถ้าเป็น https
+                    $arrContextOptions["ssl"] = array(
+                                            "verify_peer" => false,
+                                            "verify_peer_name" => false,
+                                    );
                 }
-          }else{
-            return response()->json([
-                                    'message' =>  true
-                                    ]);
-          }
+                $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$certi_cb->app_no", false, stream_context_create($arrContextOptions));
+
+                    $api = json_decode($content);
+                    // dd($api);
+                    if(!is_null($api) && $api->returnCode != '000'){
+                        return response()->json([
+                                                'message'      =>  false,
+                                                'status_error' => HP::getErrorCode($api->returnCode)
+                                                ]);
+                    }else{
+                        return response()->json([
+                                                'message' =>  true
+                                                ]);
+                    }
+            }else{
+                return response()->json([
+                                        'message' =>  true
+                                        ]);
+            }
        }
    }
 

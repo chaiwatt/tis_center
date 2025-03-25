@@ -400,12 +400,12 @@
 
     <div class="wrapper">
         <div class="container">
-            <div class="left-text">คำขอที่ {{$tracking->reference_refno}}</div>
+            <div class="left-text">คำขอที่ {{$certi_lab->app_no}}</div>
             <div class="right-box">รายงานที่ 2</div>
         </div>
         <div class="header">
             รายงานการตรวจประเมินความสามารถของห้องปฏิบัติการทดสอบ/สอบเทียบ<br>
-            ตามมาตรฐานเลขที่ มอก. 17025-2561
+            ตามมาตรฐานเลขที่ มอก. 17025-2561 
         </div>
 
         <div class="checkbox-section">
@@ -504,25 +504,24 @@
 
 
                 @php
-                    $index = 0;
+                $index = 0;
+            @endphp
+            @foreach ($data->statusAuditorMap as $statusId => $auditorIds)
+                @php
+                    $index++;
                 @endphp
-                @foreach ($data->statusAuditorMap as $statusId => $auditorIds)
+
+                @foreach ($auditorIds as $auditorId)
                     @php
-                        $index++;
+                        $info = HP::getExpertInfo($statusId, $auditorId);
                     @endphp
+                    <div style="display: flex; gap: 10px;">
+                        <span style="flex: 0 0 250px;">{{$index}}. {{$info->auditorInformation->title_th}}{{$info->auditorInformation->fname_th}} {{$info->auditorInformation->lname_th}}</span>
+                        <span style="flex: 1 0 200px;">{!!$info->statusAuditor->title!!}</span>
+                    </div>
 
-                    @foreach ($auditorIds as $auditorId)
-                        @php
-                        // dd($statusId, $auditorId);
-                            $info = HP::getExpertTrackingInfo($statusId, $auditorId);
-                        @endphp
-                        <div style="display: flex; gap: 10px;">
-                            <span style="flex: 0 0 350px;">{{HP::toThaiNumber($index)}}. {{HP::toThaiNumber($info->trackingAuditorsList->temp_users)}}</span>
-                            <span style="flex: 1 0 200px;">{{$info->statusAuditor->title}}</span>
-                        </div>
-
-                    @endforeach
                 @endforeach
+            @endforeach
             </div>
             <div style="margin-top:10px">
                 <span style="font-weight: 600">2.2 รูปแบบการตรวจประเมิน</span>  
@@ -724,49 +723,18 @@
                 </div>
             </div>
 
-            {{-- {{$assessment->bug_report}} --}}
 
 
-            @php
-                $totalPendingTransactions = 0;
-                $pendingLabReportInfos = 0;
-                $totalTransactions = 0;
-            
-                foreach ($tracking->tracking_assessment_many as $assessment) {
-                    $labReportInfoStatus = $assessment->trackingLabReportInfo->status;
-                    if($labReportInfoStatus == 1)
-                    {
-                        $pendingLabReportInfos ++;
-                    }
-                    // dd($labReportInfo);
-                    $totalTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->count();
-                    $totalPendingTransactions += $assessment->trackingLabReportInfo->signAssessmentTrackingReportTransactions->where('approval',0)->count();
-                
-                    
-                }
-            @endphp
-            {{-- {{$assessment->bug_report }} --}}
-            {{-- @if ($totalTransactions != 0 && $totalPendingTransactions != 0) --}}
-            @if ($totalTransactions == 0)
-                    
-                    <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
-                            <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
-                            @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
-                                <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
-                            @endif
-                    
-                    </div>
-                @else
-                    <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
+            {{-- {{$signAssessmentReportTransactions->count()}} --}}
+            @if ($signAssessmentReportTransactions->count() == 0)
+                <div style="text-align: center;margin-bottom:20px;margin-top:20px" id="button_wrapper">
 
-                        <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
-                        @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 4))
-                            <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
-                        @endif
-                        
-                    </div>
+                    <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
+                    <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
+                    
+                </div>
+
             @endif
-
 
 
 
@@ -838,15 +806,15 @@
             totalPendingTransactions = @json($totalPendingTransactions ?? null);
             totalTransactions = @json($totalTransactions ?? null);
 
-            
+            console.log('notice',notice)
 
-            // console.log('totalPendingTransactions',totalPendingTransactions);
+            console.log('totalPendingTransactions',signAssessmentReportTransactions.length);
 
-        //    if(labReportInfo.status !=="1"){
-        //          $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
-        //          $('.wrapper').css('pointer-events', 'none'); // ปิดการคลิกและโต้ตอบทุกอย่างใน div.wrapper
-        //          $('.wrapper').css('opacity', '0.7'); // เพิ่มความโปร่งใสเพื่อแสดงว่าถูกปิดใช้งาน (ไม่บังคับ)
-        //    }
+           if(signAssessmentReportTransactions.length != 0){
+                 $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
+                 $('.wrapper').css('pointer-events', 'none'); // ปิดการคลิกและโต้ตอบทุกอย่างใน div.wrapper
+                 $('.wrapper').css('opacity', '0.7'); // เพิ่มความโปร่งใสเพื่อแสดงว่าถูกปิดใช้งาน (ไม่บังคับ)
+           }
 
         if(totalTransactions !== null)
         {
@@ -894,7 +862,7 @@
                 }
             });
 
-            // console.log('signer',signer)
+            // console.log('signAssessmentReportTransactions',signAssessmentReportTransactions)
 
             loadSigners();
 
@@ -1111,7 +1079,7 @@
                 id:labReportInfo.id,
                 data: data,
                 persons: persons,
-                assessment_id:assessment.id,
+                notice_id:notice.id,
                 signer:signer,
                 submit_type:submit_type,
                 _token: _token
@@ -1120,15 +1088,17 @@
             $('#loadingStatus').show();
             // AJAX
             $.ajax({
-                url: "{{ route('certificate.assessment-labs.update-lab-info') }}",
+                url: "{{ route('save_assessment.update_lab_report2_info') }}",
                 method: "POST",
                 data: JSON.stringify(payload), // แปลงเป็น JSON
                 contentType: 'application/json', // ระบุว่าเป็น JSON
                 success: function(response) {
-                    console.log('สำเร็จ:', response);
-                    const baseUrl = "{{ url('/certificate/assessment-labs') }}";
-                    const assessmentId = assessment.id;
-                    window.location.href = `${baseUrl}/${assessmentId}/edit`;
+                   
+
+                    const baseUrl = "{{ url('/certify/save_assessment') }}";
+
+                    window.location.href = `${baseUrl}/${notice.id}/assess_edit/${notice.app_certi_lab_id}`;
+                    // console.log('สำเร็จ:', `${baseUrl}/${notice.id}/assess_edit/${notice.app_certi_lab_id}`);
                 },
                 error: function(xhr, status, error) {
                     console.error('เกิดข้อผิดพลาด:', error);

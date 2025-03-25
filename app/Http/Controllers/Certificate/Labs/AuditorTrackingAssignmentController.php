@@ -40,7 +40,7 @@ class AuditorTrackingAssignmentController extends Controller
         // dd($signer);
         // ตรวจสอบว่าพบข้อมูลหรือไม่
         if ($signer) {
-            // dd(MessageRecordTransaction::where('signer_id',$signer->id)->get());
+
             $filter_approval = $request->input('filter_state');
             $filter_certificate_type = $request->input('filter_certificate_type');
         
@@ -138,6 +138,7 @@ class AuditorTrackingAssignmentController extends Controller
         $messageRecordTransactions = MessageRecordTrackingTransaction::where('ba_tracking_id',$messageRecordTransaction->ba_tracking_id)
                                 ->whereNotNull('signer_id')
                                 ->where('approval',0)
+                                ->where('certificate_type',2)
                                 ->get();           
 
         if($messageRecordTransactions->count() == 0){
@@ -148,7 +149,12 @@ class AuditorTrackingAssignmentController extends Controller
             $pdfContent = $pdfService->generateBoardTrackingAuditorMessageRecordPdf();
             $this->set_mail($board);
 
-        }                        
+        }     
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'success'
+        ]);
         
     }
 

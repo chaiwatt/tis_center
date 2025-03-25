@@ -143,28 +143,25 @@
                                 </div>
                             </div>
 
-                            @if ($find_notice->report_status == 1)
-                                <div class="form-group">
-                                    <div class="col-md-12">
-                                        <label class="col-md-3 text-right"><span class="text-danger">*</span> รายงานการตรวจประเมิน: </label>
-                                        <div class="col-md-6">
-                                            @if(!is_null($find_notice) && !is_null($find_notice->file) )
-                                                <p>
-                                                    <a href="{{url('certify/check/file_client/'.$find_notice->file.'/'.( !empty($find_notice->file_client_name) ? $find_notice->file_client_name : 'null' ))}}" 
-                                                        title=" {{ !empty($find_notice->file_client_name) ? $find_notice->file_client_name : basename($find_notice->file)}}"   target="_blank">
-                                                        {!! HP::FileExtension($find_notice->file)  ?? '' !!}  {{basename($find_notice->file)}}
-                                                    </a>
-                                                    {{-- <button id="button_audit_report" type="button" class="btn btn-danger btn-xs {{ ($find_notice->report_status == 2) ? 'hide' : '' }}"><i class="fa fa-trash"></i></button> --}}
-                                                </p>
-                                            @else 
-                                            <span class="text-warning">(ยังไม่ได้สร้าง)</span>
-                                            @endif
-                                            <div id="audit_report"></div>
-                                        </div>
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <label class="col-md-3 text-right"><span class="text-danger">*</span> รายงานการตรวจประเมิน: </label>
+                                    <div class="col-md-6">
+                                        @if(!is_null($find_notice) && !is_null($find_notice->file) )
+                                            <p>
+                                                <a href="{{url('certify/check/file_client/'.$find_notice->file.'/'.( !empty($find_notice->file_client_name) ? $find_notice->file_client_name : 'null' ))}}" 
+                                                    title=" {{ !empty($find_notice->file_client_name) ? $find_notice->file_client_name : basename($find_notice->file)}}"   target="_blank">
+                                                    {!! HP::FileExtension($find_notice->file)  ?? '' !!}  {{basename($find_notice->file)}}
+                                                </a>
+                                                {{-- <button id="button_audit_report" type="button" class="btn btn-danger btn-xs {{ ($find_notice->report_status == 2) ? 'hide' : '' }}"><i class="fa fa-trash"></i></button> --}}
+                                            </p>
+                                        @else 
+                                        <span class="text-warning">(ยังไม่ได้สร้าง)</span>
+                                        @endif
+                                        <div id="audit_report"></div>
                                     </div>
                                 </div>
-                            @endif
-
+                            </div>
 
                             <div class="form-group">
                                 {{-- {{$report}} --}}
@@ -184,14 +181,12 @@
                                                             {!! HP::FileExtension($item->attachs)  ?? '' !!} {{basename($item->attachs)}}
                                                         </a>
                                                         @if ($report != null)
-                                                            @if ($find_notice->report_status == 1)
-                                                                @if ($report->status == null)
-                                                                    <a type="button" class="btn btn-sm btn-info attach-add" id="button_show_request_edit_scope_modal">
-                                                                        <i class="fa fa-pencil-square-o"></i>&nbsp;ขอให้แก้ไข
-                                                                    </a>
-                                                                @endif
+                                                        
+                                                            @if ($report->status == null)
+                                                                <a type="button" class="btn btn-sm btn-info attach-add" id="button_show_request_edit_scope_modal">
+                                                                    <i class="fa fa-pencil-square-o"></i>&nbsp;ขอให้แก้ไข
+                                                                </a>
                                                             @endif
-                                                
                                                         @endif
                                                     </p>
                                                 @endforeach
@@ -201,13 +196,12 @@
                                 </div>
                             </div>
 
-                            @if ($find_notice->report_status == 1)
                             <div class="form-group">
                                 <div class="col-md-12">
                                     <label class="col-md-3 text-right"><span class="text-danger">*</span> รายงานการตรวจประเมิน (ปิดcar): </label>
                                     <div class="col-md-6">
                                         @if(isset($find_notice)) 
-                 
+
                                             @if (is_null($find_notice->file_car))
                                                     @if ($find_notice->labReportTwoInfo->status === "1")
                                                             <a href="{{route('save_assessment.view_lab_report2_info',['id' => $find_notice->id])}}"
@@ -253,9 +247,6 @@
 
                                 </div>
                             </div>
-                            @endif
-
-                            
                   
 
                             <div class="form-group {{ ($find_notice->report_status == 2) ? 'hide' : '' }}">

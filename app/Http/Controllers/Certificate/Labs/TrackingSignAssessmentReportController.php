@@ -51,7 +51,6 @@ class TrackingSignAssessmentReportController extends Controller
 
         // ตรวจสอบว่าพบข้อมูลหรือไม่
         if ($signer) {
-            // dd(MessageRecordTransaction::where('signer_id',$signer->id)->get());
             $filter_approval = $request->input('filter_state');
             $filter_certificate_type = $request->input('filter_certificate_type');
         
@@ -204,7 +203,7 @@ class TrackingSignAssessmentReportController extends Controller
         
             $signAssessmentReportTransaction = SignAssessmentTrackingReportTransaction::find($request->id);
             $signAssessmentReportTransactions = SignAssessmentTrackingReportTransaction::where('tracking_report_info_id',$signAssessmentReportTransaction->report_info_id)
-                                    ->where('certificate_type',2)                        
+                                    ->where('certificate_type',2)                    
                                     ->whereNotNull('signer_id')
                                     ->where('approval',0)
                                     ->get();           

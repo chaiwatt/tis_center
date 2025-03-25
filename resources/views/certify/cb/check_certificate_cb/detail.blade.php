@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ระบบตรวจสอบคำขอหน่วยรับรอง {{ $certi_cb->app_no ?? null }} </h3>
+                    <h3 class="box-title pull-left">ระบบตรวจสอบคำขอหน่วยรับรอง landing {{ $certi_cb->app_no ?? null }} </h3>
                     @can('view-'.str_slug('checkcertificatecb'))
                         <a class="btn btn-success pull-right" href="{{ url("$previousUrl") }}">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ

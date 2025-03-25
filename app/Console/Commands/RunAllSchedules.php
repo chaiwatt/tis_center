@@ -44,6 +44,8 @@ class RunAllSchedules extends Command
 
         $this->call('check:cb-reject-date'); //ยกเลิกคำ CB ขอถ้าไม่แก้ภายใน 30 วัน
         $this->call('check:lab-payin-one-cb'); //อัพเดทสถานการจ่ายเงิน payin1 cb ผ่าน api
+        $this->call('check:cb-payin-two'); //อัพเดทสถานการจ่ายเงิน payin2 cb ผ่าน api
+        
         
         
     }

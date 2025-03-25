@@ -11,6 +11,7 @@ use App\RoleUser;
 use Carbon\Carbon;
 use App\Models\Basic\Amphur;
 
+use App\Certify\CbReportInfo;
 use App\Models\Basic\District;
 use App\Models\Basic\Province;
 use App\Models\Bcertify\Formula;
@@ -23,6 +24,7 @@ use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantCB\CertiCBStatus;
 use App\Models\Certify\CertiEmailLt;  //E-mail ลท.
 use App\Models\Certify\ApplicantCB\CertiCbExportMapreq;
+use App\Models\Certify\SignAssessmentReportTransaction;
 
 
 
@@ -103,7 +105,10 @@ class CertiCb extends Model
                             'doc_auditor_assignment',
                             'doc_review_update',
                             'doc_review_reject',
-                            'doc_review_reject_message'
+                            'doc_review_reject_message',
+                            'require_scope_update',
+                            'scope_view_signer_id',
+                            'scope_view_status',
                             ];
 
 
@@ -690,21 +695,99 @@ public function app_certi_cb_export()
             ->pluck('auditors_id')
             ->toArray();
 
-            // CertiCBAuditorsTo    
-
         if (!empty($appCertiAssessmentIds)) {
             
             $boardAuditors = CertiCBAuditors::whereIn('id', $appCertiAssessmentIds)->get();
             // dd($boardAuditors);
             return $boardAuditors;
-            
         }
-
         // ถ้าไม่มีข้อมูล รีเทิร์นค่าเปล่า
         return null;
     }
 
-    
+    // public function fullyApproveReport()
+    // {
+    //     $auditors = $this->paidPayIn1BoardAuditors();
+    //     if($auditors !== null)
+    //     {
+    //         $auditorIds = $this->paidPayIn1BoardAuditors()->pluck('id')->toArray();
+        
+    //         // $assessment = $boardAuditor->certiCBSaveAssessment();
+    //         $certiCBSaveAssessmentIds = CertiCBSaveAssessment::whereIn('auditors_id',$auditorIds)->pluck('id');
+           
+    //         $cbReportInfos = CbReportInfo::whereIn('cb_assessment_id',$certiCBSaveAssessmentIds)->get();
+    //         // dd($cbReportInfos);
+    //         foreach ($cbReportInfos as $cbReportInfo)
+    //         {
+    //             $signAssessmentReportTransaction = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
+    //             ->where('certificate_type',0)
+    //             ->first();
+    //             if($signAssessmentReportTransaction == null){
+    //                 return false;
+    //             }else{
+    //                 $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
+    //                 ->where('certificate_type',0)
+    //                 ->where('approval',0)
+    //                 ->get();  
+    //                 if($signAssessmentReportTransactions->count() != 0){
+    //                     return false;
+    //                 }
+    //             }
+    //         }
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
+    public function fullyApproveReport()
+    {
+        $auditors = $this->paidPayIn1BoardAuditors();
+        // Check if auditors exist
+        if($auditors !== null)
+        {
+            // Get array of auditor IDs
+            $auditorIds = $this->paidPayIn1BoardAuditors()->pluck('id')->toArray();
+            
+            // Get assessment IDs for these auditors
+            $certiCBSaveAssessmentIds = CertiCBSaveAssessment::whereIn('auditors_id', $auditorIds)->pluck('id');
+            
+            // Get report info records
+            $cbReportInfos = CbReportInfo::whereIn('cb_assessment_id', $certiCBSaveAssessmentIds)->get();
+            
+            foreach ($cbReportInfos as $cbReportInfo)
+            {
+                // Check for existence of signing transaction
+                $signAssessmentReportTransaction = SignAssessmentReportTransaction::where('report_info_id', $cbReportInfo->id)
+                    ->where('certificate_type', 0)
+                    ->where('report_type',1)
+                    ->first();
+                    
+                if($signAssessmentReportTransaction == null){
+                    return false;  // No signing transaction exists
+                } else {
+                    // Check for any unapproved transactions
+                    $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id', $cbReportInfo->id)
+                        ->where('certificate_type', 0)
+                        ->where('report_type',1)
+                        ->where('approval', 0)
+                        ->get();
+                        
+                    if($signAssessmentReportTransactions->count() != 0){
+                        return false;  // There are unapproved transactions
+                    }
+                }
+            }
+            return true;  // All reports are signed and approved
+        }
+        return false;  // No auditors found
+    }
+
+
+    public function report_to()
+    {
+        return $this->belongsTo(CertiCBReport::class,'id','app_certi_cb_id');
+    }
+        
 
 
     

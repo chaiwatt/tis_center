@@ -7,6 +7,7 @@ use App\Models\Besurv\Signer;
 use Kyslik\ColumnSortable\Sortable;
 use App\Models\Certify\LabReportInfo;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Certificate\LabReportTwoInfo;
 
 class SignAssessmentReportTransaction extends Model
 {
@@ -25,6 +26,7 @@ class SignAssessmentReportTransaction extends Model
         'linesapce',
         'view_url',
         'approval',
+        'report_type'
     ];
 
 
@@ -42,6 +44,11 @@ class SignAssessmentReportTransaction extends Model
     public function labReportInfo()
     {
         return $this->belongsTo(LabReportInfo::class, 'report_info_id', 'id');
+    }
+
+    public function labReportTwoiInfo()
+    {
+        return $this->belongsTo(LabReportTwoInfo::class, 'report_info_id', 'id');
     }
 
     public function cbReportInfo()

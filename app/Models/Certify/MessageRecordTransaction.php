@@ -6,6 +6,8 @@ use App\Models\Besurv\Signer;
 use Kyslik\ColumnSortable\Sortable;
 use App\Models\Certify\BoardAuditor;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\ApplicantCB\CertiCBAuditors;
+use App\Models\Certify\ApplicantIB\CertiIBAuditors;
 
 class MessageRecordTransaction extends Model
 {
@@ -40,6 +42,15 @@ class MessageRecordTransaction extends Model
 
     public function boardAuditor()
     {
-        return $this->belongsTo(BoardAuditor::class, 'board_auditor_id', 'id');
+        if($this->certificate_type == 0){
+            return $this->belongsTo(CertiCBAuditors::class, 'board_auditor_id', 'id');
+        }else if($this->certificate_type == 1){
+            return $this->belongsTo(CertiIBAuditors::class, 'board_auditor_id', 'id');
+        }else if($this->certificate_type == 2){
+            return $this->belongsTo(BoardAuditor::class, 'board_auditor_id', 'id');
+        }
+        
     }
+
+
 }

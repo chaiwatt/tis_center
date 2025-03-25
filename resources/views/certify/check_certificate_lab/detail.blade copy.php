@@ -1,39 +1,40 @@
-<?php $Carbon = app('\Carbon\Carbon'); ?>
-<?php $__env->startPush('css'); ?>
-<link href="<?php echo e(asset('plugins/components/icheck/skins/all.css')); ?>" rel="stylesheet" type="text/css" />
-<link href="<?php echo e(asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')); ?>" rel="stylesheet" type="text/css" />
+{{-- work on class CheckCertificateLabController extends Controller --}}
+@extends('layouts.master')
+@inject('Carbon', '\Carbon\Carbon')
+@push('css')
+<link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
+<link href="{{asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')}}" rel="stylesheet" type="text/css" />
  <!-- Data Table CSS -->
- <link href="<?php echo e(asset('plugins/components/datatables/jquery.dataTables.min.css')); ?>" rel="stylesheet" type="text/css"/>
+ <link href="{{asset('plugins/components/datatables/jquery.dataTables.min.css')}}" rel="stylesheet" type="text/css"/>
  <style type="text/css">
     .form_group {
         margin-bottom: 10px;
     }
 </style>
-<?php $__env->stopPush(); ?>
+@endpush
 
-<?php $__env->startSection('content'); ?>
+@section('content')
     <div class="container-fluid" id="app_check_deail">
         <div class="text-right m-b-15">
-            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('view-'.str_slug('auditor'))): ?>
-                <a class="btn btn-danger btn-sm waves-effect waves-light" href="<?php echo e(route('check_certificate.index')); ?>">
+            @can('view-'.str_slug('auditor'))
+                <a class="btn btn-danger btn-sm waves-effect waves-light" href="{{ route('check_certificate.index') }}">
                     <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ
                 </a>
-            <?php endif; ?>
+            @endcan
         </div>
 
-        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ landing <?php echo e($cc->applicant->check->id); ?> <?php echo e($cc->applicant->app_no ?? '-'); ?>
-
-    <?php
+        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ landing {{$cc->applicant->check->id}} {{ $cc->applicant->app_no ?? '-' }}
+    @php
         $exported = $cc->applicant->certificate_export;
-    ?>
-    <?php if($exported != null): ?>
+    @endphp
+    @if ($exported != null)
     
-        <?php if($exported->CertiLabTo != null): ?>
+        @if ($exported->CertiLabTo != null)
             <span class="text-success">(คำขอหลัก)</span>
-        <?php endif; ?>
-    <?php else: ?>
-            <span class="text-warning">(<?php echo e($cc->applicant->purposeType->name); ?>)</span>
-    <?php endif; ?>
+        @endif
+    @else
+            <span class="text-warning">({{$cc->applicant->purposeType->name}})</span>
+    @endif
 
         
         
@@ -42,26 +43,33 @@
 
 <div class="row">
 
+    {{-- <input type="text" value="{{$cc->applicant->id}}"> --}}
     <div class="col-sm-12 ">
 
     
-<a class="form_group btn <?php echo e(($cc->applicant->status >= 6) ? 'btn-info' : 'btn-warning'); ?> "   href="<?php echo e(route('show.certificate.applicant.detail', ['certilab'=>$cc->applicant])); ?>" >
+<a class="form_group btn {{ ($cc->applicant->status >= 6) ? 'btn-info' : 'btn-warning'  }} "   href="{{ route('show.certificate.applicant.detail', ['certilab'=>$cc->applicant]) }}" >
     <i class="fa fa-search" aria-hidden="true"></i> คำขอ
 </a>
 
-<?php 
+{{-- <a class="form_group btn btn-info"   href="{{ url('certify/check_certificate/export_word/'.$cc->applicant->id) }}" >
+    <i class="fa fa-cloud-download"></i>  download
+</a> --}}
+
+@php 
     $User = App\User::where('runrecno',auth()->user()->runrecno)->first(); 
     // เช็คเจ้าหน้าที่ สก. 
     if(in_array("9",$User->RoleListId)){
         $staff  = "true";
     }
     $applicant =  $cc->applicant ;
-?>
+@endphp
 
-<?php if($applicant->status >= 6): ?>
+{{-- @if($User->IsGetIdLathRoles() == 'false'  || $User->IsGetRolesAdmin() == 'true') --}}
 
-<?php if(!is_null($Cost)): ?>
-        <?php 
+@if($applicant->status >= 6)
+
+@if(!is_null($Cost))
+        @php 
             $agree =  '';
             $cost_icon =  '';
         if($Cost->check_status == 1   &&  $Cost->status_scope  == 1 ){//ผ่านการประมาณค่าใช้จ่ายแล้ว
@@ -76,21 +84,21 @@
         }else{
             $agree = 'btn-warning'; 
         }
-        ?>
-            <a  class="form_group btn <?php echo e($agree); ?>" href="<?php echo e(route('estimated_cost.edit', ['ec' => $Cost])); ?>">
-                <?php echo $cost_icon; ?>     ค่าใช้จ่าย
+        @endphp
+            <a  class="form_group btn {{$agree}}" href="{{ route('estimated_cost.edit', ['ec' => $Cost]) }}">
+                {!! $cost_icon  !!}     ค่าใช้จ่าย
             </a>
-   <?php else: ?> 
-        <a class="form_group btn btn-info" href="<?php echo e(route('estimated_cost.index')); ?>" >
+   @else 
+        <a class="form_group btn btn-info" href="{{ route('estimated_cost.index') }}" >
             ค่าใช้จ่าย
         </a>
-    <?php endif; ?>
-
+    @endif
+{{-- @endif  --}}
             
-<?php if(!is_null($Cost) &&  $Cost->check_status == 1   &&  $Cost->status_scope  == 1): ?>
-    <?php if(count($applicant->certi_auditors_many)  > 0  ): ?>
+@if(!is_null($Cost) &&  $Cost->check_status == 1   &&  $Cost->status_scope  == 1)
+    @if(count($applicant->certi_auditors_many)  > 0  )
  
-        <?php 
+        @php 
             $auditors_btn =  '';
             $auditors_icon =  '';
         if($applicant->CertiAuditorsStatus == "StatusSent"){
@@ -106,35 +114,37 @@
             $auditors_btn =  'btn-warning';
             $auditors_icon =  '';
         }
-        ?>
+        @endphp
 
         <div class="btn-group form_group">
             <div class="btn-group">
 
-                <button type="button" class="btn <?php echo e($auditors_btn); ?> dropdown-toggle" data-toggle="dropdown">
-                    <?php echo $auditors_icon; ?>    แต่งตั้งคณะฯ<span class="caret"></span>
+                {{-- <a  class="btn  {{$auditors_btn}} " href="{{ url("certify/auditor-cb")}}" >
+                    {!! $auditors_icon  !!}    แต่งตั้งคณะฯ
+                </a> --}}
+
+                <button type="button" class="btn {{$auditors_btn}} dropdown-toggle" data-toggle="dropdown">
+                    {!! $auditors_icon  !!}    แต่งตั้งคณะฯ<span class="caret"></span>
                 </button>
 
 
                 <div class="dropdown-menu" role="menu" >
                                     
-                    <?php if(in_array($applicant->status,[9,7])): ?>  
-                        <form action="<?php echo e(url('/certify/auditor/create')); ?>" method="POST" style="display:inline"> 
-                            <?php echo e(csrf_field()); ?>
-
-                            <?php echo Form::hidden('app_certi_lab_id', (!empty($applicant->id) ? $applicant->id  : null) , ['id' => 'app_certi_lab_id', 'class' => 'form-control', 'placeholder'=>'' ]);; ?>
-
+                    @if(in_array($applicant->status,[9,7]))  
+                        <form action="{{ url('/certify/auditor/create')}}" method="POST" style="display:inline"> 
+                            {{ csrf_field() }}
+                            {!! Form::hidden('app_certi_lab_id', (!empty($applicant->id) ? $applicant->id  : null) , ['id' => 'app_certi_lab_id', 'class' => 'form-control', 'placeholder'=>'' ]); !!}
                             <button class="btn btn-warning" type="submit"   style="width:750px;text-align: left"> 
                                 <i class="fa fa-plus"></i>    แต่งตั้งคณะฯ (เพิ่มเติม)
 
                             </button>
-                            <input hidden type="text" name="current_url" value="<?php echo e(request()->fullUrl()); ?>">
-                            <input hidden type="text" name="current_route" value="<?php echo e(request()->route()->getName()); ?>" readonly> 
+                            <input hidden type="text" name="current_url" value="{{ request()->fullUrl() }}">
+                            <input hidden type="text" name="current_route" value="{{ request()->route()->getName() }}" readonly> 
                         </form>
-                   <?php endif; ?>
+                   @endif
                      
-                    <?php $__currentLoopData = $applicant->certi_auditors_many; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php 
+                    @foreach($applicant->certi_auditors_many as $key => $item)
+                        @php 
                             $auditors_btn =  '';
                             if(is_null($item->status)){
                                 $auditors_btn = 'btn-success';  
@@ -145,49 +155,46 @@
                             }elseif($item->status == 2){
                                 $auditors_btn = 'btn-danger';  
                             }
-                        ?>
-                        <?php if($item->status_cancel != 1): ?>
-                            <a  class="btn <?php echo e($auditors_btn); ?> "  href="<?php echo e(url('/certify/auditor/'.$item->id.'/edit', ['app' => $applicant ? $applicant->id : ''])); ?>" style="background-color:<?php echo e($auditors_btn); ?>;width:750px;text-align: left">
-                                ครั้งที่ <?php echo e(($key + 1 )); ?> :  
-                                  <?php echo e($item->auditor ?? '-'); ?>
-
+                        @endphp
+                        @if ($item->status_cancel != 1)
+                            <a  class="btn {{$auditors_btn}} "  href="{{ url('/certify/auditor/'.$item->id.'/edit', ['app' => $applicant ? $applicant->id : '']) }}" style="background-color:{{$auditors_btn}};width:750px;text-align: left">
+                                ครั้งที่ {{ ($key + 1 )}} :  
+                                  {{ $item->auditor ?? '-'}}
                             </a> 
                             <br>
-                        <?php endif; ?>
+                        @endif
                     
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    @endforeach
                 </div>
 
             </div>
         </div>
  
 
-    <?php else: ?> 
+    @else 
     <div class="btn-group form_group">
-        
-        <form action="<?php echo e(url('/certify/auditor/create/')); ?>" method="POST" style="display:inline" > 
-            <?php echo e(csrf_field()); ?>
-
-            <?php echo Form::hidden('app_certi_lab_id',(!empty($applicant->id) ? $applicant->id  : null) , ['id' => 'app_certi_lab_id', 'class' => 'form-control']);; ?>
-
+        {{-- work on BoardAuditorController --}}
+        <form action="{{ url('/certify/auditor/create/')}}" method="POST" style="display:inline" > 
+            {{ csrf_field() }}
+            {!! Form::hidden('app_certi_lab_id',(!empty($applicant->id) ? $applicant->id  : null) , ['id' => 'app_certi_lab_id', 'class' => 'form-control']); !!}
                 <button class="btn btn-warning" type="submit" >
                     <i class="fa fa-plus"></i>    แต่งตั้งคณะฯ
                 </button>
-                <input type="hidden" type="text" name="applicantId" value="<?php echo e($applicant->id); ?>">
-                <input hidden type="text" name="current_url" value="<?php echo e(request()->fullUrl()); ?>">
-                <input hidden type="text" name="current_route" value="<?php echo e(request()->route()->getName()); ?>" readonly> 
+                <input type="hidden" type="text" name="applicantId" value="{{$applicant->id}}">
+                <input hidden type="text" name="current_url" value="{{ request()->fullUrl() }}">
+                <input hidden type="text" name="current_route" value="{{ request()->route()->getName() }}" readonly> 
         </form>
     </div>
 
-    <?php endif; ?>
-<?php endif; ?> 
+    @endif
+@endif 
 
-<?php endif; ?>   
+@endif   
 
+{{-- @if($User->IsGetIdLathRoles() == 'true'   || $User->IsGetRolesAdmin() == 'true') --}}
 
-
-    <?php if($applicant->status >= 7 &&count($applicant->many_cost_assessment) > 0): ?>
-        <?php 
+    @if($applicant->status >= 7 &&count($applicant->many_cost_assessment) > 0)
+        @php 
             $payin1_btn =  '';
             $payin1_icon =  '';
         if($applicant->CertiLabPayInOneStatus == "StatePayInOne"){
@@ -203,18 +210,18 @@
             $payin1_btn =  'btn-warning';
             $payin1_icon =  '';
         }
-        ?>
+        @endphp
     <div class="btn-group form_group">
         <div class="btn-group">
-            <button type="button" class="btn <?php echo e($payin1_btn); ?> dropdown-toggle" data-toggle="dropdown">
-                <?php echo $payin1_icon; ?>  Pay-in ครั้งที่ 1 <span class="caret"></span>
+            <button type="button" class="btn {{$payin1_btn}} dropdown-toggle" data-toggle="dropdown">
+                {!! $payin1_icon  !!}  Pay-in ครั้งที่ 1 <span class="caret"></span>
             </button>
             <div class="dropdown-menu" role="menu" >
 
          
         
-                <?php $__currentLoopData = $applicant->many_cost_assessment; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <?php 
+                @foreach($applicant->many_cost_assessment as $key => $item)
+                    @php 
                                 $payin1_btn =  '';
                             if(is_null($item->state)){
                                 $payin1_btn = 'btn-warning';  
@@ -226,53 +233,121 @@
                                 $payin1_btn = 'btn-danger';  
                             }
                             $key_temp = 0;
-                        ?>
+                        @endphp
     
-                        <?php if(empty($item->assessment->board_auditor_to->status_cancel) && $item->assessment->board_auditor_to->status_cancel != 1): ?>
+                        @if (empty($item->assessment->board_auditor_to->status_cancel) && $item->assessment->board_auditor_to->status_cancel != 1)
                             
-                            <?php
+                            @php
                                 $key_temp++;
-                            ?>
-                        <a  class="btn <?php echo e($payin1_btn); ?> " href="<?php echo e(url("certify/check_certificate/Pay_In1/".$item->id)); ?>" style="width:750px;text-align: left">
-                            ครั้งที่ <?php echo e(($key_temp)); ?> : 
-                            <?php echo e(!empty($item->assessment->board_auditor_to->auditor) ? $item->assessment->board_auditor_to->auditor :'-'); ?>
-
+                            @endphp
+                        <a  class="btn {{$payin1_btn}} " href="{{ url("certify/check_certificate/Pay_In1/".$item->id)}}" style="width:750px;text-align: left">
+                            ครั้งที่ {{  ($key_temp) }} : 
+                            {{ !empty($item->assessment->board_auditor_to->auditor) ? $item->assessment->board_auditor_to->auditor :'-'}}
                         </a> 
-                        <?php else: ?>
-                           <?php
+                        @else
+                           @php
                             $key_temp=0;
                            continue;
-                           ?> 
+                           @endphp 
                           
-                        <?php endif; ?>
+                        @endif
                        
                         <br>
-                            <?php
+                            @php
                             $key_temp=0;
-                           ?> 
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                           @endphp 
+                @endforeach
     
             </div>
         </div>
             </div>
-     <?php endif; ?> 
+     @endif 
+ {{-- @endif  --}}
+
+{{-- @if($User->IsGetIdLathRoles() == 'false'  || $User->IsGetRolesAdmin() == 'true') --}}
+
+    @if(count($applicant->many_cost_assessment_state3) > 0) 
+        {{-- @if(count($applicant->notices) > 0)
+
+            @php 
+                $assessment_btn =  '';
+                $assessment_icon =  '';
+            if($applicant->CertiLabSaveAssessmentStatus == "statusInfo"){
+                $assessment_btn = 'btn-info';
+                $assessment_icon =  '<i class="fa fa-check-square-o"></i>';
+            }elseif($applicant->CertiLabSaveAssessmentStatus == "statusSuccess"){
+                $assessment_btn = 'btn-success';
+                $assessment_icon =  '<i class="fa fa-file-text"></i>';
+            }elseif($applicant->CertiLabSaveAssessmentStatus == "statusDanger"){
+                $assessment_btn =  'btn-danger';
+                $assessment_icon =  '<i class="fa fa-arrow-circle-right"></i>';
+            }elseif($applicant->CertiLabSaveAssessmentStatus == "statusPrimary"){
+                $assessment_btn =  'btn-primary';
+            
+            }else{
+                $assessment_btn =  'btn-warning';
+                $assessment_icon =  '';
+            }
+            @endphp
+
  
+            <div class="btn-group form_group">
+                <div class="btn-group">
+                    <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment")}}" >
+                        {!! $assessment_icon  !!}    ผลการตรวจประเมิน
+                        
+                    </a>
+                    <button type="button" class="btn  {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu" role="menu" >
+                            @foreach($applicant->notices as $key => $notice)
+                                @php
+                                            $assessment_url =  '';
+                                            $assessment_btn =  '';
+                                        if ($notice->degree == 7) { // ผ่านการการประเมิน
+                                            $assessment_btn =  'btn-info';
+                                            $assessment_url =   route('save_assessment.assess_edit', ['notice' => $notice, 'app' => $applicant ? $applicant->id : ''])  ;
+                                        }elseif ($notice->degree == 0) {  //ฉบับร่าง
+                                            $assessment_btn =  'btn-primary';
+                                            $assessment_url =  url('certify/save_assessment/'.$assessment->id.'/edit/'.$applicant->id);  
+                                        }elseif (in_array($notice->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
+                                            $assessment_btn =  'btn-success';
+                                            $assessment_url =   route('save_assessment.assess_edit', ['notice' => $notice, 'app' => $applicant ? $applicant->id : ''])  ;
+                                    }elseif ($notice->degree == 8) {  //จนท. ส่งให้ ผปก.
+                                            $assessment_btn =  '#ffff80';
+                                            $assessment_url =   route('save_assessment.assess_edit', ['notice' => $notice, 'app' => $applicant ? $applicant->id : ''])  ;
+                                        }else {    //ผปก. ส่งให้ จนท.
+                                            $assessment_btn =  'btn-danger';
+                                            $assessment_url =   route('save_assessment.assess_edit', ['notice' => $notice, 'app' => $applicant ? $applicant->id : ''])  ;
+                                        }
+                                
+                                @endphp
+                                        <a  class="btn {{$assessment_btn}}"  href="{{  $assessment_url }}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                ครั้งที่ {{ count($applicant->notices) - ($key) }} :  
+                                                {{ !empty($notice->assessment->board_auditor_to->auditor) ? $notice->assessment->board_auditor_to->auditor :'-'}}
+                                        </a> 
+                                    <br>
+                            @endforeach
+                    </div>
+                </div>
+            </div>
+        @else 
+            <a  class="form_group btn btn-warning" href="{{ url('certify/save_assessment') }}" >
+                ผลการตรวจประเมิน 
+            </a>
+        @endif --}}
 
 
 
-    <?php if(count($applicant->many_cost_assessment_state3) > 0): ?> 
-        
-
-
-
-    <?php
+    @php
         $assessment_btn =  'btn-warning';
         $assessment_icon =  '';
-    ?>
-    <?php if(count($applicant->many_cost_assessment_state3) > 0): ?> 
-        <?php if(count($applicant->notices) > 0): ?>
+    @endphp
+    @if(count($applicant->many_cost_assessment_state3) > 0) 
+        @if(count($applicant->notices) > 0)
 
-            <?php 
+            @php 
                     $assessment_btn =  '';
                     $assessment_icon =  '';
                 if($applicant->CertiLabSaveAssessmentStatus == "statusInfo"){
@@ -291,27 +366,27 @@
                     $assessment_btn =  'btn-warning';
                     $assessment_icon =  '';
                 }
-            ?>
-        <?php endif; ?>
-    <?php endif; ?>
+            @endphp
+        @endif
+    @endif
 
-    <?php if($applicant->paidPayIn1BoardAuditors() !== null && $applicant->status != 4): ?>
+    @if ($applicant->paidPayIn1BoardAuditors() !== null && $applicant->status != 4)
     <div class="btn-group form_group">
         <div class="btn-group">
-            <button type="button" class="btn <?php echo e($assessment_btn); ?> dropdown-toggle" data-toggle="dropdown">
-                <?php echo $assessment_icon; ?> ผลการตรวจประเมิน <span class="caret"></span>
+            <button type="button" class="btn {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
+                {!! $assessment_icon  !!} ผลการตรวจประเมิน <span class="caret"></span>
             </button>
             <div class="dropdown-menu" role="menu" >
 
-                
-                
-                <?php $__currentLoopData = $applicant->paidPayIn1BoardAuditors()->reverse(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php
+                {{-- {{$applicant->paidPayIn1BoardAuditors()}} --}}
+                {{-- @foreach($applicant->many_cost_assessment as $key => $item) --}}
+                @foreach($applicant->paidPayIn1BoardAuditors()->reverse() as $key => $item)
+                        @php
                             $assessment_url =  '';
                             $notice = $item->assessment_to->notice();
-                        ?>
-                        <?php if($notice !== null): ?>
-                            <?php
+                        @endphp
+                        @if ($notice !== null)
+                            @php
                                 
                                 $assessment_btn =  '';
                                 if ($notice->degree == 7) { // ผ่านการการประเมิน
@@ -330,36 +405,38 @@
                                     $assessment_btn =  'btn-danger';
                                     $assessment_url =   route('save_assessment.assess_edit', ['notice' => $notice, 'app' => $applicant ? $applicant->id : ''])  ;
                                 }
-                            ?>
+                            @endphp
 
-                            <?php if($notice->submit_type == 'confirm' || $notice->submit_type == null): ?>
-                                    <a class="btn <?php echo e($assessment_btn); ?>"  href="<?php echo e($assessment_url); ?>" style="width:750px;text-align: left">   <?php echo e($item->auditor); ?></a>
-                                <?php elseif($notice->submit_type == 'save'): ?>
-                                    <a class="btn btn-info" href="<?php echo e(route('save_assessment.create', ['id' => $item->id])); ?>" style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left"> <?php echo e($item->auditor); ?>  (ฉบับร่าง)</>  
-                            <?php endif; ?>
-                         <?php else: ?>
-                             <a class="btn btn-info" href="<?php echo e(route('save_assessment.create', ['id' => $item->id])); ?>" style="background-color:<?php echo e($assessment_btn); ?>;width:750px;text-align: left"> <?php echo e($item->auditor); ?>  (อยู่ระหว่างการตรวจสอบ)</>  
-                        <?php endif; ?>
+                            @if ($notice->submit_type == 'confirm' || $notice->submit_type == null)
+                                    <a class="btn {{$assessment_btn}}"  href="{{  $assessment_url }}" style="width:750px;text-align: left">   {{$item->auditor}}</a>
+                                @elseif($notice->submit_type == 'save')
+                                    <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (ฉบับร่าง)</>  
+                            @endif
+                         @else
+                             <a class="btn btn-info" href="{{ route('save_assessment.create', ['id' => $item->id]) }}" style="background-color:{{$assessment_btn}};width:750px;text-align: left"> {{$item->auditor}}  (อยู่ระหว่างการตรวจสอบ)</>  
+                        @endif
                        
                     </a>
                 <br>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                @endforeach
             </div>
         </div>
     </div>
-    <?php endif; ?>
+    @endif
  
 
 
 
 
 
-    <?php endif; ?> 
+    @endif 
             
 
-            
-            <?php if(!empty($applicant->report_to)  && $applicant->status >= 20): ?>
-                <?php  
+            {{-- @if ($applicant->status == 20)
+                ต้องเพิ่มการทำรายงาน (ID20)
+            @endif --}}
+            @if(!empty($applicant->report_to)  && $applicant->status >= 20)
+                @php  
                         $report  = $applicant->report_to;
                         $btn_report = '';
                         $report_icon =  '';
@@ -372,24 +449,26 @@
                     }else{
                         $btn_report = 'btn-warning';
                     }
-                ?>
-                <?php if($applicant->pendingSignAssessmentReportTransaction()->count() == 0): ?>
-                        <button type="button" class="form_group btn <?php echo e($btn_report); ?>" data-toggle="modal" data-target="#exampleModalReport">
-                                <?php echo $report_icon; ?> สรุปรายงาน
+                @endphp
+                @if ($applicant->pendingSignAssessmentReportTransaction()->count() == 0)
+                        <button type="button" class="form_group btn {{ $btn_report }}" data-toggle="modal" data-target="#exampleModalReport">
+                                {!! $report_icon !!} สรุปรายงาน
                         </button>
-                        <?php echo $__env->make('certify.check_certificate_lab.modal_report', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
-                    <?php else: ?>
-                        
-                <?php endif; ?>
+                        @include ('certify.check_certificate_lab.modal_report')
+                    @else
+                        {{-- <button type="button" class="form_group btn {{ $btn_report }}" data-toggle="modal" disabled>
+                            {!! $report_icon !!} สรุปรายงาน
+                        </button> --}}
+                @endif
              
 
-            <?php endif; ?>
+            @endif
 
- 
- 
+ {{-- @endif          --}}
+ {{-- @if($User->IsGetIdLathRoles() == 'true'  || $User->IsGetRolesAdmin() == 'true') --}}
 
-            <?php if(!empty($applicant->status) && $applicant->status >= 22): ?>
-            <?php  
+            @if(!empty($applicant->status) && $applicant->status >= 22)
+            @php  
             $costcerti = App\Models\Certify\Applicant\CostCertificate::where('app_certi_lab_id',$cc->app_certi_lab_id)
                                                                     ->orderby('id','desc')
                                                                     ->first();
@@ -409,22 +488,22 @@
                             $icon_costcerti =  '';
                         }    
                                       
-            ?>
+            @endphp
             <!-- Button แนบใบ Pay-in ครั้งที่ 2  -->
-            <a  class="form_group btn <?php echo e($btn_costcerti); ?> " href="<?php echo e(url("certify/check_certificate/Pay_In2/".@$costcerti->id."/".$applicant->token)); ?>">
-                <?php echo $icon_costcerti; ?>  Pay-in ครั้งที่ 2
+            <a  class="form_group btn {{$btn_costcerti}} " href="{{ url("certify/check_certificate/Pay_In2/".@$costcerti->id."/".$applicant->token)}}">
+                {!! $icon_costcerti !!}  Pay-in ครั้งที่ 2
              </a> 
              <!-- Button  แนบใบ Pay-in ครั้งที่  2  -->
-            <?php endif; ?>
+            @endif
 
 
 
- <?php if($applicant->status >= 25 ): ?>
+ @if($applicant->status >= 25 )
 
-    
-    
-    <?php if( isset($applicant)  &&  !is_null($applicant->certificate_export)  && !in_array($applicant->certificate_export->status,[99])): ?>
-        <?php 
+    {{-- {{$applicant->certificate_export}} --}}
+    {{$applicant->certificate_export->status}}
+    @if( isset($applicant)  &&  !is_null($applicant->certificate_export)  && !in_array($applicant->certificate_export->status,[99]))
+        @php 
             $export =  $applicant->certificate_export;
             $export_btn =  '';
             $export_icon =  '';
@@ -441,75 +520,83 @@
                 $export_btn =  'btn-warning';
                 $export_icon =  '';
             }
-        ?>
+        @endphp
 
-        <?php if(isset($applicant)): ?>
-            <?php if($applicant->status !== 28): ?>
-                    <a href="<?php echo e(url('certify/certificate-export-lab/'.$export->id.'/edit')); ?>" class="form_group btn btn-warning"  >
-                        <?php echo $export_icon; ?>    ใบรับรอง
+        @if (isset($applicant))
+            @if ($applicant->status !== 28)
+                    <a href="{{ url('certify/certificate-export-lab/'.$export->id.'/edit') }}" class="form_group btn btn-warning"  >
+                        {!! $export_icon !!}    ใบรับรอง
                     </a>
                     <span class="text-warning">รอจัดส่งใบรับรอง</span>
-               <?php else: ?> 
-                    <a href="<?php echo e(url('certify/certificate-export-lab/'.$export->id.'/edit')); ?>" class="form_group btn btn-info"  >
-                        <?php echo $export_icon; ?>    ใบรับรอง
+               @else 
+                    <a href="{{ url('certify/certificate-export-lab/'.$export->id.'/edit') }}" class="form_group btn btn-info"  >
+                        {!! $export_icon !!}    ใบรับรอง
                     </a>
-            <?php endif; ?>
+            @endif
 
-        <?php endif; ?>
+        @endif
 
 
-    <?php elseif( isset($applicant)  &&  (!is_null($applicant->certi_lab_export_mapreq_to) ) ): ?>
-    
-        <?php if($applicant->report_to->ability_confirm !== null): ?>
-             <?php if($applicant->scope_view_signer_id == null): ?>
-                <a  class="form_group btn  btn-info " href="<?php echo e(url("certify/certificate_detail/".$applicant->token)); ?>" >
+    @elseif( isset($applicant)  &&  (!is_null($applicant->certi_lab_export_mapreq_to) ) )
+    {{-- {{$applicant->certi_lab_export_mapreq_to}} --}}
+        @if ($applicant->report_to->ability_confirm !== null)
+             @if ($applicant->scope_view_signer_id == null)
+                <a  class="form_group btn  btn-info " href="{{ url("certify/certificate_detail/".$applicant->token)}}" >
                     <i class="fa fa-paperclip"></i>  แนบท้าย
                 </a> 
-            <?php else: ?>
-                <?php if($applicant->scope_view_status !== null): ?>
-                    <a  class="form_group btn  btn-info " href="<?php echo e(url("certify/certificate_detail/".$applicant->token)); ?>" >
+            @else
+                @if ($applicant->scope_view_status !== null)
+                    <a  class="form_group btn  btn-info " href="{{ url("certify/certificate_detail/".$applicant->token)}}" >
                         <i class="fa fa-paperclip"></i>  แนบท้าย
                     </a> 
 
+                    {{-- <form action="{{ url('/certify/certificate-export-lab/create')}}" method="POST" style="display:inline"  > 
+                        {{ csrf_field() }}
+                        {!! Form::hidden('app_token', (!empty($applicant->token) ? $applicant->token  : null) , ['id' => 'app_token', 'class' => 'form-control' ]); !!}
                     
-                <?php endif; ?>
-            <?php endif; ?>
+                            @if ($applicant->scope_view_status !== null)
+                                <button class="btn btn-warning" type="submit" >
+                                    ออกใบรับรอง<span class="text-danger">(โอน)</span> 
+                                </button>
+                            @endif
+                  
+                    </form> --}}
+                @endif
+            @endif
             
-        <?php endif; ?>
-    <?php else: ?> 
-    
-        <?php if($applicant->report_to->ability_confirm !== null): ?>
+        @endif
+    @else 
+    {{-- {{$applicant->report_to}} --}}
+        @if ($applicant->report_to->ability_confirm !== null)
             <div class="btn-group form_group">
-                <form action="<?php echo e(url('/certify/certificate-export-lab/create')); ?>" method="POST" style="display:inline"  > 
-                    <?php echo e(csrf_field()); ?>
-
-                    <?php echo Form::hidden('app_token', (!empty($applicant->token) ? $applicant->token  : null) , ['id' => 'app_token', 'class' => 'form-control' ]);; ?>
-
-                    <?php if($applicant->scope_view_signer_id == null): ?>
+                <form action="{{ url('/certify/certificate-export-lab/create')}}" method="POST" style="display:inline"  > 
+                    {{ csrf_field() }}
+                    {!! Form::hidden('app_token', (!empty($applicant->token) ? $applicant->token  : null) , ['id' => 'app_token', 'class' => 'form-control' ]); !!}
+                    @if ($applicant->scope_view_signer_id == null)
                         <button class="btn btn-warning" type="submit" >
                             ออกใบรับรอง
                         </button>
-                    <?php else: ?>
-                        <?php if($applicant->scope_view_status !== null): ?>
+                    @else
+                        @if ($applicant->scope_view_status !== null)
                             <button class="btn btn-warning" type="submit" >
                                 ออกใบรับรอง 
                             </button>
-                        <?php else: ?>
+                        @else
                         <span class="text-warning">รอยืนยันขอบข่าย</span>
-                        <?php endif; ?>
-                    <?php endif; ?>
+                        @endif
+                    @endif
                 </form>
             </div>
-        <?php else: ?>
+        @else
         <span class="text-warning">รอยืนยันความสามารถ</span>
-        <?php endif; ?>
-    <?php endif; ?>
-<?php else: ?>
+        @endif
+    @endif
+@else
    
 
-<?php endif; ?>
+@endif
 
- 
+ {{-- @endif --}}
 
     </div>
 </div>
@@ -524,18 +611,15 @@
                     <div class="row text-center">
                        
 
-                        <form action="<?php echo e(route('check_certificate.update', ['cc' => $cc])); ?>" class="form-horizontal" id="form_operating"   method="post" enctype="multipart/form-data">
-                            <?php echo e(csrf_field()); ?>
-
-                            <?php echo e(method_field('PUT')); ?>
-
+                        <form action="{{ route('check_certificate.update', ['cc' => $cc]) }}" class="form-horizontal" id="form_operating"   method="post" enctype="multipart/form-data">
+                            {{ csrf_field() }}
+                            {{ method_field('PUT') }}
                             <div class="col-sm-8">
-                                <div class="form-group <?php echo e($errors->has('status') ? 'has-error' : ''); ?>">
-                                    <?php echo HTML::decode(Form::label('status', '<span class="text-danger">*</span> ผลการตรวจสอบคำขอ', ['class' => 'col-md-4 control-label label-filter text-right'])); ?>
-
+                                <div class="form-group {{ $errors->has('status') ? 'has-error' : ''}}">
+                                    {!! HTML::decode(Form::label('status', '<span class="text-danger">*</span> ผลการตรวจสอบคำขอ', ['class' => 'col-md-4 control-label label-filter text-right'])) !!}
                                     <div class="col-md-7">
-                                   <?php if($applicant->status < 6): ?>
-                                        <?php echo Form::select('status',
+                                   @if($applicant->status < 6)
+                                        {!! Form::select('status',
                                        [  '1'=> 'รอดำเนินการตรวจ',
                                           '2'=> 'อยู่ระหว่างการตรวจสอบ',
                                           '3'=> 'ขอเอกสารเพิ่มเติม',
@@ -546,27 +630,23 @@
                                        ['class' => 'form-control', 
                                         'placeholder'=>'-เลือกผู้ที่ต้องการมอบหมายงาน-',
                                         'id'=>'cc_status',
-                                        'required' => true]);; ?>
-
-                                    <?php else: ?>   
-                                        <?php echo Form::text('status',   !empty($applicant->certi_lab_status_to->title)   ? $applicant->certi_lab_status_to->title : null,
-                                        ['class' => 'form-control',  'disabled','id'=>'cc_status']); ?>
-
-                                    <?php endif; ?>
+                                        'required' => true]); !!}
+                                    @else   
+                                        {!! Form::text('status',   !empty($applicant->certi_lab_status_to->title)   ? $applicant->certi_lab_status_to->title : null,
+                                        ['class' => 'form-control',  'disabled','id'=>'cc_status']) !!}
+                                    @endif
                                       
                                       
                                     </div>
                                 </div>
                             </div>
-                            <?php if(!in_array($cc->status,['3','4','5'])): ?>
+                            @if(!in_array($cc->status,['3','4','5']))
                                  <!-- 3.ขอเอกสารเพิ่มเติม 5.ไม่ผ่านการตรวจสอบ  -->
                             <div class="col-sm-8 m-t-15 isShowDesc">
-                                <div class="form-group <?php echo e($errors->has('desc') ? 'has-error' : ''); ?>">
-                                    <?php echo Form::label('desc', 'ระบุรายละเอียด', ['class' => 'col-md-4 control-label label-filter text-right']); ?>
-
+                                <div class="form-group {{ $errors->has('desc') ? 'has-error' : ''}}">
+                                    {!! Form::label('desc', 'ระบุรายละเอียด', ['class' => 'col-md-4 control-label label-filter text-right']) !!}
                                     <div class="col-md-7">
-                                        <?php echo Form::textarea('desc', null, ['class' => 'form-control requiredDesc', 'placeholder'=>'ระบุรายละเอียดที่นี่(ถ้ามี)', 'rows'=>'5']);; ?>
-
+                                        {!! Form::textarea('desc', null, ['class' => 'form-control requiredDesc', 'placeholder'=>'ระบุรายละเอียดที่นี่(ถ้ามี)', 'rows'=>'5']); !!}
                                     </div>
                                 </div>
                             </div>
@@ -574,8 +654,7 @@
                                 <div id="attach_files-box">
                                     <div class="form-group attach_files">
                                         <div class="col-md-4  text-light">
-                                        <?php echo Form::label('attach_files', 'ไฟล์แนบ', ['class' => 'col-md-12 label_attach text-light  control-label ']); ?>
-
+                                        {!! Form::label('attach_files', 'ไฟล์แนบ', ['class' => 'col-md-12 label_attach text-light  control-label ']) !!}
                                         </div>
                                         <div class="col-md-6">
                                             <div class="fileinput fileinput-new input-group" data-provides="fileinput">
@@ -600,48 +679,43 @@
                                     </div>
                                 </div>
                             </div>
-                            <?php endif; ?>
+                            @endif
 
                             <div class="col-sm-8 m-t-15">
-                                <div class="form-group <?php echo e($errors->has('no') ? 'has-error' : ''); ?>">
-                                    <?php echo Form::label('employ_name', 'เจ้าหน้าที่ตรวจสอบคำขอ', ['class' => 'col-md-4 control-label label-filter text-right']); ?>
-
+                                <div class="form-group {{ $errors->has('no') ? 'has-error' : ''}}">
+                                    {!! Form::label('employ_name', 'เจ้าหน้าที่ตรวจสอบคำขอ', ['class' => 'col-md-4 control-label label-filter text-right']) !!}
                                     <div class="col-md-7 text-left">
-                                        <?php echo Form::text('employ_name',  $cc->FullRegName ?? null, ['class' => 'form-control', 'placeholder'=>'', 'disabled']);; ?>
-
+                                        {!! Form::text('employ_name',  $cc->FullRegName ?? null, ['class' => 'form-control', 'placeholder'=>'', 'disabled']); !!}
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-8 m-t-15">
-                                <div class="form-group <?php echo e($errors->has('no') ? 'has-error' : ''); ?>">
-                                    <?php echo HTML::decode(Form::label('save_date', '<span class="text-danger">*</span> วันที่บันทึก', ['class' => 'col-md-4 control-label label-filter text-right'])); ?>
-
+                                <div class="form-group {{ $errors->has('no') ? 'has-error' : ''}}">
+                                    {!! HTML::decode(Form::label('save_date', '<span class="text-danger">*</span> วันที่บันทึก', ['class' => 'col-md-4 control-label label-filter text-right'])) !!}
                                     <div class="col-md-7 text-left">
-                                        <?php echo Form::text('save_date',
+                                        {!! Form::text('save_date',
                                          $cc->report_date ? HP::revertDate($cc->report_date->format('Y-m-d'),true): $Carbon->now()->addYear(543)->format('d/m/Y'), 
                                         ['class' => 'form-control mydatepicker', 'placeholder' => 'dd/mm/yyyy', 'autocomplete' => 'off', 
-                                        'required' => 'required','disabled' => ($cc->status >= 9) ?   true :  false ]); ?>
-
-                                        <?php echo $errors->first('save_date', '<p class="help-block">:message</p>'); ?>
-
+                                        'required' => 'required','disabled' => ($cc->status >= 9) ?   true :  false ]) !!}
+                                        {!! $errors->first('save_date', '<p class="help-block">:message</p>') !!}
                                     </div>
                                 </div>
                             </div>
-                            <?php if($cc->status < 9): ?>
-                            <div class="col-sm-8 m-t-15  <?php echo e(($cc->status == 3 || $cc->status == 4 || $cc->status == 5) ? 'hide' : ''); ?>">
+                            @if($cc->status < 9)
+                            <div class="col-sm-8 m-t-15  {{ ($cc->status == 3 || $cc->status == 4 || $cc->status == 5) ? 'hide' : ''  }}">
                                 <div class="form-group">
                                     <div class="col-md-offset-4 col-md-6 m-t-15">
                                         <button class="btn btn-primary" type="submit" id="form-save" onclick="submit_form('1');return false">
                                             <i class="fa fa-paper-plane"></i> บันทึก
                                         </button>
 
-                                        <a class="btn btn-default" href="<?php echo e(url('/certify/check_certificate')); ?>">
+                                        <a class="btn btn-default" href="{{url('/certify/check_certificate')}}">
                                             <i class="fa fa-rotate-left"></i> ยกเลิก
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                            <?php endif; ?>
+                            @endif
                         </form>
                     </div>
                 </div>
@@ -649,7 +723,7 @@
         </div>
 
 
-        <?php if($history->count() > 0 ): ?>
+        @if($history->count() > 0 )
         <div class="white-box">
             <div class="row">
                 <div class="col-sm-12">
@@ -665,39 +739,36 @@
                                     </tr>
                             </thead>
                             <tbody>
-                                <?php $__currentLoopData = $history; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                @foreach($history as $key => $item)
                                     <tr>
-                                        <td class="text-center"><?php echo e($key +1); ?></td>
-                                        <td> <?php echo e(HP::DateTimeThai($item->created_at) ?? '-'); ?> </td>
+                                        <td class="text-center">{{ $key +1 }}</td>
+                                        <td> {{HP::DateTimeThai($item->created_at) ?? '-'}} </td>
                                         <td>  
-                                             <?php if(in_array($item->system,[3,6])  && is_null($item->created_by)): ?>
-                                                <?php echo e('ระบบบันทึก'); ?>
-
-                                            <?php else: ?>
-                                                <?php echo e($item->user_created->FullName ?? '-'); ?>
-
-                                            <?php endif; ?>  
+                                             @if (in_array($item->system,[3,6])  && is_null($item->created_by))
+                                                {{   'ระบบบันทึก' }}
+                                            @else
+                                                {{ $item->user_created->FullName ?? '-'}}
+                                            @endif  
                                         </td>
                                         <td>
-                                              <?php if($item->DataSystem != '-'): ?>
-                                                    <button type="button" class="btn btn-link  <?php echo e(!is_null($item->details_auditors_cancel) ? 'text-danger' : ''); ?>" style="line-height: 16px;text-align: left;" 
-                                                        data-toggle="modal" data-target="#HistoryModal<?php echo e($item->id); ?>">
-                                                            <?php echo e(@$item->DataSystem); ?>
-
+                                              @if($item->DataSystem != '-')
+                                                    <button type="button" class="btn btn-link  {{!is_null($item->details_auditors_cancel) ? 'text-danger' : ''}}" style="line-height: 16px;text-align: left;" 
+                                                        data-toggle="modal" data-target="#HistoryModal{{$item->id}}">
+                                                            {{ @$item->DataSystem }}
                                                         <br>
                                                            
                                                      </button>
 
-                                                                <?php echo $__env->make('certify/check_certificate_lab.history_detail',['history' => $item], array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
-                                                  <?php else: ?> 
-                                                  <span  class="btn-link" style="margin-left:12px;line-height: 16px;text-align: left;font-size:18px;text-decoration:none"><?php echo trim($item->details ?? ''); ?></span>
+                                                                @include ('certify/check_certificate_lab.history_detail',['history' => $item])
+                                                  @else 
+                                                  <span  class="btn-link" style="margin-left:12px;line-height: 16px;text-align: left;font-size:18px;text-decoration:none">{!! trim($item->details ?? '') !!}</span>
                                                   
-                                                  <?php endif; ?>
-                                                  
+                                                  @endif
+                                                  {{-- {{$item->details}} --}}
                                                  
                                         </td>
                                     </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -707,9 +778,9 @@
                 
             </div>
         </div>
-        <?php endif; ?>
+        @endif
 
-            <?php if(count($certi_lab->certi_auditors) > 0 ): ?>
+            @if(count($certi_lab->certi_auditors) > 0 )
 
             <div class="white-box">
                 <div class="row">
@@ -729,28 +800,26 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php $__currentLoopData = $certi_lab->certi_auditors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            @foreach($certi_lab->certi_auditors as $key => $item)
                                                 <tr>
-                                                    <td class="text-center"><?php echo e($key+1); ?></td>
-                                                    <td> <?php echo e(HP::DateTimeThai($item->created_at) ?? '-'); ?> </td>
-                                                    <td><?php echo e($item->auditor ?? null); ?></td>
+                                                    <td class="text-center">{{$key+1}}</td>
+                                                    <td> {{HP::DateTimeThai($item->created_at) ?? '-'}} </td>
+                                                    <td>{{ $item->auditor ?? null }}</td>
                                                     <td>
-                                                        <span style="color: <?php echo e(($item->step_id == 9) ? 'red' : ''); ?> "> 
-                                                            <?php echo e($item->certi_lab_step_to->title ?? null); ?>
-
+                                                        <span style="color: {{($item->step_id == 9) ? 'red' : ''}} "> 
+                                                            {{ $item->certi_lab_step_to->title ?? null }}
                                                         </span>
-                                                        <?php if(!is_null($item->reason_cancel)): ?>
+                                                        @if (!is_null($item->reason_cancel))
                                                             <br>
                                                             <span class="text-danger" style="font-size: 10px">
-                                                                ผู้ยกเลิก :   <?php echo e(isset($item->reason_cancel) ? @$item->UserCancelTo->FullName  : null); ?> <br>
-                                                                วันที่ยกเลิก :   <?php echo e(isset($item->date_cancel) ? HP::DateThai($item->date_cancel)   : null); ?> <br>
-                                                                เหตุผลที่ยกเลิก :   <?php echo e(isset($item->reason_cancel) ? $item->reason_cancel  : null); ?>
-
+                                                                ผู้ยกเลิก :   {{ isset($item->reason_cancel) ? @$item->UserCancelTo->FullName  : null }} <br>
+                                                                วันที่ยกเลิก :   {{ isset($item->date_cancel) ? HP::DateThai($item->date_cancel)   : null }} <br>
+                                                                เหตุผลที่ยกเลิก :   {{ isset($item->reason_cancel) ? $item->reason_cancel  : null }}
                                                             </span>
-                                                        <?php endif; ?>
+                                                        @endif
                                                     </td>
                                                 </tr>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -761,27 +830,27 @@
                 </div>
             </div>
             
-        <?php endif; ?>
+        @endif
 
     </div>
  
-<?php $__env->stopSection(); ?>
+@endsection
 
 
-<?php $__env->startPush('js'); ?>
-<script src="<?php echo e(asset('plugins/components/icheck/icheck.min.js')); ?>"></script>
-<script src="<?php echo e(asset('plugins/components/icheck/icheck.init.js')); ?>"></script>
-    <script src="<?php echo e(asset('plugins/components/toast-master/js/jquery.toast.js')); ?>"></script>
+@push('js')
+<script src="{{ asset('plugins/components/icheck/icheck.min.js') }}"></script>
+<script src="{{ asset('plugins/components/icheck/icheck.init.js') }}"></script>
+    <script src="{{asset('plugins/components/toast-master/js/jquery.toast.js')}}"></script>
     <!-- input calendar thai -->
-    <script src="<?php echo e(asset('plugins/components/bootstrap-datepicker-thai/js/bootstrap-datepicker.js')); ?>"></script>
+    <script src="{{ asset('plugins/components/bootstrap-datepicker-thai/js/bootstrap-datepicker.js') }}"></script>
     <!-- thai extension -->
-    <script src="<?php echo e(asset('plugins/components/bootstrap-datepicker-thai/js/bootstrap-datepicker-thai.js')); ?>"></script>
-    <script src="<?php echo e(asset('plugins/components/bootstrap-datepicker-thai/js/locales/bootstrap-datepicker.th.js')); ?>"></script>
-    <script src="<?php echo e(asset('plugins/components/sweet-alert2/sweetalert2.all.min.js')); ?>"></script>
-    <script src="<?php echo e(asset('js/app.js')); ?>"></script>
-    <script src="<?php echo e(asset('js/jasny-bootstrap.js')); ?>"></script>
+    <script src="{{ asset('plugins/components/bootstrap-datepicker-thai/js/bootstrap-datepicker-thai.js') }}"></script>
+    <script src="{{ asset('plugins/components/bootstrap-datepicker-thai/js/locales/bootstrap-datepicker.th.js') }}"></script>
+    <script src="{{asset('plugins/components/sweet-alert2/sweetalert2.all.min.js')}}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{asset('js/jasny-bootstrap.js')}}"></script>
       <!-- Data Table -->
-      <script src="<?php echo e(asset('plugins/components/datatables/jquery.dataTables.min.js')); ?>"></script>
+      <script src="{{asset('plugins/components/datatables/jquery.dataTables.min.js')}}"></script>
     <script>
         $(document).ready(function () {
             $('.check-readonly').prop('disabled', true);
@@ -797,14 +866,14 @@
                 });
          });
 
-        <?php if($applicant->status == 1 && HP_API_PID::check_api('check_api_certify_check_certificate') && HP_API_PID::CheckDataApiPid($applicant, (new App\Models\Certify\Applicant\CertiLab)->getTable()) != ''): ?>
+        @if($applicant->status == 1 && HP_API_PID::check_api('check_api_certify_check_certificate') && HP_API_PID::CheckDataApiPid($applicant, (new App\Models\Certify\Applicant\CertiLab)->getTable()) != '')
 
-            var id    =   '<?php echo $applicant->id; ?>';
-            var table =   '<?php echo (new App\Models\Certify\Applicant\CertiLab)->getTable(); ?>';
+            var id    =   '{!! $applicant->id !!}';
+            var table =   '{!! (new App\Models\Certify\Applicant\CertiLab)->getTable()  !!}';
 
             $.ajax({
                 type: 'get',
-                url: "<?php echo url('certify/function/check_api_pid'); ?>" ,
+                url: "{!! url('certify/function/check_api_pid') !!}" ,
                 data: {
                     id:id,
                     table:table,
@@ -823,7 +892,7 @@
                 });
             });
             
-        <?php endif; ?>
+        @endif
 
     </script>
 
@@ -857,7 +926,7 @@
            
                 if( confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')){
                      $.ajax({
-                           url: "<?php echo url('certify/check_certificate/delete_attach'); ?>" + "/" + $(this).attr("data-id")
+                           url: "{!! url('certify/check_certificate/delete_attach') !!}" + "/" + $(this).attr("data-id")
                        }).done(function( object ) {
                       });
                       $(this).parent().remove();
@@ -893,7 +962,7 @@
             });
             $('#cc_status').change();
 
-            var data_hide = '<?php echo e(!empty($report) &&  ($report->status == 1) ? 1 : null); ?>';
+            var data_hide = '{{  !empty($report) &&  ($report->status == 1) ? 1 : null  }}';
                 if(data_hide == 1){
                     $('.data_hide').hide ();
                     $('.report_desc').prop('disabled', true);
@@ -942,17 +1011,17 @@
                 $(this).parent().parent().parent().remove();
             });
 
-            <?php if(\Session::has('flash_message')): ?>
+            @if(\Session::has('flash_message'))
             $.toast({
                 heading: 'Success!',
                 position: 'top-center',
-                text: '<?php echo e(session()->get('flash_message')); ?>',
+                text: '{{session()->get('flash_message')}}',
                 loaderBg: '#70b7d6',
                 icon: 'success',
                 hideAfter: 3000,
                 stack: 6 
             });
-            <?php endif; ?>
+            @endif
 
             //ปฎิทิน
             $('.mydatepicker').datepicker({
@@ -963,7 +1032,7 @@
     
         });
         function submit_form(status) {
-            var row =  '<?php echo e(!empty($cc->applicant->status) ? $cc->applicant->status : null); ?>';
+            var row =  '{{ !empty($cc->applicant->status) ? $cc->applicant->status : null }}';
             if((row != null && row >= 9) && $('#cc_status').val() <= 9){ 
                 Swal.fire(
                         'ใบรับรองห้องปฏิบัติการ รับคำขอแล้ว',
@@ -1052,6 +1121,4 @@
     });
     </script>
 
-<?php $__env->stopPush(); ?>
-
-<?php echo $__env->make('layouts.master', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+@endpush

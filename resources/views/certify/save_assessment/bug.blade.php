@@ -164,9 +164,9 @@
 
 <div class="row div_hide_show_scope">
     <div class="col-md-12">
-         <div class="white-box">
+         {{-- <div class="white-box"> --}}
 
-            <div class="row ">
+            {{-- <div class="row ">
                 <div class="col-sm-4 text-right"><span class="text-danger">*</span>รายงานปิด Car  :</div>
                 <div class="col-sm-6">
                     @if(isset($find_notice)  && !is_null($find_notice->file_car))
@@ -191,7 +191,7 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
 
             <div class="form-group" id="div_file_scope">
 
@@ -274,7 +274,7 @@
             </div>
 
 
-        </div>
+        {{-- </div> --}}
     </div>
  </div>
 
@@ -348,15 +348,22 @@
             let file_status =  $(".file_status:checked").length;
             let notice = '{{ !empty($find_notice->items) ? count($find_notice->items) : 0 }}';
             if(file_status == notice){
-                $('.div_hide_show_scope').show();
+                // $('.div_hide_show_scope').show();
                 $('.status_bug_report').hide();
+                $('#div_file_comment').hide();
+                
                 $('.report_scope').prop('required', true);
                 $('.file_scope_required').prop('required', true);
+                // console.log('wow all passed')
+                // assessment_passed
+                $('#assessment_passed').val("1")
             }else{
-                $('.div_hide_show_scope').hide();
+                // $('.div_hide_show_scope').hide();
+                $('#div_file_comment').show();
                 $('.status_bug_report').show();
                 $('.report_scope').prop('required', false);
                 $('.file_scope_required').prop('required', false);
+                $('#assessment_passed').val("0")
             }
 
          });

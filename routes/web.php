@@ -69,6 +69,12 @@ Route::get('/create-cb-assessment-report-pdf','MyTestController@createCbAssessme
 Route::get('/create-cb-message-record-pdf','MyTestController@createCbMessageRecordPdf');
 
 Route::get('/run-all-schedule','MyTestController@runAllSchedules');
+Route::get('/check-payin2-cb','MyTestController@check_payin2_cb');
+
+
+Route::get('/create-lab-assessment-report-two-pdf','MyTestController@createLabAssessmentReportTwoPdf');
+
+
 
 
 

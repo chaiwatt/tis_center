@@ -101,7 +101,7 @@
                                         <div class="row">
                                             
                                             @if (isset($assessment))
-                                            
+                                              
                                                 @if ($assessment->CertiCBBugMany->count() != 0)
                                                     @php
                                                         $hasReport = false;
@@ -115,20 +115,20 @@
                                                             @endphp
                                                         @endif
                                                     @endforeach
-
+                                                    {{-- {{$hasReport}} --}}
                                                     @if ($hasReport)
-                                                        <label class="col-md-6">
-                                                            {!! Form::radio('bug_report', '2', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!} มี
-                                                        </label>
-                                                        <label class="col-md-6">
-                                                            {!! Form::radio('bug_report', '1', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
-                                                        </label>
-                                                    @else
                                                         <label class="col-md-6">
                                                             {!! Form::radio('bug_report', '1', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!} มี
                                                         </label>
                                                         <label class="col-md-6">
                                                             {!! Form::radio('bug_report', '2', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
+                                                        </label>
+                                                    @else
+                                                        <label class="col-md-6">
+                                                            {!! Form::radio('bug_report', '2', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-green','required'=>'required']) !!} มี
+                                                        </label>
+                                                        <label class="col-md-6">
+                                                            {!! Form::radio('bug_report', '1', true, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
                                                         </label>
                                                     @endif
                                                 @endif

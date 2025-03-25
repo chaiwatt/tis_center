@@ -172,7 +172,9 @@
                                                                                     <span><img src="{{$uncertain}}" alt="Image" style="max-width:160px" />   </span>
                                                                                 </span>
                                                                             @else
-                                                                                <span>{!! $uncertain !!}</span><br> 
+                                                                                {{-- <span>{!! $uncertain !!}</span><br>  --}}
+                                                                                <span>{!! formatRangeWithSpecialChars($uncertain) !!}</span><br> 
+                                                                                
                                                                             @endif
                                                                         @endforeach
                                                                     </td>

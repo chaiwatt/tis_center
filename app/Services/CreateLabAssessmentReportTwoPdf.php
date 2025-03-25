@@ -5,37 +5,47 @@ use HP;
 use stdClass;
 use Mpdf\Mpdf;
 use Smalot\PdfParser\Parser;
+use App\Models\Certificate\Tracking;
 use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use App\Models\Bcertify\LabCalRequest;
 use App\Models\Bcertify\LabTestRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Certify\Applicant\Notice;
 use App\Models\Certify\BoardAuditorDate;
 use App\Models\Bcertify\BoardAuditoExpert;
 use App\Models\Bcertify\CalibrationBranch;
 use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Bcertify\AuditorInformation;
+use App\Models\Certificate\LabReportTwoInfo;
+use App\Models\Certificate\TrackingAuditors;
+use App\Models\Certify\Applicant\NoticeItem;
+use App\Models\Certificate\TrackingAssessment;
+use App\Models\Certificate\TrackingAuditorsDate;
 use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Certificate\TrackingLabReportInfo;
+use App\Models\Bcertify\BoardAuditoExpertTracking;
 use App\Models\Certify\Applicant\CertiLabAttachAll;
 use App\Models\Bcertify\CalibrationBranchInstrument;
 use App\Models\Bcertify\HtmlLabMemorandumPdfRequest;
+use App\Models\Certify\SignAssessmentReportTransaction;
+use App\Models\Certify\MessageRecordTrackingTransaction;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
+use App\Models\Certificate\SignAssessmentTrackingReportTransaction;
 
-class CreateLabMessageRecordPdf
+class CreateLabAssessmentReportTwoPdf
 {
-    protected $board_auditor_id;
+    protected $labReportTwoInfoId;
     protected $type;
 
-    public function __construct($board_auditor,$type)
+    public function __construct($report_two_info_id,$type)
     {
-        $this->board_auditor_id = $board_auditor->id;
+        $this->labReportTwoInfoId = $report_two_info_id;
         $this->type = $type;
     }
 
-
-
-    public function generateBoardAuditorMessageRecordPdf()
+    public function generateLabReportTwoPdf()
     {
         
         $fontDirs = [public_path('pdf_fonts/')];; // เพิ่มไดเรกทอรีฟอนต์ที่คุณต้องการ
@@ -76,10 +86,15 @@ class CreateLabMessageRecordPdf
 
     public function ia($mpdf)
     {
-        $boardAuditor = BoardAuditor::find($this->board_auditor_id);
-        $boardAuditorMsRecordInfo = $boardAuditor->boardAuditorMsRecordInfos->first();
-
-        // dd( $boardAuditorMsRecordInfo);
+        // $notice = Notice::find($id);
+        $labReportInfo = LabReportTwoInfo::find($this->labReportTwoInfoId);
+        // dd($labReportInfo);
+        // $notice = $labReportInfo->notice;
+        $notice = $labReportInfo->notice;
+        $assessment = $notice->assessment;
+        $app_certi_lab = $notice->applicant;
+        $boardAuditor = $assessment->board_auditor_to;
+        $id = $boardAuditor->auditor_id;
 
         $groups = $boardAuditor->groups;
 
@@ -104,12 +119,11 @@ class CreateLabMessageRecordPdf
 
         $uniqueAuditorIds = array_unique($auditorIds);
 
-        
         $auditorInformations = AuditorInformation::whereIn('id',$uniqueAuditorIds)->get();
 
         $certi_lab = CertiLab::find($boardAuditor->app_certi_lab_id);
 
-        $boardAuditorDate = BoardAuditorDate::where('board_auditors_id',$this->board_auditor_id)->first();
+        $boardAuditorDate = BoardAuditorDate::where('board_auditors_id',$id)->first();
         $dateRange = "";
 
         if (!empty($boardAuditorDate->start_date) && !empty($boardAuditorDate->end_date)) {
@@ -123,7 +137,7 @@ class CreateLabMessageRecordPdf
             }
         }
 
-        $boardAuditorExpert = BoardAuditoExpert::where('board_auditor_id',$this->board_auditor_id)->first();
+        $boardAuditorExpert = BoardAuditoExpert::where('board_auditor_id',$id)->first();
         $experts = "หัวหน้าคณะผู้ตรวจประเมิน ผู้ตรวจประเมิน และผู้สังเกตการณ์";
         // ตรวจสอบว่ามีข้อมูลในฟิลด์ expert หรือไม่
         if ($boardAuditorExpert && $boardAuditorExpert->expert) {
@@ -157,115 +171,124 @@ class CreateLabMessageRecordPdf
         $data->header_text1 = '';
         $data->header_text2 = '';
         $data->header_text3 = '';
-        $data->header_text4 = '';
+        $data->header_text4 = $certi_lab->app_no;
         $data->lab_type = $certi_lab->lab_type == 3 ? 'ทดสอบ' : ($certi_lab->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
         $data->lab_name = $certi_lab->lab_name;
-        $data->app_no = $certi_lab->app_no;
         $data->scope_branch = $scope_branch;
+        $data->app_np = 'ทดสอบ ๑๖๗๑';
+        $data->certificate_no = '13-LB0037';
         $data->register_date = HP::formatDateThaiFullNumThai($certi_lab->created_at);
         $data->get_date = HP::formatDateThaiFullNumThai($certi_lab->get_date);
         $data->experts = $experts;
         $data->date_range = $dateRange;
         $data->statusAuditorMap = $statusAuditorMap;
 
+        // $notice = Notice::find($notice_id);
+        $assessment = $notice->assessment;
+        // dd($statusAuditorMap);
+        $app_certi_lab = $notice->applicant;
+        $boardAuditor = $assessment->board_auditor_to;
+        $id = $boardAuditor->auditor_id;
+        $labRequest = null;
+        
+        if($app_certi_lab->lab_type == 4){
+            $labRequest = LabCalRequest::where('app_certi_lab_id',$app_certi_lab->id)->where('type',1)->first();
+        }else if($app_certi_lab->lab_type == 3)
+        {
+            $labRequest = LabTestRequest::where('app_certi_lab_id',$app_certi_lab->id)->where('type',1)->first();
+        }
 
-        $htmlLabMemorandumRequest = HtmlLabMemorandumPdfRequest::where('type',"ia")->first();
+        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)
+                                            ->where('certificate_type',2)
+                                            ->where('report_type',1)
+                                            ->get();
+        $approveNoticeItems = NoticeItem::where('app_certi_lab_notice_id', $notice->id)
+            ->whereNotNull('attachs')
+            ->where('status',1)
+            ->where('file_status',1)
+            ->get();
 
-        $data->fix_text1 = <<<HTML
-               $htmlLabMemorandumRequest->text1
-            HTML;
+        $labInformation = $certi_lab->information;
 
-        $data->fix_text2 = <<<HTML
-               $htmlLabMemorandumRequest->text2
-            HTML;
-
-        // $data->fix_text1 = <<<HTML
-        //         <div style="font-weight: bold;margin-left:90px ;margin-top:5px;">๒. ข้อกฎหมาย/กฎระเบียบที่เกี่ยวข้อง</div>
-        //         <div>
-        //             <div style="margin-left:105px; letter-spacing: 0.4px">๒.๑ พระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศในราชกิจจานุเบกษา</div>
-        //             <p style="margin: top 0; letter-spacing: 0.3px">วันที่ ๔ มีนาคม ๒๕๕๑) มาตรา ๒๘ วรรค ๒ ระบุ “การขอใบรับรอง การตรวจสอบและการออกใบรับรอง ให้เป็นไปตาม หลักเกณฑ์ วิธีการและเงื่อนไขที่คณะกรรมการประกาศ กําหนด”</p>
-        //             <div style="margin-left:105px; letter-spacing: 0.3px">๒.๒ ประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไข</div>
-        //             <p style="margin: top 0;">การรับรองห้องปฏิบัติการ (ประกาศในราชกิจจานุเบกษา วันที่ ๑๗ พฤษภาคม ๒๕๖๔)</p>
-        //             <div style="margin-left:130px; letter-spacing: 0.8px">ข้อ ๖.๑.๒ (๑) แต่งตั้งคณะผู้ตรวจประเมิน ประกอบด้วย หัวหน้าคณะผู้ตรวจ</div>
-        //             <p style="margin: top 0;">ประเมิน ผู้ตรวจประเมินด้านวิชาการ และผู้ตรวจประเมิน ซึ่งอาจมีผู้เชี่ยวชาญร่วมด้วยตามความเหมาะสม</p>
-        //             <div style="margin-left:130px;letter-spacing: -0.2px">ข้อ ๖.๑.๒ (๒.๑) คณะผู้ตรวจประเมินจะทบทวน<span style="letter-spacing:0.1px">และประเมินเอกสารของห้องปฏิบัติการ</span></div>
-        //             <p style="margin: top 0;"><span style="letter-spacing:0.2px">และข้อ ๖.๑.๒ (๒.๒) คณะผู้ตรวจประเมินจะตรวจประเมินความสามารถและประสิทธิผลของการดําเนินงาน </span> <span style="letter-spacing:-0.15px">ตามระบบการบริหารของห้องปฏิบัติการโดยพิจารณาหลักฐานและเอกสารที่เกี่ยวข้อง การสัมภาษณ์ รวมทั้งสังเกต</span> <span style="letter-spacing: 0.15px;">การปฏิบัติงานตามระบบบริหารงานและมาตรฐานการตรวจสอบและรับรองที่เกี่ยวข้อง ณ สถานประกอบการ</span> ของผู้ยืนคําขอและสถานที่ทําการอื่นในสาขาที่ขอรับการรับรอง</p>
-        //             <div style="margin-left:105px; letter-spacing: 0.75px">๒.๓ ประกาศสํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม เรื่อง แนวทางการแต่งตั้ง</div>
-        //             <p style="margin: top 0;letter-spacing: 0.3px">พนักงานเจ้าหน้าที่ตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศ ณ วันที่ ๙ กุมภาพันธ์ พ.ศ. ๒๕๖๐) ซึ่งระบุพนักงานเจ้าหน้าที่ต้องมีคุณสมบัติตามข้อ ๑. ถึง ๓.</p>
-        //             <div style="margin-left:105px; letter-spacing: 0.5px">๒.๔ คําสั่งสํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม ที่ ๓/๒๕๖๕ เรื่อง มอบอํานาจ</div>
-        //             <p style="margin: top 0; letter-spacing: 0.25px">ให้ข้าราชการสั่งและปฏิบัติราชการแทนเลขาธิการสํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรมในการเป็นผู้มี<span style="letter-spacing:-0.1px">อำนาจพิจารณาดำเนินการตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (สั่ง ณ วันที่ ๑๓ พฤศจิกายน</span> ๒๕๖๖) <span style="letter-spacing: 0.35px;">ข้อ ๓. ระบุให้ผู้อํานวยการสํานักงานคณะกรรมการการมาตรฐานแห่งชาติเป็นผู้มีอํานาจพิจารณา</span> <span style="letter-spacing:0.4px">แต่งตั้งคณะผู้ตรวจประเมิน ตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ และข้อ ๕.๒ ในกรณี</span></p>
-        //             <p style="margin: bottom 0;"><span style="letter-spacing: 0.45px;">ที่ข้าราชการผู้รับมอบอํานาจตามข้อ ๓. ไม่อาจปฏิบัติราชการได้หรือไม่มีผู้ดํารงตําแหน่งดังกล่าว ให้รอง</span></p>
-        //         </div>
-        //     HTML;
-        // // 
-        // $data->fix_text2 = <<<HTML
-        //         <div style="font-weight: bold;margin-left:90px;margin-top:5px;">๓. ข้อเท็จจริง</div>
-        //         <div style="margin-left:105px;letter-spacing: 0.1px;">ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการ</div>
-        //         <p style="margin: top 0;letter-spacing: 0.5px;"> <span style="letter-spacing: 0.05px;">รับรองห้องปฏิบัติการ สมอ. มีอํานาจหน้าที่ในการรับรองความสามารถห้องปฏิบัติการ กําหนดให้มีการประเมิน</span> เพื่อพิจารณาให้การรับรองความสามารถห้องปฏิบัติการ ตามมาตรฐานเลขที่ มอก. 17025-2561</p>
-        //     HTML;
-
-
-
-       
-
-
-        // $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->get();
-        // $signerIds = $messageRecordTransactions->pluck('signer_id')->toArray();
+        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)
+                                    ->where('certificate_type',2)
+                                    ->where('report_type',2)
+                                    ->get();
 
         $signer = new stdClass();
 
+        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','1')
+                            ->where('certificate_type',2)
+                            ->where('report_type',2)
+                            ->first();
 
-       
-        $signer->signer_1 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature1')
-        ->where('certificate_type',2)
-        ->first();
-        $signer->signer_2 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature2')
-        ->where('certificate_type',2)
-        ->first();
-        $signer->signer_3 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature3')
-        ->where('certificate_type',2)
-        ->first();
-        $signer->signer_4 = MessageRecordTransaction::where('board_auditor_id', $this->board_auditor_id)->where('signature_id','Signature4')
-        ->where('certificate_type',2)
-        ->first();
+        
+        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','2')
+                            ->where('certificate_type',2)
+                            ->where('report_type',2)
+                            ->first();
+        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','3')
+                            ->where('certificate_type',2)
+                            ->where('report_type',2)
+                            ->first();
 
+        
 
         $attach1 = !empty($signer->signer_1->signer->AttachFileAttachTo) ? $signer->signer_1->signer->AttachFileAttachTo : null;
         $attach2 = !empty($signer->signer_2->signer->AttachFileAttachTo) ? $signer->signer_2->signer->AttachFileAttachTo : null;
         $attach3 = !empty($signer->signer_3->signer->AttachFileAttachTo) ? $signer->signer_3->signer->AttachFileAttachTo : null;
-        $attach4 = !empty($signer->signer_4->signer->AttachFileAttachTo) ? $signer->signer_4->signer->AttachFileAttachTo : null;
-        // dd($attach1->url);
 
         $sign_url1 = $this->getSignature($attach1);
         $sign_url2 = $this->getSignature($attach2);
         $sign_url3 = $this->getSignature($attach3);
-        $sign_url4 = $this->getSignature($attach4);
+
+        $signer->signer_url1 = $sign_url1;
+        $signer->signer_url2 = $sign_url2;
+        $signer->signer_url3 = $sign_url3;
 
 
         $signer->signer_url1 = $sign_url1;
         $signer->signer_url2 = $sign_url2;
         $signer->signer_url3 = $sign_url3;
-        $signer->signer_url4 = $sign_url4;
 
-       
+        // dd($labInformation[0],$labReportInfo);
 
-
-        // dd($boardAuditorMsRecordInfo);
-        $body = view('certify.auditor.ia_lab_message_record_pdf.body', [
+        $body = view('certify.save_assessment.report-two-pdf.body', [
+            // 'labReportInfo' => $labReportInfo,
+            // 'data' => $data,
+            // 'assessment' => $assessment,
+            // 'trackingAuditor' => $trackingAuditor,
+            // 'certi_lab' => $certi_lab,
+            // 'labRequest' => $labRequest,
+            // 'signAssessmentReportTransactions' => $signAssessmentReportTransactions,
+            // 'tracking' => $tracking ,
+            'signer' => $signer,
+            'labInformation' => $labInformation[0],
+            'labReportInfo' => $labReportInfo,
             'data' => $data,
-            'boardAuditorMsRecordInfo' => $boardAuditorMsRecordInfo,
-            'signer' => $signer
+            'notice' => $notice,
+            'assessment' => $assessment,
+            'boardAuditor' => $boardAuditor,
+            'certi_lab' => $app_certi_lab,
+            'labRequest' => $labRequest,
+            'signAssessmentReportTransactions' => $signAssessmentReportTransactions,
+            'approveNoticeItems' => $approveNoticeItems,
+            'id' => $id
         ]);
-        $footer = view('certify.auditor.ia_lab_message_record_pdf.footer', []);
 
-        // $mpdf->WriteHTML($header,2);
-        // $mpdf->SetHTMLFooter($footer);
-        $mpdf->WriteHTML($body, 2);
+        $footer = view('certify.save_assessment.report-two-pdf.footer', []);
 
-        // $title = "message_record.pdf";
+        $stylesheet = file_get_contents(public_path('css/report/lab-report.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+       
+        $mpdf->WriteHTML($body,2);
 
-        // $mpdf->Output($title, 'I');
+        $mpdf->SetHTMLFooter($footer,2);
+
+        // $title = "labreport.pdf";
         
+        // $mpdf->Output($title, "I");  
+
         // return;
         $no = str_replace("RQ-", "", $certi_lab->app_no);
         $no = str_replace("-", "_", $no);
@@ -285,14 +308,19 @@ class CreateLabMessageRecordPdf
         $filePath = $attachPath .'/'. $fullFileName;
         if (Storage::disk('ftp')->exists($filePath)) {
             $storePath = $no  . '/' . $fullFileName;
-            $boardAuditor = BoardAuditor::find($this->board_auditor_id)->update([
+            $labReportInfo = LabReportTwoInfo::find($labReportInfo->id)->update([
                 'file' => $storePath,
-                'file_client_name' => 'memorandum' . '_' . $no . '.pdf'
+                'file_client_name' => 'report' . '_' . $no . '.pdf'
             ]);
-            // dd('File Path on Server: ' . $filePath);
+            $notice = Notice::find($notice->id)->update([
+                'date_car' => null,
+                'file_car' => $storePath,
+                'file_car_client_name' => 'report' . '_' . $no . '.pdf'
+            ]);
         } else {
             // dd('File not found on server!');
         }
+
     }
 
     public function getSignature($attach)

@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ระบบบันทึกผลการตรวจประเมิน</h3>
+                    <h3 class="box-title pull-left">ระบบบันทึกผลการตรวจประเมิน landing</h3>
                     @can('view-'.str_slug('auditor'))
                     <a class="btn btn-success pull-right" href="{{ route('save_assessment.index', ['app' => $app ? $app->id : '']) }}">
                         <i class="icon-arrow-left-circle"></i> กลับ

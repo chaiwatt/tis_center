@@ -21,7 +21,6 @@
 
                     <div class="pull-right">
 
-
                       {{-- @can('add-'.str_slug('sendcertificates'))
                           <a class="btn btn-success btn-sm waves-effect waves-light" href="{{ url('/certify/send-certificates/create') }}">
                             <span class="btn-label"><i class="fa fa-plus"></i></span><b>เพิ่ม</b>
@@ -388,6 +387,10 @@
                     $('#signerModal').modal('hide');
                     // location.reload(); // ทำการ reload หน้าเว็บ
                     table.draw();
+                    if (response.success == false)
+                    {
+                        alert("ผิดพลาด ยังไม่ได้สร้างรายการบันทึกแต่งตั้ง")
+                    }
                 },
                 error: function(xhr, status, error) {
                     // ซ่อนข้อความระหว่างรอเมื่อมีข้อผิดพลาด

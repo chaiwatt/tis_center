@@ -162,15 +162,26 @@ class AuditorAssignmentController extends Controller
 
     public function signDocument(Request $request)
     {
-        
-        MessageRecordTransaction::find($request->id)->update([
-            'approval' => 1
-        ]);
-
         $messageRecordTransaction = MessageRecordTransaction::find($request->id);
+        $boardAuditor = $messageRecordTransaction->boardAuditor;
 
+        // dd($messageRecordTransaction,$boardAuditor);
+        
         if ($messageRecordTransaction->certificate_type == 2)
         {
+            $boardAuditorMsRecordInfo = $boardAuditor->boardAuditorMsRecordInfos->first();
+            // dd($boardAuditorMsRecordInfo);
+            if($boardAuditorMsRecordInfo == null)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'บันทึกข้อความยังไม่ได้สร้าง'
+                ]);
+            }
+            
+            MessageRecordTransaction::find($request->id)->update([
+                'approval' => 1
+            ]);
             // LAB
             $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$messageRecordTransaction->board_auditor_id)
                     ->whereNotNull('signer_id')
@@ -188,6 +199,20 @@ class AuditorAssignmentController extends Controller
 
         }else if($messageRecordTransaction->certificate_type == 0)
         {
+           
+            $cbBoardAuditorMsRecordInfo = $boardAuditor->cbBoardAuditorMsRecordInfos->first();
+            
+            if($cbBoardAuditorMsRecordInfo == null)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'บันทึกข้อความยังไม่ได้สร้าง'
+                ]);
+            }
+            // dd($cbBoardAuditorMsRecordInfo);
+            MessageRecordTransaction::find($request->id)->update([
+                'approval' => 1
+            ]);
             // CB
             $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$messageRecordTransaction->board_auditor_id)
                     ->whereNotNull('signer_id')
@@ -196,16 +221,16 @@ class AuditorAssignmentController extends Controller
                     ->get();           
             // dd($messageRecordTransactions->count());
             if($messageRecordTransactions->count() == 0){
-                // dd('okdd');
                 $board = CertiCBAuditors::find($messageRecordTransaction->board_auditor_id);
-                // $board = BoardAuditor::find($messageRecordTransaction->board_auditor_id);
-
-                // $this->set_mail($board,$board->CertiLabs);
                 $pdfService = new CreateCbMessageRecordPdf($board,"ia");
                 $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
             }    
-        }
 
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'success'
+        ]);
 
     }
 

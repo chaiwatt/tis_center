@@ -211,20 +211,24 @@ class CreateLabAssessmentReportPdf
 
         $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)
                                         ->where('certificate_type',2)
+                                        ->where('report_type',1)
                                         ->get();
 
         $signer = new stdClass();
 
         $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','1')
                                                         ->where('certificate_type',2)
+                                                        ->where('report_type',1)
                                                         ->first();
 
         
         $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','2')
                                                         ->where('certificate_type',2)
+                                                        ->where('report_type',1)
                                                         ->first();
         $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$labReportInfo->id)->where('signer_order','3')
                                                         ->where('certificate_type',2)
+                                                        ->where('report_type',1)
                                                         ->first();
 
         $attach1 = !empty($signer->signer_1->signer->AttachFileAttachTo) ? $signer->signer_1->signer->AttachFileAttachTo : null;

@@ -9,7 +9,7 @@
             </div>
             <div class="inline-block w-50 p-0 float-right text-right" >
                 <div style="display:block; width: 100px;height: 28px;float:right;line-height:28px;text-align:center;border: 0.5px solid #000;padding-top:5px">
-                    รายงานที่ 1
+                    รายงานที่ 1 
                 </div>
             </div>
         </div>

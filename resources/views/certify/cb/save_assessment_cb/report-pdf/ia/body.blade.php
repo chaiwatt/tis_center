@@ -15,7 +15,7 @@
                 </td>
                 
                 <td>
-                    {{$certi_cb->name}}  
+                    {{$certi_cb->name_standard}}  
                 </td>
             </tr>
         </table>

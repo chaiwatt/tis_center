@@ -197,7 +197,7 @@
 
         </div>
         <div class="form-group">
-            <div class="col-md-6">
+            {{-- <div class="col-md-6">
                 <label class="col-md-5 text-right"><span class="text-danger">*</span> รายงานข้อบกพร่อง : </label>
                 <div class="col-md-7">
                     <div class="row">
@@ -206,6 +206,19 @@
                         </label>
                         <label class="col-md-6">
                             {!! Form::radio('bug_report', '2', false, ['class'=>'check check-readonly', 'data-radio'=>'iradio_square-red','required'=>'required']) !!} ไม่มี
+                        </label>
+                    </div>
+                </div>
+            </div> --}}
+            <div class="col-md-6">
+                <label class="col-md-5 text-right"><span class="text-danger">*</span> รายงานข้อบกพร่อง : </label>
+                <div class="col-md-7">
+                    <div class="row">
+                        <label class="col-md-6">
+                            <input type="radio" name="bug_report" value="1" class="check check-readonly" data-radio="iradio_square-green" required="required" checked> มี
+                        </label>
+                        <label class="col-md-6">
+                            <input type="radio" name="bug_report" value="2" class="check check-readonly" data-radio="iradio_square-red" required="required"> ไม่มี
                         </label>
                     </div>
                 </div>
@@ -252,7 +265,7 @@
          <div class="white-box" style="border: 2px solid #e5ebec;">
          <legend><h3>ขอบข่ายที่ขอรับการรับรอง (Scope)</h3></legend>   
             <div class="row">
-                <div class="col-md-12 ">
+                {{-- <div class="col-md-12 ">
                     <div id="other_attach-box">
                         <div class="form-group other_attach_scope">
                             <div class="col-md-4 text-right">
@@ -281,7 +294,38 @@
                             </div> 
                          </div>
                        </div>
-                 </div>
+                 </div> --}}
+                 
+                 @php
+                     $certiCb = $auditor->CertiCbCostTo;
+
+                 @endphp
+
+                 @if (isset($certiCb) && $certiCb->FileAttach3->count() > 0)
+                 <div class="row">
+                     @foreach($certiCb->FileAttach3 as $data)
+                       @if ($data->file)
+                         <div class="col-md-12">
+                             <div class="form-group">
+                                 <div class="col-md-4 text-light"> </div>
+                                 <div class="col-md-6 text-light">
+                                     <a href="{{url('certify/check/file_cb_client/'.$data->file.'/'.( !empty($data->file_client_name) ? $data->file_client_name :  basename($data->file) ))}}" target="_blank">
+                                         {!! HP::FileExtension($data->file)  ?? '' !!}
+                                         {{  !empty($data->file_client_name) ? $data->file_client_name :  basename($data->file)   }}
+                                     </a> 
+                                 </div>
+                                 {{-- <div class="col-md-2 text-left">
+                                     <a href="{{url('certify/certi_cb/delete').'/'.basename($data->id).'/'.$data->token}}" class="hide_attach btn btn-danger btn-xs" 
+                                          onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')" >
+                                         <i class="fa fa-remove"></i>
+                                     </a>
+                                 </div>  --}}
+                             </div>
+                         </div>
+                         @endif
+                      @endforeach
+                   </div>
+                 @endif
             </div>
             {{-- <div class="row">
                 <div class="col-md-12 ">
@@ -315,7 +359,6 @@
                        </div>
                  </div>
             </div> --}}
-
         </div>
     </div>
 </div>         

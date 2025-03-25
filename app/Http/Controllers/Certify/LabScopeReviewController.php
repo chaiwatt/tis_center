@@ -57,6 +57,7 @@ class LabScopeReviewController extends Controller
             $query = CertiLab::query();
             $query->where('scope_view_signer_id',$signer->id);
             $query->whereHas('report_to');
+            
         
             if ($filter_approval) {
                 // dd('ลงนามแล้ว');

@@ -1519,7 +1519,7 @@ class CheckCertificateLabController extends Controller
         }
 
        $copiedScopes = $this->copyScopeLabFromAttachement($cc->applicant);
-    //    dd($copiedScope);
+    //    dd($copiedScopes);
 
 
         return view('certify.check_certificate_lab.detail', compact('cc', 'Cost', 'find_cost_assessment','assessment', 'history', 'feewaiver',  'certi_lab','status_cancel','copiedScopes' ))  ;

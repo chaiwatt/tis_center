@@ -38,10 +38,12 @@
                 <th class="text-center" width="15%">ผลการประเมินที่พบ</th>
                 <th class="text-center" width="15%">มอก. 17025 : ข้อ</th>
                 <th class="text-center" width="10%">ประเภท</th>
+                @if($key1 > 0) 
+                <th class="text-center" width="15%" >สาเหตุ</th>
+                @endif
                 <th class="text-center" width="20%">แนวทางการแก้ไข</th>
 
                 @if($key1 > 0) 
-                <th class="text-center" width="15%" >สาเหตุ</th>
                 <th class="text-center" width="10%" >หลักฐาน</th>
                 @endif
             </tr>
@@ -65,6 +67,12 @@
                     <td>
                         {{  array_key_exists($item2->type,$type) ? $type[$item2->type] : '-' }}  
                     </td>
+
+                    @if($key1 > 0) 
+                    <td>
+                        {{ @$item2->cause ?? null }}
+                    </td>
+                    @endif
                 
                     <td>
                         {{ @$item2->details ?? null }}
@@ -76,9 +84,7 @@
                         @endif
                     </td>
                     @if($key1 > 0) 
-                    <td>
-                        {{ @$item2->cause ?? null }}
-                    </td>
+                  
                     <td>
                             @if($item2->status == 1) 
                                         @if($item2->file_status == 1)

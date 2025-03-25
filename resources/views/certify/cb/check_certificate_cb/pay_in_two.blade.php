@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left"> Pay-In ครั้งที่ 2 </h3>
+                    <h3 class="box-title pull-left"> Pay-In ครั้งที่ 2 landing</h3>
                     @can('view-'.str_slug('estimatedcostcb'))
                         <a class="btn btn-success pull-right" href="{{url("$previousUrl")}}">
                             <i class="icon-arrow-left-circle"></i> กลับ
@@ -86,6 +86,7 @@
                                 $purpose_cost = $purpose_costs[$purpose_type];
                             @endphp
                             <tr>
+                                
                                 <td class="text-center">1.</td>
                                 <td class="text-left">ค่าธรรมเนียมคำขอการใบรับรอง สก.</td>
                                 <td class="text-right">{{ number_format($fee, 2) }}</td>
@@ -501,6 +502,8 @@
 
 
          $('#save_pay_in').click(function () {
+            // alert('ok');
+            // return;
             var row =  $("input[name=conditional_type]:checked").val();
             if(row == '1'){ // เรียกเก็บค่าธรรมเนียม
 

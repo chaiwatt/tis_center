@@ -19,7 +19,9 @@ class CertiCBReport extends Model
                             'status_alert',
                             'details',
                             'created_by',
-                            'updated_by'
+                            'updated_by',
+                            'review_approve',
+                            'ability_confirm'
                             ];
     public function CertiCBCostTo()
     {

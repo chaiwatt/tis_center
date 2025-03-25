@@ -23,7 +23,7 @@
             @endcan
         </div>
 
-        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ landing {{ $cc->applicant->app_no ?? '-' }}
+        <h3 class="box-title" style="display: inline-block;">คำขอรับใบรับรองห้องปฏิบัติการ landing {{$cc->applicant->check->id}} {{ $cc->applicant->app_no ?? '-' }}
     @php
         $exported = $cc->applicant->certificate_export;
     @endphp
@@ -43,17 +43,12 @@
 
 <div class="row">
 
-    {{-- <input type="text" value="{{$cc->applicant->id}}"> --}}
     <div class="col-sm-12 ">
 
     
 <a class="form_group btn {{ ($cc->applicant->status >= 6) ? 'btn-info' : 'btn-warning'  }} "   href="{{ route('show.certificate.applicant.detail', ['certilab'=>$cc->applicant]) }}" >
     <i class="fa fa-search" aria-hidden="true"></i> คำขอ
 </a>
-
-{{-- <a class="form_group btn btn-info"   href="{{ url('certify/check_certificate/export_word/'.$cc->applicant->id) }}" >
-    <i class="fa fa-cloud-download"></i>  download
-</a> --}}
 
 @php 
     $User = App\User::where('runrecno',auth()->user()->runrecno)->first(); 
@@ -63,8 +58,6 @@
     }
     $applicant =  $cc->applicant ;
 @endphp
-
-{{-- @if($User->IsGetIdLathRoles() == 'false'  || $User->IsGetRolesAdmin() == 'true') --}}
 
 @if($applicant->status >= 6)
 
@@ -93,7 +86,7 @@
             ค่าใช้จ่าย
         </a>
     @endif
-{{-- @endif  --}}
+
             
 @if(!is_null($Cost) &&  $Cost->check_status == 1   &&  $Cost->status_scope  == 1)
     @if(count($applicant->certi_auditors_many)  > 0  )
@@ -118,10 +111,6 @@
 
         <div class="btn-group form_group">
             <div class="btn-group">
-
-                {{-- <a  class="btn  {{$auditors_btn}} " href="{{ url("certify/auditor-cb")}}" >
-                    {!! $auditors_icon  !!}    แต่งตั้งคณะฯ
-                </a> --}}
 
                 <button type="button" class="btn {{$auditors_btn}} dropdown-toggle" data-toggle="dropdown">
                     {!! $auditors_icon  !!}    แต่งตั้งคณะฯ<span class="caret"></span>
@@ -500,6 +489,7 @@
 
  @if($applicant->status >= 25 )
 
+    {{-- {{$applicant->certificate_export}} --}}
     {{-- {{$applicant->certificate_export->status}} --}}
     @if( isset($applicant)  &&  !is_null($applicant->certificate_export)  && !in_array($applicant->certificate_export->status,[99]))
         @php 
@@ -565,6 +555,7 @@
             
         @endif
     @else 
+    {{-- {{$applicant->report_to}} --}}
         @if ($applicant->report_to->ability_confirm !== null)
             <div class="btn-group form_group">
                 <form action="{{ url('/certify/certificate-export-lab/create')}}" method="POST" style="display:inline"  > 

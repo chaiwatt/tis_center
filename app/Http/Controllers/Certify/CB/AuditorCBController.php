@@ -117,6 +117,7 @@ class AuditorCBController extends Controller
      */
     public function create(Request $request)
     {
+      
         $model = str_slug('auditorcb','-');
         if(auth()->user()->can('add-'.$model)) {
           $previousUrl = app('url')->previous();
@@ -147,7 +148,28 @@ class AuditorCBController extends Controller
            }
            $signers = Signer::all();
            $cbAuditorTeams = CbAuditorTeam::where('state',1)->get();
-            return view('certify.cb.auditor_cb.create',['cbAuditorTeams'=>$cbAuditorTeams,'signers'=>$signers,'app_no' => $app_no ,'auditorcb' => $auditorcb,'auditors_status'=> $auditors_status,'previousUrl'=>$previousUrl]);
+
+           $selectUserIds  = User::whereIn('reg_subdepart',[1803])
+           ->pluck('runrecno')
+           ->toArray();
+
+           $select_users = Signer::whereIn('user_register_id',$selectUserIds)->get();
+          //  dd($select_users);
+          //  public function user()
+          //  {
+          //      return $this->belongsTo(User::class, 'user_register_id', 'runrecno');
+          //  }
+
+            return view('certify.cb.auditor_cb.create',[
+              'cbAuditorTeams'=>$cbAuditorTeams,
+              'signers'=>$signers,
+              'app_no' => $app_no ,
+              'auditorcb' => $auditorcb,
+              'auditors_status'=> $auditors_status,
+              'previousUrl'=>$previousUrl,
+              'select_users' => $select_users
+            ]);
+
         }
         abort(403);
 
@@ -165,6 +187,7 @@ class AuditorCBController extends Controller
           try {
                 $request->request->add(['created_by' => auth()->user()->getKey()]); //user create
                 $requestData = $request->all();
+                $requestData['cb_auditor_team_id'] =   $request->cbAuditorTeam ;
                 $requestData['status'] =   null ;
                 $requestData['step_id'] =  2  ;//ขอความเห็นแต่งคณะผู้ตรวจประเมิน
                 $requestData['vehicle'] = isset($request->vehicle) ? 1 : null ;
@@ -254,10 +277,12 @@ class AuditorCBController extends Controller
             $signers = Signer::all();
             $cbAuditorTeams = CbAuditorTeam::where('state',1)->get();
 
-            $messageRecordTransaction = CbMessageRecordTransaction::where('board_auditor_id',$id)->first();
-            $messageRecordTransactions = CbMessageRecordTransaction::where('board_auditor_id',$id)->get();
+            // $messageRecordTransaction = CbMessageRecordTransaction::where('board_auditor_id',$id)->first();
+            // $messageRecordTransactions = CbMessageRecordTransaction::where('board_auditor_id',$id)->get();
 
-            // dd('fuck');
+           $messageRecordTransaction = MessageRecordTransaction::where('board_auditor_id',$id)->where('certificate_type',0)->first();
+          $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$id)->where('certificate_type',0)->get();
+
 
             return view('certify.cb.auditor_cb.edit', compact('messageRecordTransaction','messageRecordTransactions','cbAuditorTeams','signers','auditorcb','auditors_status','previousUrl','attach_path'));
         }
@@ -274,12 +299,17 @@ class AuditorCBController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+      $cbAuditorTeam = CbAuditorTeam::find($request->cbAuditorTeam);
+      $auditorTeamData = json_decode($cbAuditorTeam->auditor_team_json, true);
+        // dd($request->cbAuditorTeam );
         $model = str_slug('auditorcb','-');
         if(auth()->user()->can('edit-'.$model)) {
      
           try {
           $request->request->add(['updated_by' => auth()->user()->getKey()]); //user update
           $requestData = $request->all();
+          $requestData['cb_auditor_team_id'] =   $request->cbAuditorTeam ;
           $requestData['status'] =   null ;
           $requestData['step_id'] =  2  ; //ขอความเห็นแต่งคณะผู้ตรวจประเมิน
           $requestData['vehicle'] = isset($request->vehicle) ? 1 : null ;
@@ -297,7 +327,8 @@ class AuditorCBController extends Controller
           //วันที่ตรวจประเมิน
           $this->DataCertiCBAuditorsDate($auditors->id,$request);
 
-          $this->storeStatus($auditors->id,(array)$requestData['list']);
+          // $this->storeStatus($auditors->id,(array)$requestData['list']);
+          $this->storeStatusFromCbAuditorTeam($auditors->id,$auditorTeamData);
 
            //ค่าใช้จ่าย
           $this->storeItems($auditors->id,$request);
@@ -597,7 +628,9 @@ class AuditorCBController extends Controller
              'message_record_status' => 1
          ]);
  
-         $check = MessageRecordTransaction::where('board_auditor_id',$baId)->get();
+         $check = MessageRecordTransaction::where('board_auditor_id',$baId)
+         ->where('certificate_type',0)
+         ->get();
          if($check->count() == 0){
              $signatures = json_decode($request->input('signaturesJson'), true);
              $viewUrl = url('/certify/auditor/view-cb-message-record/'.$baId);
@@ -632,7 +665,7 @@ class AuditorCBController extends Controller
                  } 
              }
          }else{
-            MessageRecordTransaction::where('board_auditor_id',$baId)->update([
+            MessageRecordTransaction::where('board_auditor_id',$baId)->where('certificate_type',0)->update([
                  'approval' => 0
              ]);
          }
@@ -769,7 +802,6 @@ class AuditorCBController extends Controller
    public function auditor_cb_doc_review_store(Request $request)
   {
       // ตรวจสอบความถูกต้องของข้อมูลที่ได้รับ (Validation)
-      // dd($request->all());
       $request->validate([
           'cb_id' => 'required|string',
           'cb_name' => 'required|string',
@@ -816,8 +848,14 @@ class AuditorCBController extends Controller
           'file' => $filePath,
           'filename' => $fileName,
           'auditors' => json_encode($auditors, JSON_UNESCAPED_UNICODE),
-          'status' => '0', // ตั้งค่า status เริ่มต้น
+          'status' => '0', 
       ]);
+
+      // CertiCb::find($request->certiCbId)->update([
+      //   'doc_auditor_assignment' => 2,
+      //   'doc_review_reject' => null,
+      //   'doc_review_reject_message' => null,
+      // ]);
 
       $certiCb = CertiCb::find($request->cb_id);
       if($request->assessment_type == '1')

@@ -405,7 +405,7 @@
         </div>
         <div class="header">
             รายงานการตรวจประเมินความสามารถของห้องปฏิบัติการทดสอบ/สอบเทียบ<br>
-            ตามมาตรฐานเลขที่ มอก. 17025-2561
+            ตามมาตรฐานเลขที่ มอก. 17025-2561  landing
         </div>
 
         <div class="checkbox-section">
@@ -1557,9 +1557,9 @@
                 {{$notice->degree}} --}}
 
                 <button  type="button" id="btn_draft_submit" class="btn btn-red" >ฉบับร่าง</button>
-                @if ($notice->report_status == 2 || ($notice->report_status == 1 && $notice->degree == 4))
-                    <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
-                @endif
+                {{-- @if ($notice->report_status == 2 || ($notice->report_status == 1 && $notice->degree == 4)) --}}
+                <button  type="button" id="btn_submit" class="btn btn-green" >ส่งข้อมูล</button>
+                {{-- @endif --}}
                 
             </div>
             
@@ -1624,7 +1624,7 @@
             labRequest = @json($labRequest ?? []);
             signAssessmentReportTransactions = @json($signAssessmentReportTransactions ?? []);
 
-            // console.log('labReportInfo',labReportInfo);
+            // console.log('boardAuditor',boardAuditor);
 
         //    if(labReportInfo.status !=="1"){
         //          $('#button_wrapper').hide(); // ซ่อน div ด้วย jQuery
@@ -3156,7 +3156,11 @@
                 contentType: 'application/json', // ระบุว่าเป็น JSON
                 success: function(response) {
                     console.log('สำเร็จ:', response);
-                    window.location.href = "{{ route('save_assessment.index') }}";
+                    // window.location.href = "{{ route('save_assessment.index') }}";
+                    const baseUrl = "{{ url('/certify/save_assessment/create') }}";
+                    // http://127.0.0.1:8081/certify/save_assessment/create/1856
+
+                    window.location.href = `${baseUrl}/${boardAuditor.id}`;
                 },
                 error: function(xhr, status, error) {
                     console.error('เกิดข้อผิดพลาด:', error);

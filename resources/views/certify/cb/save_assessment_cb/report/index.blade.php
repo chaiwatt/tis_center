@@ -852,7 +852,7 @@
                 <div class="inline-group">
                     <div class="label">1. หน่วยตรวจ : </div>
                     <div class="content">
-                        {{$certi_cb->name}}
+                        {{$certi_cb->name_standard}}
                     </div>
                 </div>
             </div>
