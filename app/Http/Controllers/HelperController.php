@@ -342,6 +342,43 @@ class HelperController extends Controller
         //     $admin_role->givePermissionTo($setting_team_ib_delete);
         // }
 
+
+        // $ib_board_auditor_doc_review_add    = Permission::firstOrCreate(['name' => 'add-ib-board-auditor-doc-review']);
+        // $ib_board_auditor_doc_review_view   = Permission::firstOrCreate(['name' => 'view-ib-board-auditor-doc-review']);
+        // $ib_board_auditor_doc_review_edit   = Permission::firstOrCreate(['name' => 'edit-ib-board-auditor-doc-review']);
+        // $ib_board_auditor_doc_review_delete = Permission::firstOrCreate(['name' => 'delete-ib-board-auditor-doc-review']);
+
+        // if (!$admin->hasPermission($ib_board_auditor_doc_review_add)) {
+        //     $admin_role->givePermissionTo($ib_board_auditor_doc_review_add);
+        // }
+        // if (!$admin->hasPermission($ib_board_auditor_doc_review_view)) {
+        //     $admin_role->givePermissionTo($ib_board_auditor_doc_review_view);
+        // }
+        // if (!$admin->hasPermission($ib_board_auditor_doc_review_edit)) {
+        //     $admin_role->givePermissionTo($ib_board_auditor_doc_review_edit);
+        // }
+        // if (!$admin->hasPermission($ib_board_auditor_doc_review_delete)) {
+        //     $admin_role->givePermissionTo($ib_board_auditor_doc_review_delete);
+        // }
+
+        // $save_ib_board_auditor_doc_review_add    = Permission::firstOrCreate(['name' => 'add-save-ib-board-auditor-doc-review']);
+        // $save_ib_board_auditor_doc_review_view   = Permission::firstOrCreate(['name' => 'view-save-ib-board-auditor-doc-review']);
+        // $save_ib_board_auditor_doc_review_edit   = Permission::firstOrCreate(['name' => 'edit-save-ib-board-auditor-doc-review']);
+        // $save_ib_board_auditor_doc_review_delete = Permission::firstOrCreate(['name' => 'delete-save-ib-board-auditor-doc-review']);
+
+        // if (!$admin->hasPermission($save_ib_board_auditor_doc_review_add)) {
+        //     $admin_role->givePermissionTo($save_ib_board_auditor_doc_review_add);
+        // }
+        // if (!$admin->hasPermission($save_ib_board_auditor_doc_review_view)) {
+        //     $admin_role->givePermissionTo($save_ib_board_auditor_doc_review_view);
+        // }
+        // if (!$admin->hasPermission($save_ib_board_auditor_doc_review_edit)) {
+        //     $admin_role->givePermissionTo($save_ib_board_auditor_doc_review_edit);
+        // }
+        // if (!$admin->hasPermission($save_ib_board_auditor_doc_review_delete)) {
+        //     $admin_role->givePermissionTo($save_ib_board_auditor_doc_review_delete);
+        // }
+
         return "done";
 
     }

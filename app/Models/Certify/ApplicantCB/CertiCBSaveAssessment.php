@@ -6,8 +6,9 @@ use DB;
 use HP;
 
 use App\User;
-use Kyslik\ColumnSortable\Sortable;
+use App\Certify\CbReportInfo;
 
+use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Certify\ApplicantCB\AuditorRepresentative;
 
@@ -112,24 +113,28 @@ class CertiCBSaveAssessment extends Model
                    ->where('file_section',4);
     }
     //ไฟล์แนบ car
-        public function FileAttachAssessment5To()
-        {
-            $tb = new CertiCBSaveAssessment;
-            return $this->belongsTo(CertiCBAttachAll::class, 'id','ref_id')
-                        ->where('table_name',$tb->getTable())
-                        ->where('file_section',5)
-                        ->orderby('id','desc');
-        }
+    public function FileAttachAssessment5To()
+    {
+        $tb = new CertiCBSaveAssessment;
+        return $this->belongsTo(CertiCBAttachAll::class, 'id','ref_id')
+                    ->where('table_name',$tb->getTable())
+                    ->where('file_section',5)
+                    ->orderby('id','desc');
+    }
 
 
-        public function getStatusTitleAttribute() {
-            $list = '';
-              if($this->bug_report == 1){
-                $list =  'พบข้อบกพร่อง';
-              }else{
-                $list =  'ไม่พบข้อบกพร่อง';
-              }
-              return  $list ?? '-';
-        }
+    public function getStatusTitleAttribute() {
+        $list = '';
+          if($this->bug_report == 1){
+            $list =  'พบข้อบกพร่อง';
+          }else{
+            $list =  'ไม่พบข้อบกพร่อง';
+          }
+          return  $list ?? '-';
+    }
+
+    public function cbReportInfo() {
+      return $this->hasOne(CbReportInfo::class, 'cb_assessment_id','id');
+    }
 
 }

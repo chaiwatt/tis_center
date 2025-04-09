@@ -25,7 +25,7 @@
     <input type="hidden" name="signaturesJson" id="signaturesJson">
     <div class="col-md-12">
         <div class="col-md-9">
-            <div class="form-group {{ $errors->has('certi_no') ? 'has-error' : ''}}">
+            <div class="form-group {{ $errors->has('certi_no') ? 'has-error' : ''}}" hidden>
                 {!! HTML::decode(Form::label('certi_no', '<span class="text-danger">*</span>  เลขคำขอ', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
                     @if(isset($app_no))
@@ -322,7 +322,7 @@
 
 
             <div class="form-group {{ $errors->has('other_attach') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('other_attach', '<span class="text-danger">*</span> บันทึก ลมอ. แต่งตั้งคณะผู้ตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                {!! HTML::decode(Form::label('other_attach', '<span class="text-danger">*</span> คณะผู้ตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
 
 

@@ -464,15 +464,67 @@ Route::group(['prefix' => 'certify'], function () {
     Route::resource('estimated_cost-ib', 'Certify\IB\\EstimatedCostIBController');
     Route::get('estimated_cost-ib/app_no/{id?}','Certify\IB\EstimatedCostIBController@GetDataTraderOperaterName');
     Route::get('estimated_cost-ib/delete_file/{id?}/{keys?}','Certify\IB\EstimatedCostIBController@delete_file');
+
+
+   //แต่งตั้งคณะผู้ตรวจประเมินเอกสาร (IB)
+   Route::get('/auditor_ib_doc_review/auditor_ib_doc_review_index', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review_index')->name('auditor_ib_doc_review_index');
+   Route::get('/auditor_ib_doc_review/auditor_ib_doc_review/{id}', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review')->name('auditor_ib_doc_review');
+   Route::post('/auditor_ib_doc_review/auditor_ib_doc_review_store', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review_store')->name('auditor_ib_doc_review_store');
+   Route::get('/auditor_ib_doc_review/auditor_ib_doc_review_edit/{id}', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review_edit')->name('auditor_ib_doc_review_edit');
+   Route::put('/auditor_ib_doc_review/auditor_ib_doc_review_update/{id}', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review_update')->name('auditor_ib_doc_review_update');
+   Route::post('/auditor_ib_doc_review/bypass_doc_auditor_assignment', 'Certify\IB\\AuditorIBController@bypass_doc_auditor_assignment')->name('bypass_ib_doc_auditor_assignment');
+   Route::post('/auditor_ib_doc_review/cancel_doc_review_team', 'Certify\IB\\AuditorIBController@cancel_doc_review_team')->name('ib_cancel_doc_review_team');
+   Route::post('/auditor_ib_doc_review/reject_doc_review', 'Certify\IB\\AuditorIBController@reject_doc_review')->name('ib_reject_doc_review');
+   Route::post('/auditor_ib_doc_review/accept_doc_review', 'Certify\IB\\AuditorIBController@accept_doc_review')->name('ib_accept_doc_review');
+   
+   Route::get('/auditor_ib_doc_review/auditor_ib_doc_review_result_show/{id}', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review_result_show')->name('auditor_ib_doc_review_result_show');
+   Route::put('/auditor_ib_doc_review/auditor_ib_doc_review_result_update/{id}', 'Certify\IB\\AuditorIBController@auditor_ib_doc_review_result_update')->name('auditor_ib_doc_review_result_update');
+
+   Route::get('/auditor_ib_doc_review/save_board_auditor_doc_review_index', 'Certify\IB\\AuditorIBController@save_board_auditor_doc_review_index')->name('save_board_auditor_doc_review_index');
+
+
+    
     //แต่งตั้งคณะผู้ตรวจประเมิน (IB)
+    Route::get('/auditor-ib/create/{id?}', 'Certify\IB\\AuditorIBController@create');
     Route::resource('/auditor-ib', 'Certify\IB\\AuditorIBController');
     Route::get('/auditor-ib/app_no/{id}', 'Certify\IB\\AuditorIBController@DataCertiNo');
     Route::post('/auditor-ib/update_delete/{id?}', 'Certify\IB\\AuditorIBController@update_delete');
+
+
+    Route::get('/auditor-ib/create-ib-message-record/{id?}', 'Certify\IB\\AuditorIBController@CreateIbMessageRecord')->name('certify.create_ib_message_record');
+    Route::post('/auditor-ib/save-ib-message-record/{id?}', 'Certify\IB\\AuditorIBController@SaveIbMessageRecord')->name('save.create_ib_message_record');
+    Route::get('/auditor-ib/view-ib-message-record/{id?}', 'Certify\IB\\AuditorIBController@ViewIbMessageRecord')->name('view.create_ib_message_record');
+
+
     
     Route::resource('/save_assessment-ib', 'Certify\IB\\SaveAssessmentIbController');
+
+    Route::get('/save_assessment-ib/create/{id?}','Certify\IB\\SaveAssessmentIbController@create')->name('save_ib_assessment.create');
+    Route::post('/save_assessment-ib/store/{id?}','Certify\IB\\SaveAssessmentIbController@store')->name('save_ib_assessment.store');
+
+    Route::get('/save_assessment-ib/ib-report-create/{id}','Certify\IB\\SaveAssessmentIbController@createIbReport')->name('save_assessment.ib_report_create');
+    Route::post('/save_assessment-ib/ib-report-store','Certify\IB\\SaveAssessmentIbController@storeIbReport')->name('save_assessment.ib_report_store');
+    Route::get('/save_assessment-ib/ib-report-view/{id}','Certify\IB\\SaveAssessmentIbController@viewIbReport')->name('save_assessment.ib_report_view');
+
+    Route::get('/save_assessment-ib/ib-report-two-create/{id}','Certify\IB\\SaveAssessmentIbController@createIbReportTwo')->name('save_assessment.ib_report_two_create');
+    Route::post('/save_assessment-ib/ib-report-two-store','Certify\IB\\SaveAssessmentIbController@storeIbReportTwo')->name('save_assessment.ib_report_two_store');
+    Route::get('/save_assessment-ib/ib-report-two-view/{id}','Certify\IB\\SaveAssessmentIbController@viewIbReportTwo')->name('save_assessment.ib_report_two_view');
+
     Route::get('/save_assessment-ib/certi_ib/{id?}', 'Certify\IB\\SaveAssessmentIbController@DataCertiIb');
     Route::get('/save_assessment-ib/assessment/{id?}/edit', 'Certify\IB\\SaveAssessmentIbController@DataAssessment');
     Route::post('/save_assessment-ib/update/{id?}', 'Certify\IB\\SaveAssessmentIbController@UpdateAssessment');
+
+    Route::post('/save_assessment-ib/check-complete-report-one-sign','Certify\IB\\SaveAssessmentIbController@checkCompleteReportOneSign')->name('save_assessment.check_complete_ib_report_one_sign');
+    Route::post('/save_assessment-ib/check-complete-report-two-sign','Certify\IB\\SaveAssessmentIbController@checkCompleteReportTwoSign')->name('save_assessment.check_complete_ib_report_two_sign');
+
+    Route::post('/save_assessment-ib/add-auditor-representative','Certify\IB\\SaveAssessmentIbController@addAuditorIbRepresentative')->name('save_assessment.add_auditor_ib_representative');
+    Route::post('/save_assessment-ib/delete-auditor-representative','Certify\IB\\SaveAssessmentIbController@deleteAuditorIbRepresentative')->name('delete_assessment.add_auditor_ib_representative');
+
+    Route::post('/save_assessment-ib/email-to-cb-expert/{id?}', 'Certify\IB\\SaveAssessmentIbController@EmailToIbExpert')->name('save_assessment.email_to_ib_expert');
+
+
+    Route::post('/save_assessment-ib/add-reference-document','Certify\IB\\SaveAssessmentIbController@addIbReferenceDocument')->name('delete_assessment.add_ib_reference_document');
+    Route::post('/save_assessment-ib/delete-reference-document','Certify\IB\\SaveAssessmentIbController@deleteIbReferenceDocument')->name('delete_assessment.add_ib_reference_document');
 
 
     Route::get('setting-team-ib', 'Certify\IB\\IbAuditorTeamController@index');
@@ -614,8 +666,18 @@ Route::group(['prefix' => 'certify'], function () {
     Route::post('/save_assessment-cb/cb-report-store','Certify\CB\\SaveAssessmentCBController@storeCbReport')->name('save_assessment.cb_report_store');
     Route::get('/save_assessment-cb/cb-report-view/{id}','Certify\CB\\SaveAssessmentCBController@viewCbReport')->name('save_assessment.cb_report_view');
 
+    Route::get('/save_assessment-cb/cb-report-two-create/{id}','Certify\CB\\SaveAssessmentCBController@createCbReportTwo')->name('save_assessment.cb_report_two_create');
+    Route::post('/save_assessment-cb/cb-report-two-store','Certify\CB\\SaveAssessmentCBController@storeCbReportTwo')->name('save_assessment.cb_report_two_store');
+    Route::get('/save_assessment-cb/cb-report-two-view/{id}','Certify\CB\\SaveAssessmentCBController@viewCbReportTwo')->name('save_assessment.cb_report_two_view');
+
+
     Route::get('/view-cb-info/{id?}','Certify\CB\\SaveAssessmentCBController@viewCbInfo')->name('save_assessment.view_cb_info');
     Route::post('/update-cb-info','Certify\CB\\SaveAssessmentCBController@updateCbInfo')->name('save_assessment.update_cb_info');
+
+
+
+    Route::post('/save_assessment-cb/check-complete-report-one-sign','Certify\CB\\SaveAssessmentCBController@checkCompleteReportOneSign')->name('save_assessment.check_complete_cb_report_one_sign');
+    Route::post('/save_assessment-cb/check-complete-report-two-sign','Certify\CB\\SaveAssessmentCBController@checkCompleteReportTwoSign')->name('save_assessment.check_complete_cb_report_two_sign');
 
     Route::post('/save_assessment-cb/add-auditor-representative','Certify\CB\\SaveAssessmentCBController@addAuditorRepresentative')->name('save_assessment.add_auditor_representative');
     Route::post('/save_assessment-cb/delete-auditor-representative','Certify\CB\\SaveAssessmentCBController@deleteAuditorRepresentative')->name('delete_assessment.add_auditor_representative');

@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Smalot\PdfParser\Parser;
 use App\Certify\CbReportInfo;
+use App\Certify\IbReportInfo;
 use App\Helpers\EpaymentDemo;
 use App\Models\Besurv\Signer;
 use Yajra\Datatables\Datatables;
@@ -56,6 +57,7 @@ use App\Models\Certify\Applicant\NoticeItem;
 use App\Models\Certify\SendCertificateLists;
 use App\Services\CreateTrackingLabReportPdf;
 use App\Services\CreateCbAssessmentReportPdf;
+use App\Services\CreateIbAssessmentReportPdf;
 use App\Models\Certificate\CbDocReviewAuditor;
 use App\Models\Certificate\TrackingAssessment;
 use App\Models\Certificate\TrackingInspection;
@@ -2988,5 +2990,56 @@ public function create_bill()
         $pdfContent = $pdfService->generateLabReportTwoPdf();
     }
 
+    public function getEmailInfo()
+    {
+        $sendCertificateList = SendCertificateLists::find(525);
+        $app =null;
+        if($sendCertificateList->certificate_type == 3){
+            $app = $sendCertificateList->app_cert_to;
+        }else if($sendCertificateList->certificate_type == 2)
+        {
+            $app = $sendCertificateList->app_cert_ib_to;
+        }else if($sendCertificateList->certificate_type == 1)
+        {
+            // dd('cb');
+            $app = $sendCertificateList->app_cert_cb_to;
+        }
+        // dd($app);
+        $mail = auth()->user()->reg_email;
+        $app = $sendCertificateList->app_cert_to;
+        // dd($app);
+        $dataMailCenter = $app->DataEmailCertifyCenter;
+        $dataMail = ['1804'=> 'lab1@tisi.mail.go.th','1805'=> 'lab2@tisi.mail.go.th','1806'=> 'lab3@tisi.mail.go.th'];
+        $EMail =  array_key_exists($app->subgroup,$dataMail)  ? $dataMail[$app->subgroup] :'admin@admin.com';
+        dd($dataMailCenter,$EMail);
+    }
+
+    public function check_ib_payin()
+    {
+        $today = now(); // กำหนดวันปัจจุบัน
+
+        $transactionPayIns = TransactionPayIn::where('invoiceStartDate', '<=', $today)
+            ->where('invoiceEndDate', '>=', $today)
+            ->where(function ($query) {
+                $query->where('status_confirmed', 0)
+                    ->orWhereNull('status_confirmed');
+            })
+            ->where('state', 1)
+            ->where('count', '<=', 3)
+            ->where(function ($query) {
+                $query->where('ref1', 'like', 'IB%');
+            })
+            ->get();
+        dd($transactionPayIns);
+    }
+
+    public function createIbAssessmentReportPdf()
+    {
+        $lastRecord = IbReportInfo::orderBy('id', 'desc')->first();
+        // dd($lastRecord->id);
+        $pdfService = new CreateIbAssessmentReportPdf($lastRecord->id,"ia");
+        $pdfContent = $pdfService->generateIbAssessmentReportPdf();
+    }
+    
 }
 

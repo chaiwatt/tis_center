@@ -3,7 +3,10 @@
 namespace App\Models\Certify;
 
 use App\Certify\CbReportInfo;
+use App\Certify\IbReportInfo;
 use App\Models\Besurv\Signer;
+use App\Certify\CbReportTwoInfo;
+use App\Certify\IbReportTwoInfo;
 use Kyslik\ColumnSortable\Sortable;
 use App\Models\Certify\LabReportInfo;
 use Illuminate\Database\Eloquent\Model;
@@ -55,6 +58,22 @@ class SignAssessmentReportTransaction extends Model
     {
         return $this->belongsTo(CbReportInfo::class, 'report_info_id', 'id');
     }
+
+    public function ibReportInfo()
+    {
+        return $this->belongsTo(IbReportInfo::class, 'report_info_id', 'id');
+    }
+
+    public function cbReportTwoInfo()
+    {
+        return $this->belongsTo(CbReportTwoInfo::class, 'report_info_id', 'id');
+    }
+
+    public function ibReportTwoInfo()
+    {
+        return $this->belongsTo(IbReportTwoInfo::class, 'report_info_id', 'id');
+    }
+
 
     public function signer(){
         return $this->belongsTo(Signer::class, 'signer_id', 'id');

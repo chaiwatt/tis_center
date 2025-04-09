@@ -1612,9 +1612,9 @@
             <div class="submit-section" id="button_wrapper">
                 <button type="button" id="btn_draft_submit" class="btn-draft" >ฉบับร่าง</button>
                 {{-- {{$assessment->bug_report }} --}}
-                @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 3))
+                {{-- @if ($assessment->bug_report == 2 || ($assessment->bug_report == 1 && $assessment->degree == 3)) --}}
                     <button type="button" id="btn_submit" class="btn-submit" >บันทึก</button>
-                @endif
+                {{-- @endif --}}
             </div>
         </form>
     </div>

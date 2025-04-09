@@ -25,7 +25,7 @@
         <div class="col-sm-12">
             <div class="white-box">
 
-                <h3 class="box-title pull-left">ระบบตรวจสอบคำขอหน่วยรับรอง landing {{ $certi_cb->app_no ?? null }} </h3>
+                <h3 class="box-title pull-left">ระบบตรวจสอบคำขอหน่วยรับรอง show {{ $certi_cb->app_no ?? null }} </h3>
                 @can('view-'.str_slug('checkcertificatecb'))
                     <a class="btn btn-success pull-right" href="{{ url('/certify/check_certificate-cb') }}">
                         <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ
@@ -123,7 +123,7 @@
                             <div class="form_group btn-group">
                                 <div class="btn-group">
                                     <button type="button" class="btn {{$auditors_btn}} dropdown-toggle" data-toggle="dropdown">
-                                        แต่งตั้งคณะฯ   <span class="caret"></span>
+                                        แต่งตั้งคณะฯ  <span class="caret"></span>
                                     </button>
                                     <div class="dropdown-menu" role="menu" >
                                         @if($certi_cb->status == 10)   <!-- อยู่ระหว่างดำเนินการ -->
@@ -151,10 +151,12 @@
                                                 }elseif($item->status == 2){
                                                     $auditors_btn = 'btn-danger';  
                                                 }
+                                                $total = count($certi_cb->CertiCBAuditorsManyBy);
+                                                $display_key = $total - $i_key;
                                             @endphp
                                             @if ($item->status_cancel != 1)
                                                 <a  class="btn {{$auditors_btn}} " href="{{ url("certify/auditor-cb/".$item->id."/edit")}}" style="background-color:{{$auditors_btn}};width:750px;text-align: left">
-                                                    ครั้งที่ {{ ($i_key + 1 )}} :  
+                                                    ครั้งที่ {{ $display_key }} :  
                                                     {{ $item->auditor ?? '-'}}
                                                 </a> 
                                                 <br>
@@ -165,11 +167,18 @@
                             </div>
                         @else 
                             <div class="btn-group form_group">
-                                <form action="{{ url('/certify/auditor-cb/create')}}" method="POST" style="display:inline" > 
+                                {{-- <form action="{{ url('/certify/auditor-cb/create')}}" method="POST" style="display:inline" > 
                                     {{ csrf_field() }}
                                     {!! Form::hidden('certicb_id', (!empty($certi_cb->id) ? $certi_cb->id  : null) , [ 'class' => 'form-control' ]); !!}
                                     <button class="btn btn-warning" type="submit" >
                                         <i class="fa fa-plus"></i>    แต่งตั้งคณะฯ
+                                    </button>
+                                </form> --}}
+                                <form action="{{ url('/certify/auditor-cb/create')}}" method="POST" style="display:inline" >
+                                    @csrf
+                                    <input type="hidden" name="certicb_id" value="{{ !empty($certi_cb->id) ? $certi_cb->id : null }}" class="form-control">
+                                    <button class="btn btn-warning" type="submit">
+                                        <i class="fa fa-plus"></i> แต่งตั้งคณะฯ
                                     </button>
                                 </form>
                             </div>
@@ -208,6 +217,7 @@
                                 <button type="button" class="btn {{$payin1_btn}} dropdown-toggle" data-toggle="dropdown">
                                     {!! $payin1_icon  !!}  Pay-in ครั้งที่ 1 <span class="caret"></span>
                                 </button>
+                                {{-- {{$certi_cb->CertiCBPayInOneMany->count()}} --}}
                                 <div class="dropdown-menu" role="menu" >
                                     @php $key_payin_one = 0;   @endphp
                                     @foreach($certi_cb->CertiCBPayInOneMany as $key => $item)
@@ -222,10 +232,12 @@
                                             }elseif($item->state == 2){   //ผปก. ส่งให้ จนท.
                                                 $payin1_btn = 'btn-danger';  
                                             }
+                                            $total = count($certi_cb->CertiCBPayInOneMany);
+                                            $display_key = $total - $key;
                                         @endphp
                                         @if ($item->status   != 3) 
                                             <a  class="btn {{$payin1_btn}} " href="{{ url("certify/check_certificate-cb/Pay_In1/".$item->id."/".$certi_cb->token)}}" style="width:750px;text-align: left">
-                                                {{-- ครั้งที่ห {{  ($key_payin_one +1) }} :   --}}
+                                                ครั้งที่ห {{ $display_key }} :  
                                                 {{ $item->CertiCBAuditorsTo->auditor ?? '-'}}
                                             </a> 
                                             <br>
@@ -266,49 +278,6 @@
                             }
                         @endphp
 
-                        {{-- <div class="form_group btn-group">
-                            <div class="btn-group">
-                                <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-cb")}}" >
-                                    {!! $assessment_icon  !!}    ผลการตรวจประเมิน
-                                </a>
-                                <button type="button" class="btn  {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
-                                    <span class="caret"></span>
-                                </button>
-
-                                <div class="dropdown-menu" role="menu" >
-                                    @foreach($certi_cb->CertiCBSaveAssessmentMany as $key => $assessment)
-                                        @php
-                                            $assessment_url =  '';
-                                            $assessment_btn =  '';
-                                            if ($assessment->degree == 7) { // ผ่านการการประเมิน
-                                                $assessment_btn =  'btn-info';
-                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
-                                            }elseif ($assessment->degree == 0) {  //ฉบับร่าง
-                                                $assessment_btn =  'btn-primary';
-                                                $assessment_url =  'certify/save_assessment-cb/'.$assessment->id.'/edit'; 
-                                            }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
-                                                $assessment_btn =  'btn-success';
-                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
-                                            }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
-                                                $assessment_btn =  '#ffff80';
-                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
-                                            }else {    //ผปก. ส่งให้ จนท.
-                                                $assessment_btn =  'btn-danger';
-                                                $assessment_url =  'certify/save_assessment-cb/assessment/'.$assessment->id.'/edit';
-                                            }
-
-                                        @endphp
-                                        <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
-                                            ครั้งที่ {{ count($certi_cb->CertiCBSaveAssessmentMany) - ($key) }} :  
-                                            {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}
-                                        </a> 
-                                        <br>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div> --}}
-
-
                         <div class="form_group btn-group">
                             <div class="btn-group">
                                 <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-cb")}}" >
@@ -319,9 +288,11 @@
                                 </button>
 
                                 <div class="dropdown-menu" role="menu" >
+                                    {{-- {{$certi_cb->paidPayIn1BoardAuditors()}} --}}
                                     @foreach($certi_cb->paidPayIn1BoardAuditors() as $key => $boardAuditor)
                                         @php
                                             $assessment = $boardAuditor->certiCBSaveAssessment();
+                                            // dd($assessment);
                                                 $assessment_url =  '';
                                                 $assessment_btn =  '';
                                                 if ($assessment != null) {
@@ -346,9 +317,7 @@
 
 
                                         @endphp
-                                       {{-- @php
-                                           dd($assessment)
-                                       @endphp --}}
+
                                         @if ($assessment != null)
                                                 {{-- <a  class="btn btn-info  " href=""  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                                     ครั้งที่ {{ $key + 1 }} :  

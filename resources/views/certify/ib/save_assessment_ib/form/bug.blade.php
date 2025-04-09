@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-sm-12 m-t-15" v-if="isTable">
-        <table class="table color-bordered-table primary-bordered-table">
+        <table class="table color-bordered-table primary-bordered-table no-hover-animate">
             <thead>
             <tr>
                 <th class="text-center" width="2%">ลำดับ</th>
@@ -31,7 +31,7 @@
                     <td class="text-center">
                         {{$key+1}}
                     </td>
-                    <td>
+                    {{-- <td>
                         {!! Form::hidden('id[]',!empty($item->id)?$item->id:null, ['class' => 'form-control'])  !!}
                        {!! Form::text('report[]', $item->report ?? null,  ['class' => 'form-control ','disabled'=>true])!!}
                     </td>
@@ -39,20 +39,36 @@
                   
                         {!! Form::text('notice[]', $item->remark ?? null,  ['class' => 'form-control notice','disabled'=>true])!!}
                     </td>
-                    {{-- <td>
-                       {!! Form::text('no[]', $item->no ?? null,  ['class' => 'form-control ','disabled'=>true])!!}
-                    </td>
-                    <td>
-                        {!! Form::text('type[]',  $type[$item->type] ?? null,  ['class' => 'form-control','disabled'=>true])!!}
-                    </td> --}}
                     <td>
                          {!! Form::text('details[]', $item->details ?? null,  ['class' => 'form-control','disabled'=>true])!!}
+                    </td> --}}
+                    <td style="padding: 0px;">
+                        <input type="hidden" name="id[]" value="{{ !empty($item->id) ? $item->id : '' }}" class="form-control">
+                        <textarea name="report[]" class="form-control non-editable auto-expand" style="border-right: 1px solid #ccc;" >{{ $item->report ?? '' }}</textarea>
                     </td>
-                    <td  class="text-center">
+                    <td style="padding: 0px;">
+                        <textarea name="notice[]" class="form-control non-editable notice auto-expand" style="border-left: none; border-right: 1px solid #ccc;" >{{ $item->remark ?? '' }}</textarea>
+                    </td>
+                    
+                    <td style="padding: 0px;">
+                        <textarea name="details" class="form-control non-editable  auto-expand" style="border-left: none; border-right: 1px solid #ccc;"  >{{ $item->details ?? '' }}</textarea>
+                    </td>
+
+                    {{-- <td  class="text-center">
                           <label>{!! Form::checkbox('status['.$item->id.']', '1', !empty($item->status == 1 ) ? true : false,
                            ['class'=>"check checkbox_status $status assessment_results",'data-checkbox'=>"icheckbox_flat-green", "data-key"=>($key+1)]) !!} &nbsp;ผ่าน &nbsp;
                            </label>
-                   </td>
+                   </td> --}}
+                   <td class="text-center" style="vertical-align: top">
+                    <label>
+                        <input type="checkbox" name="status[{{ $item->id }}]" value="1" 
+                            class="check checkbox_status {{ $status }} assessment_results" 
+                            data-checkbox="icheckbox_flat-green" 
+                            data-key="{{ $key+1 }}"
+                            {{ !empty($item->status) && $item->status == 1 ? 'checked' : '' }}>
+                        &nbsp;ผ่าน &nbsp;
+                    </label>
+                </td>
                    <td  class="text-center">
 
                        @if(!is_null($item->attachs))
@@ -77,14 +93,15 @@
     </div>
 </div>
 <div class="row" id="div_comment">
-    <div class="col-sm-3 text-right">ระบุข้อคิดเห็น (ผลการประเมิน) :</div>
-    <div class="col-sm-9">
-        <table class="table color-bordered-table primary-bordered-table">
+    <div class="col-sm-12">ระบุข้อคิดเห็น (ผลการประเมิน) :</div>
+    <div class="col-sm-12">
+        <table class="table color-bordered-table primary-bordered-table no-hover-animate">
             <thead>
                 <tr>
                     <th class="text-center" width="2%">ลำดับ</th>
-                    <th class="text-center" width="40%">ผลการประเมินที่พบ</th>
-                    <th class="text-center" width="58%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">ผลการประเมินที่พบ</th>
+                    <th class="text-center" width="38%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">สาเหตุ</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -92,15 +109,19 @@
                 @foreach($assessment->CertiIBBugMany as $key => $item)
                         @if($item->status != 1)
                             <tr>
-                                <td class="text-center">
+                                <td class="text-center" style="padding: 0px">
                                     {{$key+1}}
                                 </td>
-                                <td>
+                                <td style="padding: 0px;pointer-events: none;opacity: 0.6;">
                                     {{ $item->remark ?? null }}
                                 </td>
-                                <td>
+                                <td style="padding: 0px">
                                     <input type="hidden" class="type_itme" value="{{$item->id}}">
-                                    {!! Form::textarea('comment['.$item->id.']',null, [ 'class' => 'form-control','rows' => 3,'required'=>true]) !!} 
+                                    {{-- {!! Form::textarea('comment['.$item->id.']',null, [ 'class' => 'form-control','rows' => 3,'required'=>true]) !!}  --}}
+                                    <textarea name="comment[{{ $item->id }}]" class="form-control auto-expand" style="border-right: 1px solid #ccc;"  rows="5" required></textarea>
+                                </td>
+                                <td style="padding: 0px">
+                                    <textarea name="cause[{{ $item->id }}]" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;" rows="5" required></textarea>
                                 </td>
                             </tr>
                         @endif
@@ -113,14 +134,15 @@
 
 
 <div class="row" id="div_file_comment">
-    <div class="col-sm-3 text-right">ระบุข้อคิดเห็น (หลักฐาน) :</div>
-    <div class="col-sm-9">
-        <table class="table color-bordered-table primary-bordered-table">
+    <div class="col-sm-12 text-right">ระบุข้อคิดเห็น (หลักฐาน) :</div>
+    <div class="col-sm-12">
+        <table class="table color-bordered-table primary-bordered-table no-hover-animate">
             <thead>
                 <tr>
                     <th class="text-center" width="2%">ลำดับ</th>
-                    <th class="text-center" width="40%">ผลการประเมินที่พบ</th>
-                    <th class="text-center" width="58%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">ผลการประเมินที่พบ</th>
+                    <th class="text-center" width="38%">ข้อคิดเห็นของคณะผู้ตรวจประเมิน</th>
+                    <th class="text-center" width="30%">สาเหตุ</th>
                 </tr>
             </thead>
             <tbody id="table_body_file">
@@ -128,15 +150,19 @@
                 @foreach($assessment->CertiIBBugMany as $key => $item)
                         @if($item->status == 1 &&   $item->file_status != 1)
                             <tr>
-                                <td class="text-center">
+                                <td class="text-center" style="padding: 0px">
                                     {{$key+1}}
                                 </td>
-                                <td>
+                                <td style="padding: 0px">
                                     {{ $item->remark ?? null }}
                                 </td>
                                 <td>
                                      <input type="hidden" class="type_itme" value="{{$item->id}}">
-                                     {!! Form::textarea('file_comment['.$item->id.']', null ,  ['class' => 'form-control file_comment','rows' => 3,'required'=>true])!!}
+                                     {{-- {!! Form::textarea('file_comment['.$item->id.']', null ,  ['class' => 'form-control file_comment','rows' => 3,'required'=>true])!!} --}}
+                                     <textarea name="file_comment[{{ $item->id }}]" class="form-control file_comment auto-expand" style="border-right: 1px solid #ccc;" rows="5" required></textarea>
+                                </td>
+                                <td style="padding: 0px">
+                                    <textarea name="cause[{{ $item->id }}]" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;" rows="5" required></textarea>
                                 </td>
                             </tr>
                         @endif
@@ -149,8 +175,8 @@
 
 <div class="row div_hide_show_scope">
     <div class="col-md-12">
-         <div class="white-box">
-
+         {{-- <div class="white-box"> --}}
+{{-- 
             <div class="row ">
                 <div class="col-sm-4 text-right"><span class="text-danger">*</span>รายงานปิด Car  :</div>
                 <div class="col-sm-6">
@@ -176,11 +202,11 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
             
             <div class="form-group" id="div_file_scope">
  
-     <div class="row form-group" id="div_details">
+     <div class="row form-group" id="div_details" hidden>
          <div class="col-md-12">
              <div class="white-box" style="border: 2px solid #e5ebec;">
              <legend><h3>ขอบข่ายที่ขอรับการรับรอง (Scope)</h3></legend>   
@@ -229,7 +255,7 @@
                            </div>
                      </div>
                 </div>
-                <div class="row">
+                {{-- <div class="row">
                     <div class="col-md-12 ">
                         <div id="other_attach_report">
                             @if(!is_null($assessment) && (count($assessment->FileAttachAssessment3Many) > 0 ) )
@@ -272,7 +298,7 @@
 
                            </div>
                      </div>
-                </div>
+                </div> --}}
     
             </div>
         </div>
@@ -280,7 +306,7 @@
             </div>
 
 
-        </div>
+        {{-- </div> --}}
     </div>     
  </div> 
 
@@ -305,6 +331,44 @@
 </script> --}}
 <script>
     $(document).ready(function(){
+
+        function autoExpand(textarea) {
+                    textarea.style.height = 'auto'; // รีเซ็ตความสูง
+                    textarea.style.height = textarea.scrollHeight + 'px'; // กำหนดความสูงตามเนื้อหา
+                }
+    
+                // ฟังก์ชันปรับขนาด textarea ทุกตัวในแถวเดียวกัน
+                function syncRowHeight(textarea) {
+                    let $row = $(textarea).closest('tr'); // หา tr ที่ textarea อยู่
+                    let maxHeight = 0;
+    
+                    // วนลูปหา maxHeight ใน textarea ทุกตัวในแถว
+                    $row.find('.auto-expand').each(function () {
+                        this.style.height = 'auto'; // รีเซ็ตความสูงก่อนคำนวณ
+                        let currentHeight = this.scrollHeight;
+                        if (currentHeight > maxHeight) {
+                            maxHeight = currentHeight;
+                        }
+                    });
+    
+                    // กำหนดความสูงให้ textarea ทุกตัวในแถวเท่ากัน
+                    $row.find('.auto-expand').each(function () {
+                        this.style.height = maxHeight + 'px';
+                    });
+                }
+    
+                // ดักจับ event input
+                $(document).on('input', '.auto-expand', function () {
+                    // console.log('aha');
+                    autoExpand(this); // ปรับ textarea ที่มีการเปลี่ยนแปลง
+                    syncRowHeight(this); // ปรับ textarea ทั้งแถว
+                });
+    
+                // ปรับขนาดทุก textarea เมื่อโหลดหน้าเว็บ
+                $('.auto-expand').each(function () {
+                    autoExpand(this);
+                    syncRowHeight(this);
+                });
         
             //   ResetTableFileNumber();
             check_max_size_file();
@@ -321,30 +385,39 @@
                   html += '<tr>';
                   html += '<td class="text-center">'+key+'</td>';
                   html += '<td>'+notice_id+'</td>';
-                  html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="file_comment['+itme+']" rows="3" cols="50" required  class="form-control"> </textarea> </td>';
+                  html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="file_comment['+itme+']" rows="5" style="border-right: 1px solid #ccc;" required  class="form-control file_comment auto-expand"> </textarea></td>';
+                  html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="cause['+itme+']" rows="5" style="border-left: none; border-right: 1px solid #ccc;" required  class="form-control auto-expand"> </textarea></td>';
                   html += '</tr>';
                   table.append(html);
             }
+            // html += '<td style="padding: 0px"> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="cause['+itme+']" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;"  rows="5"  required > </textarea> </td>';
            
             // ResetTableFileNumber();
             // 
             let file_status =  $(".file_status:checked").length;
             let notice = '{{ !empty($assessment->CertiIBBugMany) ? count($assessment->CertiIBBugMany) : 0 }}';
+            // console.log('notice',notice)
             if(file_status == notice){  
                 $('.div_hide_show_scope').show();
+                $('#div_file_comment').hide();
                 $('.status_bug_report').hide();
                 $('.report_scope').prop('required', true);
                 $('.file_scope_required').prop('required', true);
+                $('#assessment_passed').val("1")
             }else{
+                $('#div_file_comment').show();
                 $('.div_hide_show_scope').hide();
                 $('.status_bug_report').show();
                 $('.report_scope').prop('required', false);
                 $('.file_scope_required').prop('required', false);
+                $('#assessment_passed').val("0")
             } 
 
          });
 
         let file_status =    $('#table_body').find('.file_status:not(:checked)').length;
+
+        console.log('file_status',file_status)
         if(file_status > 0){
             $('#div_file_comment').show();   
             $('.file_comment').prop('required', true);
@@ -356,6 +429,7 @@
         let results =  $(".assessment_results:checked").length;
             let notice = '{{ !empty($assessment->CertiIBBugMany) ? count($assessment->CertiIBBugMany) : 0 }}';
             if(results == notice){
+                
                 $('#div_comment').hide();
             }
 
@@ -462,10 +536,12 @@
                       html += '<tr>';
                       html += '<td class="text-center">'+key+'</td>';
                       html += '<td>'+notice+'</td>';
-                      html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="comment['+itme+']" rows="3" cols="50" required  class="form-control"> </textarea> </td>';
+                      html += '<td style="padding: 0px"> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="comment['+itme+']" class="form-control auto-expand" style="border-right: 1px solid #ccc;"  rows="5" required ></textarea></td>';
+                      html += '<td style="padding: 0px"> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="cause['+itme+']" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;"  rows="5"  required ></textarea></td>';
                       html += '</tr>';
                       table.append(html);
                 // ResetTableNumber();
+                // <textarea name="cause[{{ $item->id }}]" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;" rows="5" required></textarea>
         }
  
         //รีเซตเลขลำดับ

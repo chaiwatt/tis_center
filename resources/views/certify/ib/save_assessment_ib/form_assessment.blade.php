@@ -2,13 +2,37 @@
 @push('css')
     <link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
     <link href="{{asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')}}" rel="stylesheet" type="text/css" />
+    <style>
+        textarea.auto-expand {
+            border-radius: 0 !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            resize: none; 
+            overflow: hidden; 
+            min-height: 50px; 
+        }
+        .no-hover-animate tbody tr:hover {
+            background-color: inherit !important; /* ปิดการเปลี่ยนสี background */
+            transition: none !important; /* ปิดเอฟเฟกต์การเปลี่ยนแปลง */
+        }
+        
+        /* กำหนดขนาดความกว้างของ SweetAlert2 */
+        .custom-swal-popup {
+            width: 500px !important;  /* ปรับความกว้างตามต้องการ */
+        }
+
+        textarea.non-editable {
+            pointer-events: none; /* ทำให้ไม่สามารถคลิกหรือแก้ไขได้ */
+            opacity: 0.9; /* กำหนดความทึบของ textarea */
+        }
+    </style>
 @endpush
 @section('content')
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">บันทึกผลการตรวจประเมิน (IB) {{ $assessment->id }}</h3>
+                    <h3 class="box-title pull-left">บันทึกผลการตรวจประเมิน (IB) checkpoint {{ $assessment->id }}</h3>
                     @can('view-'.str_slug('saveassessmentib'))
                         <a class="btn btn-success pull-right loading_state" href="{{ url('/certify/save_assessment-ib') }}">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ
@@ -34,6 +58,8 @@
                     ]) !!}
  <div id="box-readonly">
                     <div class="row">
+                        <input type="hidden" id="assessment_passed" name="assessment_passed" value="0">
+                        <input type="hidden" id="assessment_id" value="{{$assessment->id}}">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <div class="col-md-6">
@@ -69,7 +95,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" hidden>
                                 <div class="col-md-6">
                                     <label class="col-md-5 text-right"><span class="text-danger">*</span> รายงานข้อบกพร่อง : </label>
                                     <div class="col-md-7">
@@ -87,21 +113,78 @@
                                     <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
                                     <div class="col-md-8">
                                         @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) 
-                                              <p id="RemoveFlie">
                                                 <a href="{{url('certify/check/file_ib_client/'.$assessment->FileAttachAssessment1To->file.'/'.( !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name : 'null' ))}}" 
                                                     title="{{ !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name :  basename($assessment->FileAttachAssessment1To->file) }}" target="_blank">
                                                     {!! HP::FileExtension($assessment->FileAttachAssessment1To->file)  ?? '' !!}
                                                 </a> 
-                                                <button class="btn btn-danger btn-xs div_hide" type="button"
-                                                 onclick="RemoveFlie({{$assessment->FileAttachAssessment1To->id}})">
-                                                   <i class="icon-close"></i>
-                                               </button>   
                                             </p>
-                                            <div id="AddFile"></div>      
                                         @endif
                                     </div>
                                 </div>
                             </div>
+                            {{-- {{$assessment->bug_report}} --}}
+                            @if ($assessment->bug_report == 1)
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
+                                    <div class="col-md-8">
+                                        @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) 
+                                                <a href="{{url('certify/check/file_ib_client/'.$assessment->FileAttachAssessment1To->file.'/'.( !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name : 'null' ))}}" 
+                                                    title="{{ !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name :  basename($assessment->FileAttachAssessment1To->file) }}" target="_blank">
+                                                    {!! HP::FileExtension($assessment->FileAttachAssessment1To->file)  ?? '' !!} {{$assessment->FileAttachAssessment1To->file_client_name}}
+                                                </a> 
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            @endif
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <label class="col-md-4 text-right"><span class="text-danger">*</span>ขอบข่ายการรับรอง : </label>
+                                        <div class="col-md-8">
+                                            @if(count($assessment->FileAttachAssessment2Many) > 0 ) 
+                                            @foreach($assessment->FileAttachAssessment2Many as  $key => $item)
+                                                <p>
+                                                   <a style="text-decoration: none" href="{{url('certify/check/file_ib_client/'.$item->file.'/'.( !empty($item->file_client_name) ? $item->file_client_name : 'null' ))}}" 
+                                                    title="{{ !empty($item->file_client_name) ? $item->file_client_name :  basename($item->file) }}" target="_blank">
+                                                        {!! HP::FileExtension($item->file)  ?? '' !!} {{$item->file_client_name}}
+                                                    </a>  
+                                                </p>
+                                            @endforeach
+                                        @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if ($assessment->bug_report == 1)
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน (ปิดcar): </label>
+                                        <div class="col-md-8">
+                                            @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment5To)) 
+                                                    <a href="{{url('certify/check/file_ib_client/'.$assessment->FileAttachAssessment5To->file.'/'.( !empty($assessment->FileAttachAssessment5To->file_client_name) ? $assessment->FileAttachAssessment5To->file_client_name : 'null' ))}}" 
+                                                        title="{{ !empty($assessment->FileAttachAssessment5To->file_client_name) ? $assessment->FileAttachAssessment5To->file_client_name :  basename($assessment->FileAttachAssessment5To->file) }}" target="_blank">
+                                                        {!! HP::FileExtension($assessment->FileAttachAssessment5To->file)  ?? '' !!} {{$assessment->FileAttachAssessment5To->file_client_name}}
+                                                    </a> 
+                                             @else
+                                                <a href="{{route('save_assessment.ib_report_two_create',['id' => $assessment->id])}}"
+                                                    title="จัดทำรายงาน2" class="btn btn-warning">
+                                                    รายงานที่2
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        @endif
+                           
                         </div>
                     </div>
 
@@ -161,12 +244,12 @@
                      </div>
                      <hr>
                         <div class="clearfix"></div> 
-                         @include ('certify/ib.save_assessment_ib/form.log_bug')
+                         @include ('certify.ib.save_assessment_ib.form.log_bug')
                          @if($assessment->degree == 2 || $assessment->degree == 8)
-                          @include ('certify/ib.save_assessment_ib/form.bug')
+                          @include ('certify.ib.save_assessment_ib.form.bug')
                           @endif
                           @if($assessment->degree >= 5 || $assessment->degree == 8)
-                          @include ('certify/ib.save_assessment_ib/form.log_inspection')
+                          @include ('certify.ib.save_assessment_ib.form.log_inspection')
                           @endif
               
 </div>
@@ -336,20 +419,68 @@ function  submit_form(){
                         l = 3;
                  }
             }
-            Swal.fire({
-                title:title,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
+            // Swal.fire({
+            //     title:title,
+            //     icon: 'warning',
+            //     showCancelButton: true,
+            //     confirmButtonColor: '#3085d6',
+            //     cancelButtonColor: '#d33',
+            //     confirmButtonText: 'บันทึก',
+            //     cancelButtonText: 'ยกเลิก'
+            //     }).then((result) => {
+            //         if (result.value) {
+            //             $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+            //             $('#form_assessment').submit();
+            //         }
+            // })
+
+            const _token = $('input[name="_token"]').val();
+            var assessment_id = $('#assessment_id').val();
+// alert($('#assessment_passed').val());
+            // return;
+          Swal.fire({
+              title:title,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'บันทึก',
+              cancelButtonText: 'ยกเลิก'
+              }).then((result) => {
+                if($('#assessment_passed').val() == "1"){
+                    // alert($('#assessment_passed').val());
+                    $.ajax({
+                        url: "{{route('save_assessment.check_complete_ib_report_two_sign')}}",
+                        method: "POST",
+                        data: {
+                            _token: _token,
+                            assessment_id: $('#assessment_id').val(),
+                        },
+                        success: function(result) {
+                            console.log(result);
+                            if (result.message == true) {
+                                $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                $('#form_assessment').submit();
+                            }else{
+                                
+                                if (result.record_count == 0) {
+                                    alert('ยังไม่ได้สร้างรายงานปิด Car(รายงานที่2)');
+                                    // window.location.href = window.location.origin + '/certify/save_assessment-ib/ib-report-two-create/' + assessment_id;
+                                }else{
+                                    alert('อยู่ระหว่างการลงนามรายงานปิด Car(รายงานที่2)');
+                                }
+                            }
+
+                        }
+                    });
+                }else{
                     if (result.value) {
                         $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
                         $('#form_assessment').submit();
                     }
-            })
+                }
+
+          })
         }
  
     $(document).ready(function(){

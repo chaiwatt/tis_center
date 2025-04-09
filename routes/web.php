@@ -73,6 +73,12 @@ Route::get('/check-payin2-cb','MyTestController@check_payin2_cb');
 
 
 Route::get('/create-lab-assessment-report-two-pdf','MyTestController@createLabAssessmentReportTwoPdf');
+Route::get('/get-email-info','MyTestController@getEmailInfo');
+Route::get('/check-ib-payin','MyTestController@check_ib_payin');
+
+Route::get('/create-ib-assessment-report-pdf','MyTestController@createIbAssessmentReportPdf');
+
+
 
 
 
@@ -113,9 +119,14 @@ Route::get('/create-by-expert-lab-sur/{notice_id?}','ExternalExpertActionControl
 Route::post('/store-by-expert-lab-sur','ExternalExpertActionController@storeByExpertLabSur')->name('store_by_expert.lab_sur');
 Route::get('/store-by-expert-get-app-lab-sur/{app_no?}','ExternalExpertActionController@storeByExpertGetAppLabSur')->name('store_by_expert_get_app.lab_sur');
 
+
 Route::get('/create-by-cb-expert/{assessment_id?}','ExternalCBExpertActionController@createByCbExpert');
 Route::post('/store-by-cb-expert','ExternalCBExpertActionController@storeByCbExpert')->name('store_by_cb_expert');
 Route::get('/store-by-cb-expert-get-app/{app_no?}','ExternalCBExpertActionController@storeByExpertGetApp')->name('store_by_cb_expert_get_app');
+
+Route::get('/create-by-ib-expert/{assessment_id?}','ExternalIBExpertActionController@createByIbExpert');
+Route::post('/store-by-ib-expert','ExternalIBExpertActionController@storeByIbExpert')->name('store_by_ib_expert');
+Route::get('/store-by-ib-expert-get-app/{app_no?}','ExternalIBExpertActionController@storeByExpertGetApp')->name('store_by_ib_expert_get_app');
 
 
 // HelperController

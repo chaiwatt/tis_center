@@ -120,7 +120,7 @@ class CreateCbMessageRecordPdf
       $data->header_text4 = $certi_cb->app_no;
       $data->lab_type = $certi_cb->lab_type == 3 ? 'ทดสอบ' : ($certi_cb->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
       $data->name_standard = $certi_cb->name_standard;
-      $data->app_no = 'ทดสอบ ๑๖๗๑';
+      $data->app_no = $certi_cb->app_no;
       $data->certificate_no = '13-LB0037';
       $data->register_date = HP::formatDateThaiFullNumThai($certi_cb->created_at);
       $data->get_date = HP::formatDateThaiFullNumThai($certi_cb->get_date);

@@ -2,20 +2,21 @@
 
 namespace App\Models\Certify\ApplicantIB;
 
-use Illuminate\Database\Eloquent\Model;
-use Kyslik\ColumnSortable\Sortable;
-
-use HP;
 use DB;
+use HP;
 
 use App\User;
+use App\Certify\IbReportInfo;
+
+use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Database\Eloquent\Model;
 
 class CertiIBSaveAssessment extends Model
 {
     use Sortable;
     protected $table = 'app_certi_ib_assessment';
     protected $primaryKey = 'id';
-    protected $fillable = ['app_certi_ib_id','auditors_id', 'name','laboratory_name','report_date','bug_report','degree','main_state','details','date_car','status_car','state','created_by', 'updated_by'];
+    protected $fillable = ['app_certi_ib_id','auditors_id', 'name','laboratory_name','report_date','bug_report','degree','main_state','details','date_car','status_car','state','created_by', 'updated_by','date_scope_edit','submit_type','expert_token','accept_fault','notice_duration','notice_confirm_date'];
 
 
 
@@ -133,14 +134,22 @@ class CertiIBSaveAssessment extends Model
 
 
 
-        public function getStatusTitleAttribute() {
-            $list = '';
-              if($this->bug_report == 1){
-                $list =  'พบข้อบกพร่อง';
-              }else{
-                $list =  'ไม่พบข้อบกพร่อง';
-              }
-              return  $list ?? '-';
-        }
+    public function getStatusTitleAttribute() {
+        $list = '';
+          if($this->bug_report == 1){
+            $list =  'พบข้อบกพร่อง';
+          }else{
+            $list =  'ไม่พบข้อบกพร่อง';
+          }
+          return  $list ?? '-';
+    }
 
+    public function auditorIbRepresentatives()
+    {
+        return $this->hasMany(AuditorIbRepresentative::class, 'assessment_id','id');
+    }
+
+    public function ibReportInfo() {
+      return $this->hasOne(IbReportInfo::class, 'ib_assessment_id','id');
+    }
 }

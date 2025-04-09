@@ -13,6 +13,10 @@
         .form_group {
             margin-bottom: 10px;
         } 
+        .swal-btn {
+        font-size: 16px !important;
+        padding: 10px 18px !important;
+    }
     </style>
 @endpush
 
@@ -23,7 +27,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">คำขอรับใบรับรองหน่วยตรวจ {{ $certi_ib->app_no ?? null }} </h3>
+                    <h3 class="box-title pull-left">คำขอรับใบรับรองหน่วยตรวจ show {{ $certi_ib->app_no ?? null }} </h3>
                     @can('view-'.str_slug('checkcertificateib'))
                         <a class="btn btn-success pull-right" href="{{ url('/certify/check_certificate-ib') }}">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ
@@ -56,13 +60,46 @@
                                     $cost_btn = 'btn-warning'; 
                                 }
                             @endphp
-                            <a  class="form_group btn {{$cost_btn}}" href="{{  url('certify/estimated_cost-ib/'.$Cost->id.'/edit') }}" target="_blank">
+                            <a  class="form_group btn {{$cost_btn}}" href="{{  url('certify/estimated_cost-ib/'.$Cost->id.'/edit') }}" >
                                 {!! $cost_icon  !!}     ค่าใช้จ่าย
                             </a>
                         @endif 
 
+                        @php
+                            $doneDocAuditorAssigment = $certi_ib->doc_auditor_assignment;
+
+                        @endphp
+
+                        @if ($certi_ib->status >= 9 && $doneDocAuditorAssigment != null)
+                        <div class="form_group btn-group">
+                            <div class="btn-group">
+                                @if ($certi_ib->ibDocReviewAuditor == null)
+                                        <button type="button" id="btn_doc_auditor" 
+                                            class="btn {{ $doneDocAuditorAssigment == 1 ? 'btn-warning' : 'btn-info' }}">
+                                            แต่งตั้งคณะผู้ตรวจเอกสาร
+                                        </button>
+                                    @else
+                                    <a href="{{route("auditor_ib_doc_review_edit",['id' => $certi_ib->id])}}"
+                                        class="btn 
+                                            @if($certi_ib->ibDocReviewAuditor->status == '0') btn-warning 
+                                            @elseif($certi_ib->ibDocReviewAuditor->status == '2') btn-danger 
+                                            @elseif($certi_ib->ibDocReviewAuditor->status == '1') btn-info 
+                                            @else btn-secondary @endif">
+                                        คณะผู้ตรวจเอกสาร
+                                    </a>
+                                
+                                @endif
+                                
+                            
+                            </div>
+                        </div>
+                        @endif
+
+
+
                         <!-- START  status 9 -->  
-                        @if($certi_ib->status >= 9)
+                        {{-- @if($certi_ib->status >= 9) --}}
+                        @if($certi_ib->status >= 9 && ( $doneDocAuditorAssigment == null || $doneDocAuditorAssigment == 2 ))
                             @if(count($certi_ib->CertiIBAuditorsManyBy) > 0) 
                                 @php 
                                     $auditors_btn =  '';
@@ -84,16 +121,35 @@
 
                                 <div class="form_group btn-group">
                                     <div class="btn-group">
-                                        <a  class="btn  {{$auditors_btn}} " href="{{ url("certify/auditor-ib")}}" target="_blank">
-                                            {!! $auditors_icon  !!}    แต่งตั้งคณะฯ
-                                        </a>
-
+                                        {{-- <a  class="btn  {{$auditors_btn}} " href="{{ url("certify/auditor-ib")}}" target="_blank"> --}}
                                         <button type="button" class="btn {{$auditors_btn}} dropdown-toggle" data-toggle="dropdown">
-                                            <span class="caret"></span>
+                                            แต่งตั้งคณะฯ<span class="caret"></span>
                                         </button>
 
+                                        {{-- <button type="button" class="btn {{$auditors_btn}} dropdown-toggle" data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button> --}}
+
                                         <div class="dropdown-menu" role="menu" >
-                                            @php $i_key = 0;   @endphp
+
+                                            @if($certi_ib->status == 10)   <!-- อยู่ระหว่างดำเนินการ -->
+                                                {{-- <form action="{{ url('/certify/auditor-ib/create')}}" method="POST" style="display:inline" >  --}}
+                                                    {{-- {{ csrf_field() }} --}}
+                                                    {{-- {!! Form::hidden('certiib_id', (!empty($certi_ib->id) ? $certi_ib->id  : null) , [ 'class' => 'form-control' ]); !!} --}}
+                                                    <a class="btn btn-warning" href="{{ url('/certify/auditor-ib/create/'.$certi_ib->id)}}"   style="width:450px;text-align: left"> 
+                                                        <i class="fa fa-plus"></i>    แต่งตั้งคณะฯ
+                                                    </a>
+                                                {{-- </form> --}}
+
+
+                                            @endif
+
+                                            @php 
+                                                $i_key = 0;   
+                                            @endphp
+
+                          
+
                                             @foreach($certi_ib->CertiIBAuditorsManyBy as $key => $item)
                                                 @php 
                                                     $auditors_btn =  '';
@@ -106,10 +162,13 @@
                                                     }elseif($item->status == 2){
                                                         $auditors_btn = 'btn-danger';  
                                                     }
+                                                    // คำนวณลำดับใหม่จาก count - 1 ลงมา
+                                                    $total = count($certi_ib->CertiIBAuditorsManyBy);
+                                                    $display_key = $total - $key;
                                                 @endphp
                                                 @if ($item->status_cancel != 1)
-                                                    <a  class="btn {{$auditors_btn}} " href="{{ url("certify/auditor-ib/".$item->id."/edit")}}"  style="background-color:{{$auditors_btn}};width:750px;text-align: left">
-                                                        ครั้งที่ {{ ($i_key + 1 )}} :  
+                                                    <a  class="btn {{$auditors_btn}} " href="{{ url("certify/auditor-ib/".$item->id."/edit")}}"  style="background-color:{{$auditors_btn}};width:450px;text-align: left">
+                                                        ครั้งที่ {{ $display_key }} :  
                                                         {{ $item->auditor ?? '-'}}
                                                     </a> <br>
                                                 @endif
@@ -118,9 +177,24 @@
                                     </div>
                                 </div>
                             @else 
-                                <a  class="form_group btn btn-warning" href="{{ url("certify/auditor-ib")}}" target="_blank">
-                                    แต่งตั้งคณะฯ
-                                </a>
+                                {{-- <a  class="form_group btn btn-warning" href="{{ url("certify/auditor-ib")}}">
+                                    <i class="fa fa-plus"></i> แต่งตั้งคณะฯ
+                                </a> --}}
+
+                                <div class="btn-group form_group">
+                                    {{-- <form action="{{ url('/certify/auditor-ib/create')}}" method="POST" style="display:inline" >
+                                        @csrf
+                                        <input type="hidden" name="certiib_id" value="{{ !empty($certi_ib->id) ? $certi_ib->id : null }}" class="form-control">
+                                        <button class="btn btn-warning" type="submit">
+                                            <i class="fa fa-plus"></i> แต่งตั้งคณะฯ c
+                                        </button>
+                                    </form> --}}
+
+                                    <a class="btn btn-warning" href="{{ url('/certify/auditor-ib/create/'.$certi_ib->id)}}"  > 
+                                        <i class="fa fa-plus"></i>    แต่งตั้งคณะฯ
+                                    </a>
+                                </div>
+                               
                             @endif
                         @endif 
                         <!-- END  status 9 --> 
@@ -154,8 +228,11 @@
                                     <button type="button" class="btn {{$payin1_btn}} dropdown-toggle" data-toggle="dropdown">
                                         {!! $payin1_icon  !!}  Pay-in ครั้งที่ 1 <span class="caret"></span>
                                     </button>
+                                    {{-- {{$certi_ib->CertiIBPayInOneMany->count()}} --}}
                                     <div class="dropdown-menu" role="menu" >
-                                        @php $key_payin_one = 0;   @endphp
+                                        @php 
+                                            $key_payin_one = 0;   
+                                        @endphp
                                         @foreach($certi_ib->CertiIBPayInOneMany as $key => $item)
                                             @php 
                                                 $payin1_btn =  '';
@@ -168,10 +245,13 @@
                                                 }elseif($item->state == 2){   //ผปก. ส่งให้ จนท.
                                                     $payin1_btn = 'btn-danger';  
                                                 }
+
+                                                $total = count($certi_ib->CertiIBPayInOneMany);
+                                                $display_key = $total - $key;
                                             @endphp
                                             @if ($item->status   != 3) 
-                                                <a  class="btn {{$payin1_btn}} " href="{{ url("certify/check_certificate-ib/Pay_In1/".$item->id."/".$certi_ib->token)}}" style="width:750px;text-align: left">
-                                                    ครั้งที่ {{  ($key_payin_one +1) }} :  
+                                                <a  class="btn {{$payin1_btn}} " href="{{ url("certify/check_certificate-ib/Pay_In1/".$item->id."/".$certi_ib->token)}}" style="width:450px;text-align: left">
+                                                    ครั้งที่ {{ $display_key }} :  
                                                     {{ $item->CertiIBAuditorsTo->auditor ?? '-'}}
                                                 </a> 
                                                 <br>
@@ -188,7 +268,7 @@
                     <!-- START  admin , ผอ , ผก ,เจ้าหน้าที่ IB  -->
                     @if((auth()->user()->SetRolesLicenseCertify() == "true" ||  in_array("27",auth()->user()->RoleListId)) && count($certi_ib->CertiIBPayInOneStatusMany)  > 0) 
 
-                        @if(count($certi_ib->CertiIBSaveAssessmentMany) > 0 ) 
+                        {{-- @if(count($certi_ib->CertiIBSaveAssessmentMany) > 0 )  --}}
                             @php 
                                 $assessment_btn =  '';
                                 $assessment_icon =  '';
@@ -212,7 +292,7 @@
 
                             <div class="form_group btn-group">
                                 <div class="btn-group">
-                                    <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-ib")}}" target="_blank">
+                                    <a  class="btn {{$assessment_btn}}" href="{{ url("certify/save_assessment-ib")}}">
                                         {!! $assessment_icon  !!}    ผลการตรวจประเมิน
                                     </a>
                                     <button type="button" class="btn  {{$assessment_btn}} dropdown-toggle" data-toggle="dropdown">
@@ -220,43 +300,71 @@
                                     </button>
 
                                     <div class="dropdown-menu" role="menu" >
-                                        @foreach($certi_ib->CertiIBSaveAssessmentMany as $key => $assessment)
+                                        {{-- @foreach($certi_ib->CertiIBSaveAssessmentMany as $key => $assessment) --}}
+                                        @foreach($certi_ib->paidPayIn1BoardAuditors() as $key => $boardAuditor)
                                             @php
+                                                $assessment = $boardAuditor->certiIBSaveAssessment();
+                                                // dd($boardAuditor);
                                                 $assessment_url =  '';
                                                 $assessment_btn =  '';
-                                                if ($assessment->degree == 7) { // ผ่านการการประเมิน
-                                                    $assessment_btn =  'btn-info';
-                                                    $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
-                                                }elseif ($assessment->degree == 0) {  //ฉบับร่าง
-                                                    $assessment_btn =  'btn-primary';
-                                                    $assessment_url =  'certify/save_assessment-ib/'.$assessment->id.'/edit'; 
-                                                }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
-                                                    $assessment_btn =  'btn-success';
-                                                    $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
-                                                }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
-                                                    $assessment_btn =  '#ffff80';
-                                                    $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
-                                                }else {    //ผปก. ส่งให้ จนท.
-                                                    $assessment_btn =  'btn-danger';
-                                                    $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
+                                                if ($assessment != null) {
+                                                    if ($assessment->degree == 7) { // ผ่านการการประเมิน
+                                                        $assessment_btn =  'btn-info';
+                                                        $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
+                                                    }elseif ($assessment->degree == 0) {  //ฉบับร่าง
+                                                        $assessment_btn =  'btn-primary';
+                                                        $assessment_url =  'certify/save_assessment-ib/'.$assessment->id.'/edit'; 
+                                                    }elseif (in_array($assessment->degree,[1,3,4,6])) {  //จนท. ส่งให้ ผปก.
+                                                        $assessment_btn =  'btn-success';
+                                                        $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
+                                                    }elseif ($assessment->degree == 8) {  //จนท. ส่งให้ ผปก.
+                                                        $assessment_btn =  '#ffff80';
+                                                        $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
+                                                    }else {    //ผปก. ส่งให้ จนท.
+                                                        $assessment_btn =  'btn-danger';
+                                                        $assessment_url =  'certify/save_assessment-ib/assessment/'.$assessment->id.'/edit';
+                                                    }
                                                 }
 
                                             @endphp
-                                            <a  class="btn {{$assessment_btn}}"  href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
-                                                ครั้งที่ {{ count($certi_ib->CertiIBSaveAssessmentMany) - ($key) }} :  
-                                                {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}
-                                            </a> 
-                                            <br>
+
+
+                                    
+
+                                            @if ($assessment != null)
+                                                    {{-- <a  class="btn btn-info  " href=""  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                        ครั้งที่ {{ $key + 1 }} :  
+                                                        {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}} dddd
+                                                    </a>  --}}
+
+                                                    @if ($assessment->submit_type == 'confirm' || $assessment->submit_type == null || $assessment->bug_report == 2)
+                                                        
+                                                            <a  class="btn {{$assessment_btn}}  " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                                {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}
+                                                            </a> 
+                                                        @elseif($assessment->submit_type == 'save')
+                                                        <a  class="btn btn-info  " href="{{route('save_ib_assessment.create',['id' => $boardAuditor->id])}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                        {{$boardAuditor->auditor}} (ฉบับร่าง)
+                                                        </a> 
+                                                    @endif
+
+                                                
+                                                @else
+                                                    <a  class="btn btn-info  " href="{{route('save_ib_assessment.create',['id' => $boardAuditor->id])}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                                        {{$boardAuditor->auditor}} (อยู่ระหว่างดำเนินการ)
+                                                    </a> 
+                                            @endif
+
                                         @endforeach
                                     </div>
                                 </div>
                             </div>
 
-                        @else 
+                        {{-- @else 
                             <a  class="form_group btn btn-warning" href="{{ url("certify/save_assessment-ib")}}" target="_blank">
                                 ผลการตรวจประเมิน
                             </a>
-                        @endif
+                        @endif --}}
 
                         {{-- ทบทวน --}}
                         @if( $certi_ib->status >= 11 && count($certi_ib->CertiIBSaveAssessmentMany) > 0   && $certi_ib->CertiIBSaveAssessmentStatus == "statusInfo")
@@ -505,10 +613,7 @@
                                                     </div>
                                                 </div>
                                             @endif
-
                                         @endif
-
-
 
                                     {!! Form::close() !!}
 
@@ -653,8 +758,9 @@
     <script src="{{asset('js/jasny-bootstrap.js')}}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
     <script type="text/javascript">
+     let certi_ib;
         $(document).ready(function(){
-
+        certi_ib = @json($certi_ib ?? []);
             @if($certi_ib->status == 1 && HP_API_PID::check_api('check_api_certify_check_certificate_ib') && HP_API_PID::CheckDataApiPid($certi_ib, (new App\Models\Certify\ApplicantIB\CertiIb)->getTable()) != '')
                 var id    =   '{!! $certi_ib->id !!}';
                 var table =   '{!! (new App\Models\Certify\ApplicantIB\CertiIb)->getTable()  !!}';
@@ -863,5 +969,44 @@
                 }
             });
          }
+
+         $("#btn_doc_auditor").on("click", function() {
+            const _token = $('input[name="_token"]').val();
+            let certiIbId = certi_ib.id;
+
+            Swal.fire({
+                title: "ต้องการแต่งตั้งทีมตรวจประเมินหรือไม่?",
+                icon: "question",
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: "แต่งตั้ง",
+                denyButtonText: "ไม่แต่งตั้ง",
+                cancelButtonText: "ยกเลิก",
+                customClass: {
+                    confirmButton: 'swal-btn', 
+                    denyButton: 'swal-btn', 
+                    cancelButton: 'swal-btn'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Swal.fire("แต่งตั้งเรียบร้อย!", "", "success");
+                    window.location.href = "/certify/auditor_ib_doc_review/auditor_ib_doc_review/" + certiIbId;
+                } else if (result.isDenied) {
+                    $.ajax({
+                        
+                        url: "{{route('bypass_ib_doc_auditor_assignment')}}",
+                        method: "POST",
+                        data: {
+                            certiIbId: certiIbId,
+                            _token: _token
+                        },
+                        success: function(result) {
+                            location.reload(); // รีโหลดหน้า
+                        }
+                    });
+                }
+            });
+        });
+
     </script>
 @endpush

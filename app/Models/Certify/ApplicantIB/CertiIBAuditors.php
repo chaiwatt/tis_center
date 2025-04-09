@@ -2,9 +2,11 @@
 
 namespace App\Models\Certify\ApplicantIB;
 
-use Illuminate\Database\Eloquent\Model;
-use App\User;
 use HP;
+use App\User;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Bcertify\IbBoardAuditorMsRecordInfo;
 
 class CertiIBAuditors  extends Model
 {
@@ -19,7 +21,7 @@ class CertiIBAuditors  extends Model
                             'state',
                             'created_by',
                             'updated_by',
-                            'status_cancel','reason_cancel','created_cancel','date_cancel','step_id'
+                            'status_cancel','reason_cancel','created_cancel','date_cancel','step_id','ib_auditor_team_id','message_record_status'
                           ];
    
  public function CertiIBCostTo()
@@ -149,5 +151,20 @@ class CertiIBAuditors  extends Model
     public function CertiIBAuditorsStepTo()
     {
         return $this->belongsTo(CertiIBAuditorsStep::class,'step_id');
+    }
+
+    public function certiIBSaveAssessment()
+    {
+        return CertiIBSaveAssessment::where('auditors_id',$this->id)->first();
+    }
+
+    public function ibBoardAuditorMsRecordInfos()
+    {
+        return $this->hasOne(IbBoardAuditorMsRecordInfo::class,'board_auditor_id');
+    }
+
+    public function messageRecordTransactions()
+    {
+        return $this->hasMany(MessageRecordTransaction::class, 'board_auditor_id')->where('certificate_type',1);
     }
 }

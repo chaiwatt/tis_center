@@ -419,7 +419,8 @@
                       html += '<tr>';
                       html += '<td class="text-center">'+key+'</td>';
                       html += '<td>'+notice+'</td>';
-                      html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="comment['+itme+']" rows="3" cols="50" required  class="form-control"> </textarea> </td>';
+                      html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="comment['+itme+']" rows="5" style="border-right: 1px solid #ccc;" required  class="form-control auto-expand"> </textarea> </td>';
+                      html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="cause['+itme+']" rows="5" required style="border-left: none; border-right: 1px solid #ccc;" class="form-control auto-expand"> </textarea> </td>';
                       html += '</tr>';
                       table.append(html);
                 // ResetTableNumber();

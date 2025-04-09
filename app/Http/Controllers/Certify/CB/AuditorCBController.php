@@ -117,7 +117,7 @@ class AuditorCBController extends Controller
      */
     public function create(Request $request)
     {
-      
+     
         $model = str_slug('auditorcb','-');
         if(auth()->user()->can('add-'.$model)) {
           $previousUrl = app('url')->previous();
@@ -526,7 +526,7 @@ class AuditorCBController extends Controller
 
         public function auditor_cb_doc_review($id)
         {
-    
+   
             $model = str_slug('auditorcb','-');
             if(auth()->user()->can('add-'.$model)) {
           
@@ -825,6 +825,8 @@ class AuditorCBController extends Controller
           }
       }
 
+      // dd($request->list,$auditors);
+
       // อัปโหลดไฟล์ถ้ามี
       $filePath = null;
       $fileName = null;
@@ -1072,8 +1074,6 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
                   <div style="text-indent:125px">ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการรับรองหน่วยตรวจ พ.ศ.๒๕๖๔ สำนักงานจะตรวจติดตามผลรับรองหน่วยตรวจอย่างน้อย ๑ ครั้ง ภายใน ๒ ปี โดยแต่ละครั้งอาจจะตรวจประเมินเพียงบางส่วนหรือทุกข้อกำหนดก็ได้ตามความเหมาะสม และก่อนครบการรับรอง ๕ ปี ต้องตรวจประเมินให้ครบทุกข้อกำหนด</div>
               HTML;
       
-      // dd($certi_cb,$boardAuditor,$boardAuditorDate->start_date,$dateRange);
-      // $boardAuditorMsRecordInfo = $boardAuditor->cbBoardAuditorMsRecordInfos->first();
 
       return view('certify.cb.auditor_cb.initial-message-record', [
           'data' => $data,
@@ -1146,10 +1146,8 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
       }
       
 
-
     $data = new stdClass();
 
-    // dd($certi_cb);
 
     $data->header_text1 = '';
     $data->header_text2 = '';
@@ -1186,6 +1184,5 @@ public function sendMailAuditorDocReview($certi_cb,$cbDocReviewAuditor)
       ]);
   }
 
-  //  certify.cb.auditor_cb.initial-message-record
   
 }

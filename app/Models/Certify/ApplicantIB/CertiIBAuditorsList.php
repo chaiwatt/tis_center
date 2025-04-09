@@ -2,10 +2,12 @@
 
 namespace App\Models\Certify\ApplicantIB;
 
-use Illuminate\Database\Eloquent\Model;
-use App\User;
 use HP;
+use App\User;
 use App\Models\Bcertify\StatusAuditor;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Bcertify\AuditorInformation;
+
 class CertiIBAuditorsList  extends Model
 {
     protected $table = 'app_certi_ib_auditors_list';
@@ -33,4 +35,9 @@ class CertiIBAuditorsList  extends Model
     
      return @$this->StatusAuditorTo->title ?? '-';
    }     
+
+   public function auditorInformation()
+   {
+     return $this->belongsTo(AuditorInformation::class,'user_id');
+   }
 }

@@ -175,19 +175,19 @@
 
 <div class="row div_hide_show_scope"  id="div_details">
     <div class="col-md-12">
-         <div class="white-box">
+         {{-- <div class="white-box"> --}}
 
-            <div class="row ">
+            {{-- <div class="row ">
                 <div class="col-sm-4 text-right"><span class="text-danger">*</span>รายงานปิด Car  :</div>
                 <div class="col-sm-6">
                     @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment4To)) 
                     <p id="RemoveFlieScope">
-                      {{-- @if($assessment->FileAttachAssessment4To->file !='' && HP::checkFileStorage($attach_path.$assessment->FileAttachAssessment4To->file)) --}}
+            
                          <a href="{{url('certify/check/file_cb_client/'.$assessment->FileAttachAssessment4To->file.'/'.( !empty($assessment->FileAttachAssessment4To->file_client_name) ? $assessment->FileAttachAssessment4To->file_client_name : 'null' ))}}" 
                                 title="{{ !empty($assessment->FileAttachAssessment4To->file_client_name) ? $assessment->FileAttachAssessment4To->file_client_name :  basename($assessment->FileAttachAssessment4To->file) }}" target="_blank">
                             {!! HP::FileExtension($assessment->FileAttachAssessment4To->file)  ?? '' !!} 
                        </a>
-                      {{-- @endif --}}
+              
                     </p>
                     @else 
                        <div class="fileinput fileinput-new input-group" data-provides="fileinput" >
@@ -204,11 +204,11 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
             
    
 
-     <div class="row form-group">
+     <div class="row form-group" hidden>
          <div class="col-md-12">
              <div class="white-box" style="border: 2px solid #e5ebec;">
              <legend><h3>ขอบข่ายที่ขอรับการรับรอง (Scope)</h3></legend>   
@@ -314,7 +314,7 @@
           
 
 
-        </div>
+        {{-- </div> --}}
     </div>     
  </div> 
 
@@ -322,6 +322,45 @@
 
 <script>
     $(document).ready(function(){
+
+        function autoExpand(textarea) {
+                    textarea.style.height = 'auto'; // รีเซ็ตความสูง
+                    textarea.style.height = textarea.scrollHeight + 'px'; // กำหนดความสูงตามเนื้อหา
+                }
+    
+                // ฟังก์ชันปรับขนาด textarea ทุกตัวในแถวเดียวกัน
+                function syncRowHeight(textarea) {
+                    let $row = $(textarea).closest('tr'); // หา tr ที่ textarea อยู่
+                    let maxHeight = 0;
+    
+                    // วนลูปหา maxHeight ใน textarea ทุกตัวในแถว
+                    $row.find('.auto-expand').each(function () {
+                        this.style.height = 'auto'; // รีเซ็ตความสูงก่อนคำนวณ
+                        let currentHeight = this.scrollHeight;
+                        if (currentHeight > maxHeight) {
+                            maxHeight = currentHeight;
+                        }
+                    });
+    
+                    // กำหนดความสูงให้ textarea ทุกตัวในแถวเท่ากัน
+                    $row.find('.auto-expand').each(function () {
+                        this.style.height = maxHeight + 'px';
+                    });
+                }
+    
+                // ดักจับ event input
+                $(document).on('input', '.auto-expand', function () {
+                    // console.log('aha');
+                    autoExpand(this); // ปรับ textarea ที่มีการเปลี่ยนแปลง
+                    syncRowHeight(this); // ปรับ textarea ทั้งแถว
+                });
+    
+                // ปรับขนาดทุก textarea เมื่อโหลดหน้าเว็บ
+                $('.auto-expand').each(function () {
+                    autoExpand(this);
+                    syncRowHeight(this);
+                });
+                
         // ResetTableFileNumber();
         check_max_size_file();
         $('.div_hide_show_scope').hide();
@@ -337,7 +376,8 @@
                   html += '<tr>';
                   html += '<td class="text-center">'+key+'</td>';
                   html += '<td>'+notice_id+'</td>';
-                  html += '<td> <input type="hidden" class="type_itme" value="'+itme+'"> <textarea  name="file_comment['+itme+']" rows="3" cols="50" required  class="form-control"> </textarea>  </td>';
+                  html += '<td> <input type="hidden" class="type_itme" value="'+itme+'"> <textarea  name="file_comment['+itme+']" rows="5" style="border-right: 1px solid #ccc;" required  class="form-control file_comment auto-expand"> </textarea>  </td>';
+                  html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="cause['+itme+']" rows="5" style="border-left: none; border-right: 1px solid #ccc;" required  class="form-control auto-expand"> </textarea></td>';
                   html += '</tr>';
                   table.append(html);
             }
@@ -348,14 +388,18 @@
             let notice = '{{ !empty($assessment->CertiCBBugMany) ? count($assessment->CertiCBBugMany) : 0 }}';
             if(file_status == notice){ 
                 $('.div_hide_show_scope').show();
+                $('#div_file_comment').hide();
                 $('.status_bug_report').hide();
                 $('.report_scope').prop('required', true);
                 $('.file_scope_required').prop('required', true);
+                $('#assessment_passed').val("1")
             }else{
+                $('#div_file_comment').show();
                 $('.div_hide_show_scope').hide();
                 $('.status_bug_report').show();
                 $('.report_scope').prop('required', false);
                 $('.file_scope_required').prop('required', false);
+                $('#assessment_passed').val("0")
             } 
 
          });
@@ -476,7 +520,8 @@
                       html += '<tr>';
                       html += '<td class="text-center">'+key+'</td>';
                       html += '<td>'+notice+'</td>';
-                      html += '<td> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="comment['+itme+']" rows="3" cols="50" required  class="form-control"> </textarea>  </td>';
+                      html += '<td style="padding: 0px"> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="comment['+itme+']" class="form-control auto-expand" style="border-right: 1px solid #ccc;"  rows="5" required > </textarea> </td>';
+                      html += '<td style="padding: 0px"> <input type="hidden" class="type_itme" value="'+itme+'">  <textarea  name="cause['+itme+']" class="form-control auto-expand" style="border-left: none; border-right: 1px solid #ccc;"  rows="5"  required > </textarea> </td>';
                       html += '</tr>';
                       table.append(html);
                 ResetTableNumber();

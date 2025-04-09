@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers\Certify\IB;
 
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-
-use App\estimatedcostib;
-use Illuminate\Http\Request;
-use Exception;
-use Storage;
 use HP;
+use Storage;
+
 use App\User;
-use App\Models\Certify\ApplicantIB\CertiIb;
-use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
-use App\Models\Certify\ApplicantIB\CertiIBCheck;
-use App\Models\Certify\ApplicantIB\CertiIBCost;
-use App\Models\Certify\ApplicantIB\CertiIBCostItem;
-use App\Models\Certify\ApplicantIB\CertiIbHistory;
-
-
-
-use Illuminate\Support\Facades\Mail;
+use stdClass;
+use Exception;
+use App\Http\Requests;
+use App\estimatedcostib;
 use App\Mail\IB\IBCostMail;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Certify\ApplicantIB\CertiIb;
+use App\Models\Certify\ApplicantIB\CertiIBCost;
+use App\Models\Certify\ApplicantIB\CertiIBCheck;
+
+
+
+use App\Models\Certify\ApplicantIB\CertiIbHistory;
+use App\Models\Certify\ApplicantIB\CertiIBCostItem;
+use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
 
 
 class estimatedcostibController extends Controller
@@ -191,6 +192,7 @@ class estimatedcostibController extends Controller
      */
     public function edit($id)
     {
+        // dd('ok');
         $model = str_slug('estimatedcostib','-');
         if(auth()->user()->can('edit-'.$model)) {
 
@@ -214,7 +216,7 @@ class estimatedcostibController extends Controller
      */
     public function update(Request $request, $id)
     {
-
+        // dd($request->all());
         $model = str_slug('estimatedcostib','-');
         if(auth()->user()->can('edit-'.$model)) {
 
@@ -232,9 +234,26 @@ class estimatedcostibController extends Controller
             $this->storeItems($requestData, $cost);
 
             // ไฟล์แนบ
-            if ($request->attachs){
-                $this->set_attachs($request->attachs, $cost);
-            }
+            // if ($request->attachs){
+            //     $this->set_attachs($request->attachs, $cost);
+            // }
+
+            $json = $this->copyScopeIbFromAttachement($cost->app_certi_ib_id);
+            $copiedScopes = json_decode($json, true);
+            
+            $tb = new CertiIBCost;
+      
+            $certi_ib_attach_more                   = new CertiIBAttachAll();
+            $certi_ib_attach_more->app_certi_ib_id  = $cost->CertiIBCostTo->id ?? null;
+            $certi_ib_attach_more->ref_id           = $cost->id;
+            $certi_ib_attach_more->table_name       = $tb->getTable();
+            $certi_ib_attach_more->file_section     = '1';
+            $certi_ib_attach_more->file             = $copiedScopes[0]['attachs'];
+            $certi_ib_attach_more->file_client_name =  $copiedScopes[0]['file_client_name'];
+            $certi_ib_attach_more->token            = str_random(16);
+            $certi_ib_attach_more->save();
+       
+
 
             $certi_ib = CertiIb::findOrFail($cost->app_certi_ib_id);
 
@@ -334,6 +353,47 @@ class estimatedcostibController extends Controller
         } catch (Exception $x) {
             throw $x;
         }
+    }
+
+    
+    public function copyScopeIbFromAttachement($certiIbId)
+    {
+        $copiedScoped = null;
+        $fileSection = null;
+    
+        $app = CertiIb::find($certiIbId);
+    
+        $latestRecord = CertiIBAttachAll::where('app_certi_ib_id', $certiIbId)
+        ->where('file_section', 3)
+        ->where('table_name', 'app_certi_ib')
+        ->orderBy('created_at', 'desc') // เรียงลำดับจากใหม่ไปเก่า
+        ->first();
+    
+        $existingFilePath = 'files/applicants/check_files_ib/' . $latestRecord->file ;
+    
+        // ตรวจสอบว่าไฟล์มีอยู่ใน FTP และดาวน์โหลดลงมา
+        if (HP::checkFileStorage($existingFilePath)) {
+            $localFilePath = HP::getFileStoragePath($existingFilePath); // ดึงไฟล์ลงมาที่เซิร์ฟเวอร์
+            $no  = str_replace("RQ-","",$app->app_no);
+            $no  = str_replace("-","_",$no);
+            $dlName = 'scope_'.basename($existingFilePath);
+            $attach_path  =  'files/applicants/check_files_ib/'.$no.'/';
+    
+            if (file_exists($localFilePath)) {
+                $storagePath = Storage::putFileAs($attach_path, new \Illuminate\Http\File($localFilePath),  $dlName );
+                $filePath = $attach_path . $dlName;
+                if (Storage::disk('ftp')->exists($filePath)) {
+                    $list  = new  stdClass;
+                    $list->attachs =  $no.'/'.$dlName;
+                    $list->file_client_name =  $dlName;
+                    $scope[] = $list;
+                    $copiedScoped = json_encode($scope);
+                } 
+                unlink($localFilePath);
+            }
+        }
+    
+        return $copiedScoped;
     }
 
     public function set_attachs($attachs, $cost) {

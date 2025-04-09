@@ -36,7 +36,11 @@ class CheckCbPayInOne extends Command
 
         $transactionPayIns = TransactionPayIn::where('invoiceStartDate', '<=', $today)
             ->where('invoiceEndDate', '>=', $today)
-            ->whereNull('status_confirmed')
+            // ->whereNull('status_confirmed')
+            ->where(function ($query) {
+                $query->where('status_confirmed', 0)
+                    ->orWhereNull('status_confirmed');
+            })
             ->where('state',1)
             ->where('count','<=',3)
             ->where(function ($query) {

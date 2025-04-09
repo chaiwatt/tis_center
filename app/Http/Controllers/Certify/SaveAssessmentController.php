@@ -743,12 +743,6 @@ class SaveAssessmentController extends Controller
         
 
 
-
-       
-
-        // if($request->assessment_passed == 1){
-        //     dd("passed");
-        // }
         // dd($notice->id,$notice->degree,$request->all());
 // try {   
         
@@ -809,11 +803,11 @@ class SaveAssessmentController extends Controller
 
            // รายงาน Car
             // if($request->file_car && $request->hasFile('file_car')){
-            if($request->assessment_passed == 1){
-                $auditors->date_car              =  date('Y-m-d') ;
-                // $auditors->file_car              =   $this->store_File($request->file_car,$app->app_no) ;
-                // $auditors->file_car_client_name =  HP::ConvertCertifyFileName($request->file_car->getClientOriginalName()) ;
-            }
+            // if($request->assessment_passed == 1){
+            //     $auditors->date_car              =  date('Y-m-d') ;
+            //     // $auditors->file_car              =   $this->store_File($request->file_car,$app->app_no) ;
+            //     // $auditors->file_car_client_name =  HP::ConvertCertifyFileName($request->file_car->getClientOriginalName()) ;
+            // }
 
             if($request->file_scope  && $request->hasFile('file_scope')){    // รายงาน Scope
                 foreach ($request->file_scope as $key => $itme) {

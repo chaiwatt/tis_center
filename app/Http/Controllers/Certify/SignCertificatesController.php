@@ -327,8 +327,6 @@ class SignCertificatesController extends Controller
                               $otp_sign =  SignCertificateOtp::create($input);
 
                              SignCertificateOtp::where('Ref_otp',$request->ref_otp)->update(['state'=> 3]);
-                            //  dd($otp_sign->Ref_otp, $otp_sign->otp);
-                            // self::get_line_otp($otp_sign->Ref_otp, $otp_sign->otp,$sign->line_token);
                             
                             $mail = auth()->user()->reg_email;
                             $app = $send->app_cert_to;
@@ -345,42 +343,18 @@ class SignCertificatesController extends Controller
                                                 'otp'           => $otp_sign->otp,
                                                 'ref_otp'       => $otp_sign->Ref_otp,
                                                 'email'         =>  !empty($app->DataEmailCertifyCenter) ? $app->DataEmailCertifyCenter : $EMail,
-                                            ];
-                            
-                                $log_email =  HP::getInsertCertifyLogEmail( $app->app_no,
-                                                                            $app->id,
-                                                                            (new CertiLab)->getTable(),
-                                                                            $send->id,
-                                                                            (new SendCertificateLists)->getTable(),
-                                                                            1,
-                                                                            'OTP ลงนามใบรับรอง',
-                                                                            view('mail.Lab.mail_otp_notification', $data_app),
-                                                                            $app->created_by,
-                                                                            $app->agent_id,
-                                                                            auth()->user()->getKey(),
-                                                                            !empty($app->DataEmailCertifyCenter) ?  implode(',',(array)$app->DataEmailCertifyCenter)  : $EMail,
-                                                                            $app->email,
-                                                                            !empty($app->DataEmailDirectorLABCC) ? implode(',',(array)$app->DataEmailDirectorLABCC)   :  $EMail,
-                                                                            !empty($app->DataEmailDirectorLABReply) ?implode(',',(array)$app->DataEmailDirectorLABReply)   :  $EMail,
-                                                                            null
-                                                                            );
+                                            ];                            
                                  $user = User::find($sign->user_register_id);
                 
                                  $mail = $user->reg_email;
 
                                   $html = new  OtpNofitication($data_app);
                                   $mail = Mail::to($mail)->send($html);
-                    
-                                  if(is_null($mail) && !empty($log_email)){
-                                    HP::getUpdateCertifyLogEmail($log_email->id);
-                                  }
                               }
-
 
                             return response()->json([
                                                     'message' =>  true,
                                                     'Ref_otp' =>  $otp_sign->Ref_otp,
-                                                    // 'otp' =>  $otp_sign->otp,
                                                 ]);
                             exit;
                         }

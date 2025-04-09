@@ -2,30 +2,39 @@
 
 namespace App\Http\Controllers\Certify\IB;
 
-use App\Http\Requests;
-use App\Http\Controllers\Controller; 
-
-use Storage;
-use stdClass;
 use HP;
+use Storage;
+
 use App\User;
+use stdClass;
+use Carbon\Carbon;
+use App\Http\Requests;
 
-use App\Models\Certify\ApplicantIB\CertiIb;
-use App\Models\Certify\ApplicantIB\CertiIBAttachAll; 
-use App\Models\Certify\ApplicantIB\CertiIbHistory; 
-use App\Models\Certify\ApplicantIB\CertiIBAuditors; 
-use App\Models\Certify\ApplicantIB\CertiIBAuditorsList;
-use App\Models\Certify\ApplicantIB\CertiIBSaveAssessment;
-use App\Models\Certify\ApplicantIB\CertiIBSaveAssessmentBug;
-use App\Models\Certify\ApplicantIB\CertiIBReport;
-use App\Models\Certify\ApplicantIB\CertiIBCheck;
-use App\Models\Certify\ApplicantIB\CertiIBReview;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\Mail;    
+use App\Certify\IbReportInfo;
+use App\Mail\Ib\MailToIbExpert;
+use App\Certify\IbReportTwoInfo;
+use App\Http\Controllers\Controller; 
 use App\Mail\IB\IBSaveAssessmentMail;
 use App\Mail\IB\IBCheckSaveAssessment;
+use Illuminate\Support\Facades\Mail;    
 use App\Mail\IB\IBSaveAssessmentPastMail;
+use App\Models\Certify\ApplicantIB\CertiIb;
+
+use App\Models\Certify\ApplicantIB\CertiIBCheck;
+use App\Models\Certify\ApplicantIB\CertiIBReport;
+
+use App\Models\Certify\ApplicantIB\CertiIBReview;
+use App\Models\Certify\ApplicantIB\CertiIbHistory; 
+use App\Models\Certify\ApplicantIB\CertiIBAuditors; 
+use App\Models\Certify\ApplicantIB\CertiIBAttachAll; 
+use App\Models\Certify\ApplicantIB\CertiIBAuditorsList;
+use App\Models\Certify\SignAssessmentReportTransaction;
+use App\Models\Certify\ApplicantIB\CertiIBSaveAssessment;
+use App\Models\Certify\ApplicantIB\AuditorIbRepresentative;
+use App\Models\Certify\ApplicantIB\CertiIBSaveAssessmentBug;
+
 class SaveAssessmentIbController extends Controller
 {
 
@@ -45,6 +54,7 @@ class SaveAssessmentIbController extends Controller
 
     public function index(Request $request)
     {
+        // dd('ok');
         $model = str_slug('saveassessmentib','-');
         if(auth()->user()->can('view-'.$model)) {
          
@@ -92,13 +102,27 @@ class SaveAssessmentIbController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create($id)
     {
         $model = str_slug('saveassessmentib','-');
         if(auth()->user()->can('add-'.$model)) {
             $previousUrl = app('url')->previous();
             $assessment = new CertiIBSaveAssessment;
              $bug = [new CertiIBSaveAssessmentBug];
+
+             if($id != null)
+             {
+                 // dd('ok');
+                 $assessment = CertiIBSaveAssessment::where('auditors_id',$id)->first();
+                 // dd($assessment);
+                 if($assessment != null)
+                 {
+                     $bug = CertiIBSaveAssessmentBug::where('assessment_id',$assessment->id)->get();
+                     // dd($bug);
+                 }
+                 
+             }
+
              $app_no = [];
              //เจ้าหน้าที่ IB และไม่มีสิทธิ์ admin , ผอ , ผก , ลท.
             if(in_array("27",auth()->user()->RoleListId) && auth()->user()->SetRolesAdminCertify() == "false" ){ 
@@ -126,11 +150,21 @@ class SaveAssessmentIbController extends Controller
                     }
                   }
             }
+
+            $certiIBAuditorsLists = CertiIBAuditors::find($id)->CertiIBAuditorsLists;
+            $auditor = CertiIBAuditors::find($id);
+
+//    dd($assessment);
+  
+    // dd($assessment->id);
    
             return view('certify/ib/save_assessment_ib.create',['app_no'=> $app_no,
                                                                 'assessment'=>$assessment,
                                                                 'bug'=>$bug,
-                                                                'previousUrl'=> $previousUrl
+                                                                'auditorId'=> $id,
+                                                                'auditor'=> $auditor,
+                                                                'previousUrl'=> $previousUrl,
+                                                                'certiIBAuditorsLists'=> $certiIBAuditorsLists,
                                                                 ]);
         }
         abort(403);
@@ -152,7 +186,8 @@ class SaveAssessmentIbController extends Controller
                 'app_certi_ib_id' => 'required',
             ]);
 
- 
+            // dd($request->all());
+
             $request->request->add(['created_by' => auth()->user()->getKey()]); 
             $requestData = $request->all();
             $requestData['report_date'] =  HP::convertDate($request->report_date,true) ?? null;
@@ -161,20 +196,52 @@ class SaveAssessmentIbController extends Controller
             }else{
                 $requestData['main_state'] = 1;
             }
-            $auditors = CertiIBSaveAssessment::create($requestData);
-            $CertiIb = CertiIb::findOrFail($auditors->app_certi_ib_id);
+            // $auditors = CertiIBSaveAssessment::create($requestData);
+            $CertiIb = CertiIb::findOrFail($request->app_certi_ib_id);
             $tb = new CertiIBSaveAssessment;
               
             // ข้อบกพร่อง/ข้อสังเกต
+  
+
+            $assessment = CertiIBSaveAssessment::where('auditors_id',$request->auditors_id)->first();
+
+            // dd($request->all(),$assessment);
+           
+            if($assessment == null){
+                $assessment = CertiIBSaveAssessment::create($requestData);
+                $json = $this->copyScopeIbFromAttachement($assessment->app_certi_ib_id);
+                $copiedScopes = json_decode($json, true);
+
+                $tbx = new CertiIBSaveAssessment;
+                $certi_ib_attach_more = new CertiIBAttachAll();
+                $certi_ib_attach_more->app_certi_ib_id      = $assessment->app_certi_ib_id ?? null;
+                $certi_ib_attach_more->ref_id               = $assessment->id;
+                $certi_ib_attach_more->table_name           = $tbx->getTable();
+                $certi_ib_attach_more->file_section         = '2';
+                $certi_ib_attach_more->file                 = $copiedScopes[0]['attachs'];
+                $certi_ib_attach_more->file_client_name     = $copiedScopes[0]['file_client_name'];
+                $certi_ib_attach_more->token                = str_random(16);
+                $certi_ib_attach_more->save();
+
+                $ibReportInfo = new IbReportInfo();
+                $ibReportInfo->ib_assessment_id = $assessment->id;
+                $ibReportInfo->save();
+
+                $ibReportTwoInfo = new IbReportTwoInfo();
+                $ibReportTwoInfo->ib_assessment_id = $assessment->id;
+                $ibReportTwoInfo->save();
+
+            }
+
             if(isset($requestData["detail"])){
-                $this->storeDetail($auditors,$requestData["detail"]);
+                $this->storeDetail($assessment,$requestData["detail"]);
             }
     
             // รายงานการตรวจประเมิน
              if($request->file  && $request->hasFile('file')){
                         $certi_ib_attach_more                   = new CertiIBAttachAll();
-                        $certi_ib_attach_more->app_certi_ib_id  = $auditors->app_certi_ib_id ?? null;
-                        $certi_ib_attach_more->ref_id           = $auditors->id;
+                        $certi_ib_attach_more->app_certi_ib_id  = $assessment->app_certi_ib_id ?? null;
+                        $certi_ib_attach_more->ref_id           = $assessment->id;
                         $certi_ib_attach_more->table_name       = $tb->getTable();
                         $certi_ib_attach_more->file_section     = '1';
                         $certi_ib_attach_more->file             = $this->storeFile($request->file,$CertiIb->app_no);
@@ -182,13 +249,13 @@ class SaveAssessmentIbController extends Controller
                         $certi_ib_attach_more->token            = str_random(16);
                         $certi_ib_attach_more->save();
             }
- if($auditors->bug_report == 2){
+             if($assessment->bug_report == 2){
                 // รายงาน Scope
                 if($request->file_scope  && $request->hasFile('file_scope')){
                     foreach ($request->file_scope as $index => $item){
                             $certi_ib_attach_more = new CertiIBAttachAll();
-                            $certi_ib_attach_more->app_certi_ib_id  = $auditors->app_certi_ib_id ?? null;
-                            $certi_ib_attach_more->ref_id           = $auditors->id;
+                            $certi_ib_attach_more->app_certi_ib_id  = $assessment->app_certi_ib_id ?? null;
+                            $certi_ib_attach_more->ref_id           = $assessment->id;
                             $certi_ib_attach_more->table_name       = $tb->getTable();
                             $certi_ib_attach_more->file_section     = '2';
                             $certi_ib_attach_more->file             = $this->storeFile($item,$CertiIb->app_no);
@@ -201,8 +268,8 @@ class SaveAssessmentIbController extends Controller
                 if($request->file_report  && $request->hasFile('file_report')){
                     foreach ($request->file_report as $index => $item){
                             $certi_ib_attach_more                   = new CertiIBAttachAll();
-                            $certi_ib_attach_more->app_certi_ib_id  = $auditors->app_certi_ib_id ?? null;
-                            $certi_ib_attach_more->ref_id           = $auditors->id;
+                            $certi_ib_attach_more->app_certi_ib_id  = $assessment->app_certi_ib_id ?? null;
+                            $certi_ib_attach_more->ref_id           = $assessment->id;
                             $certi_ib_attach_more->table_name       = $tb->getTable();
                             $certi_ib_attach_more->file_section     = '3';
                             $certi_ib_attach_more->file             = $this->storeFile($item,$CertiIb->app_no);
@@ -216,8 +283,8 @@ class SaveAssessmentIbController extends Controller
             if($request->attachs  && $request->hasFile('attachs')){
                 foreach ($request->attachs as $index => $item){
                         $certi_ib_attach_more                   = new CertiIBAttachAll();
-                        $certi_ib_attach_more->app_certi_ib_id  = $auditors->app_certi_ib_id ?? null;
-                        $certi_ib_attach_more->ref_id           = $auditors->id;
+                        $certi_ib_attach_more->app_certi_ib_id  = $assessment->app_certi_ib_id ?? null;
+                        $certi_ib_attach_more->ref_id           = $assessment->id;
                         $certi_ib_attach_more->table_name       = $tb->getTable();
                         $certi_ib_attach_more->file_section     = '4';
                         $certi_ib_attach_more->file             = $this->storeFile($item,$CertiIb->app_no);
@@ -231,12 +298,30 @@ class SaveAssessmentIbController extends Controller
        //
   
          // สถานะ แต่งตั้งคณะกรรมการ
-        $committee = CertiIBAuditors::findOrFail($auditors->auditors_id); 
-       if(($auditors->degree == 1 || $auditors->degree == 8) && $auditors->bug_report == 1){
+        $committee = CertiIBAuditors::findOrFail($assessment->auditors_id); 
+       if(($assessment->degree == 1 || $assessment->degree == 8) && $assessment->bug_report == 1){
+                $assessment->submit_type = $request->submit_type;
+                $nowTimeStamp = Carbon::now()->addDays(15)->timestamp;
+                $encodedTimestamp = base64_encode($nowTimeStamp);
+                $token = Str::random(30) . '_' . $encodedTimestamp;
+
+                if($assessment->expert_token == null)
+                {
+                    $assessment->expert_token = $token;
+                }
+               
+
+                if($request->submit_type == "confirm")
+                {
+                    $assessment->notice_confirm_date = Carbon::now()->addDays(1);
+                }
+               
+                $assessment->save();
+
                 //Log  //  Mail
-                $this->set_history_bug($auditors);
-                $this->set_mail($auditors,$CertiIb);
-               if($auditors->main_state == 1 ){
+                $this->set_history_bug($assessment);
+                $this->set_mail($assessment,$CertiIb);
+               if($assessment->main_state == 1 ){
                     $committee->step_id = 8; // แก้ไขข้อบกพร่อง/ข้อสังเกต
                     $committee->save();
                      
@@ -250,7 +335,7 @@ class SaveAssessmentIbController extends Controller
                                              ->get(); 
                     if(count($auditor) == count($CertiIb->CertiIBAuditorsManyBy)){
                         $report = new   CertiIBReview;  //ทบทวนฯ
-                        $report->app_certi_ib_id  = $certi_ib->id;
+                        $report->app_certi_ib_id  = $CertiIb->id;
                         $report->save();
                         $CertiIb->update(['review'=>1,'status'=>11]);  // ทบทวน
                     }
@@ -258,12 +343,12 @@ class SaveAssessmentIbController extends Controller
         }
 
 
-            if($auditors->degree == 4){
+            if($assessment->degree == 4){
                 $committee->step_id = 7; // ผ่านการตรวจสอบประเมิน
                 $committee->save();
                    //  Log
-                 $this->set_history($auditors);
-                $this->set_mail_past($auditors,$CertiIb);  
+                 $this->set_history($assessment);
+                $this->set_mail_past($assessment,$CertiIb);  
             }
             if($request->previousUrl){
                 return redirect("$request->previousUrl")->with('message', 'เรียบร้อยแล้ว!');
@@ -273,6 +358,47 @@ class SaveAssessmentIbController extends Controller
         }
         abort(403);
     }
+
+    public function copyScopeIbFromAttachement($certiIbId)
+{
+    $copiedScoped = null;
+    $fileSection = null;
+
+    $app = CertiIb::find($certiIbId);
+
+    $latestRecord = CertiIBAttachAll::where('app_certi_ib_id', $certiIbId)
+    ->where('file_section', 3)
+    ->where('table_name', 'app_certi_ib')
+    ->orderBy('created_at', 'desc') // เรียงลำดับจากใหม่ไปเก่า
+    ->first();
+
+    $existingFilePath = 'files/applicants/check_files_ib/' . $latestRecord->file ;
+
+    // ตรวจสอบว่าไฟล์มีอยู่ใน FTP และดาวน์โหลดลงมา
+    if (HP::checkFileStorage($existingFilePath)) {
+        $localFilePath = HP::getFileStoragePath($existingFilePath); // ดึงไฟล์ลงมาที่เซิร์ฟเวอร์
+        $no  = str_replace("RQ-","",$app->app_no);
+        $no  = str_replace("-","_",$no);
+        $dlName = 'scope_'.basename($existingFilePath);
+        $attach_path  =  'files/applicants/check_files_ib/'.$no.'/';
+
+        if (file_exists($localFilePath)) {
+            $storagePath = Storage::putFileAs($attach_path, new \Illuminate\Http\File($localFilePath),  $dlName );
+            $filePath = $attach_path . $dlName;
+            if (Storage::disk('ftp')->exists($filePath)) {
+                $list  = new  stdClass;
+                $list->attachs =  $no.'/'.$dlName;
+                $list->file_client_name =  $dlName;
+                $scope[] = $list;
+                $copiedScoped = json_encode($scope);
+            } 
+            unlink($localFilePath);
+        }
+    }
+
+    return $copiedScoped;
+}
+
 
     /**
      * Display the specified resource.
@@ -473,6 +599,8 @@ class SaveAssessmentIbController extends Controller
         $assessment = CertiIBSaveAssessment::findOrFail($id);
         return view('certify/ib.save_assessment_ib.form_assessment', compact('assessment','previousUrl'));
     }
+
+
     public function UpdateAssessment(Request $request, $id){
  
         $auditors = CertiIBSaveAssessment::findOrFail($id);
@@ -496,7 +624,8 @@ if($auditors->degree != 5){  // ข้อบกพร่อง/ข้อสั�
                }
              } 
 
-            if($request->hasFile('file_car')){
+            // if($request->hasFile('file_car')){
+            if($request->assessment_passed == 1){
                     $auditors->main_state = 1;
                     $auditors->degree = 4;
                     $auditors->date_car = date("Y-m-d"); // วันที่ปิด Car
@@ -701,6 +830,7 @@ if($auditors->main_state == 1){
                     $bug->no = $detail["no"][$key] ?? null;
                     $bug->type =  $detail["type"][$key] ?? null;
                     $bug->reporter_id =  $detail["found"][$key] ?? null;
+                    $bug->owner_id = auth()->user()->runrecno;
                     $bug->save();
             }
     }
@@ -915,4 +1045,420 @@ if($auditors->main_state == 1){
                 return null;
             }
     }
+
+    
+    public function createIbReport($id)
+    {
+        
+        $assessment = CertiIBSaveAssessment::find($id);
+        $ibReportInfo = IbReportInfo::where('ib_assessment_id',$id)->first();
+        $certi_ib = CertiIb::find($assessment->app_certi_ib_id);
+
+        // dd($ibReportInfo);
+        $referenceDocuments = CertiIBAttachAll::where('app_certi_ib_id',$assessment->app_certi_ib_id)
+                ->where('ref_id',$assessment->id)
+                ->where('file_section','123')
+                ->get();
+        if($ibReportInfo == null)
+        {
+            return view('certify.ib.save_assessment_ib.report.index',[
+                'assessment' => $assessment,
+                'certi_ib' =>$certi_ib,
+                'referenceDocuments' => $referenceDocuments
+            ]);
+        }else{
+
+            $ibReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)
+                                ->where('certificate_type',1)
+                                ->where('report_type',1)
+                                ->get();
+            // dd('ok');
+            return view('certify.ib.save_assessment_ib.report.view',[
+                'ibReportInfo' => $ibReportInfo,
+                'assessment' => $assessment,
+                'certi_ib' =>$certi_ib,
+                'referenceDocuments' => $referenceDocuments,
+                'ibReportInfoSigners' => $ibReportInfoSigners,
+            ]);
+        }
+
+    }
+
+    public function addAuditorIbRepresentative(Request $request)
+    {
+        // dd($request->all());
+        // Validate input
+        $request->validate([
+            'assessment_id' => 'required|integer',
+            'name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
+        ]);
+    
+        // Create new AuditorRepresentative record
+        $auditor = AuditorIbRepresentative::create([
+            'assessment_id' => $request->assessment_id,
+            'name' => $request->name,
+            'position' => $request->position,
+        ]);
+    
+        // Get updated list
+        $auditorIbRepresentatives = AuditorIbRepresentative::where('assessment_id', $request->assessment_id)->get();
+        // dd($auditorIbRepresentatives);
+        // Return updated list as JSON
+        return response()->json(['auditorIbRepresentatives' => $auditorIbRepresentatives]);
+    }
+
+    public function deleteAuditorIbRepresentative(Request $request)
+    {
+        // ตรวจสอบ input
+        $request->validate([
+            'auditor_id' => 'required|integer',
+            'assessment_id' => 'required|integer',
+        ]);
+
+        // ลบข้อมูล
+        AuditorIbRepresentative::where('id', $request->auditor_id)->delete();
+
+        // ดึงข้อมูลอัปเดต
+        $auditorIbRepresentatives = AuditorIbRepresentative::where('assessment_id', $request->assessment_id)->get();
+
+        // ส่งข้อมูลที่อัปเดตกลับไป
+        return response()->json(['auditorIbRepresentatives' => $auditorIbRepresentatives]);
+    }
+
+    public function addIbReferenceDocument(Request $request)
+    {
+        // dd($request->all());
+        $assessment = CertiIBSaveAssessment::find($request->ref_id);
+        
+        $certi_ib_attach_more = new CertiIBAttachAll();
+        $certi_ib_attach_more->app_certi_ib_id  = $assessment->app_certi_ib_id ?? null;
+        $certi_ib_attach_more->ref_id           = $assessment->id;
+        $certi_ib_attach_more->table_name       = (new CertiIBAttachAll)->getTable();
+        $certi_ib_attach_more->file_section     = '123';
+        $certi_ib_attach_more->file             = $this->storeFile($request->file, $assessment->app_no);
+        $certi_ib_attach_more->file_client_name = HP::ConvertCertifyFileName($request->file->getClientOriginalName());
+        $certi_ib_attach_more->token            = Str::random(16);
+        $certi_ib_attach_more->save();
+
+         // ส่งข้อมูลไฟล์กลับไปที่ JavaScript แบบเดิม
+        $referenceDocuments = CertiIBAttachAll::where('app_certi_ib_id', $assessment->app_certi_ib_id)
+        ->where('ref_id', $assessment->id)
+        ->where('file_section', '123')
+        ->get();  // ไม่ต้องแปลงเป็นอาร์เรย์
+
+        return response()->json(['referenceDocuments' => $referenceDocuments]);
+    }
+
+    public function deleteIbReferenceDocument(Request $request)
+    {
+        $assessment = CertiIBSaveAssessment::find($request->assessment_id);
+        // ค้นหาข้อมูลเอกสารที่ต้องการลบ
+        $referenceDocument = CertiIBAttachAll::find($request->id);
+
+        
+
+        if ($referenceDocument) {
+            if (Storage::exists($referenceDocument->file)) {
+                Storage::delete($referenceDocument->file);
+            }
+
+            // ลบข้อมูลจากฐานข้อมูล
+            $referenceDocument->delete();
+
+            // ส่งผลลัพธ์กลับว่าลบสำเร็จ
+            // return response()->json(['success' => true]);
+        }
+
+        // ส่งข้อมูลไฟล์กลับไปที่ JavaScript แบบเดิม
+        $referenceDocuments = CertiIBAttachAll::where('app_certi_ib_id', $assessment->app_certi_ib_id)
+        ->where('ref_id', $assessment->id)
+        ->where('file_section', '123')
+        ->get();  // ไม่ต้องแปลงเป็นอาร์เรย์
+
+        // dd( $referenceDocuments);
+
+        return response()->json(['referenceDocuments' => $referenceDocuments]);
+    }
+
+    public function storeIbReport(Request $request)
+    {
+        // dd($request->all());
+        $signers = json_decode($request->input('signer'), true);
+        // dd($signers);
+        $data = json_decode($request->input('data'), true); // แปลง JSON String เป็น Array
+        $id = $request->id;
+
+        IbReportInfo::where('ib_assessment_id',$id)->delete();
+
+        $assessment = CertiIBSaveAssessment::find($id);
+        
+        // สร้าง array สำหรับ insert
+        $insertData = [
+            'ib_assessment_id' => $id,
+            'eval_riteria_text' => $data[0]['eval_riteria_text'] ?? null,
+            'background_history' => $data[0]['background_history'] ?? null, // แปลงเป็น JSON หากเป็น array
+            'insp_proc' => $data[0]['insp_proc'] ?? null,
+            'evaluation_key_point' => $data[0]['evaluation_key_point'] ?? null,
+            'observation' => $data[0]['observation'] ?? null,
+            'evaluation_result' => $data[0]['evaluation_result'] ?? null,
+            'auditor_suggestion' => $data[0]['auditor_suggestion'] ?? null,
+            'status' => $request->status,
+        ];
+    
+        // ดึงข้อมูล evaluation_detail และแมปเข้าไป
+        foreach ($data[0]['evaluation_detail'] as $key => $value) {
+            $insertData["{$key}_chk"] = $value['chk'] ?? false;
+            $insertData["{$key}_eval_select"] = $value['eval_select'] ?? null;
+            $insertData["{$key}_comment"] = $value['comment'] ?? null;
+        }
+
+        $ibReportInfo = IbReportInfo::create($insertData);
+
+        $config = HP::getConfig();
+        $url  =   !empty($config->url_center) ? $config->url_center : url('');
+        SignAssessmentReportTransaction::where('report_info_id', $ibReportInfo->id)
+                                        ->where('certificate_type',1)
+                                        ->where('report_type',1)
+                                        ->delete();
+        // dd($signers);
+        foreach ($signers as $signer) {
+            // ตรวจสอบความถูกต้องของข้อมูล
+            if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
+                continue; // ข้ามรายการนี้หากข้อมูลไม่ครบถ้วน
+            }
+
+            SignAssessmentReportTransaction::create([
+                'report_info_id' => $ibReportInfo->id,
+                'signer_id' => $signer['signer_id'],
+                'signer_name' => $signer['signer_name'],
+                'signer_position' => $signer['signer_position'],
+                'signer_order' => $signer['id'],
+                'view_url' => $url . '/certify/save_assessment-ib/ib-report-create/'. $id,
+                'certificate_type' => 1,
+                'report_type' => 1,
+                'app_id' => $assessment->CertiIBCostTo->app_no,
+            ]);
+        }
+        return response()->json(['ibReportInfo' => $ibReportInfo]);
+    }
+
+
+
+    public function createIbReportTwo($id)
+    {
+       
+        $assessment = CertiIBSaveAssessment::find($id);
+        $ibReportInfo = IbReportTwoInfo::where('ib_assessment_id',$id)->first();
+        $certi_ib = CertiIb::find($assessment->app_certi_ib_id);
+
+        $referenceDocuments = CertiIBAttachAll::where('app_certi_ib_id',$assessment->app_certi_ib_id)
+                ->where('ref_id',$assessment->id)
+                ->where('file_section','123')
+                ->get();
+        if($ibReportInfo == null)
+        {
+            return view('certify.ib.save_assessment_ib.report_two.index',[
+                'assessment' => $assessment,
+                'certi_ib' =>$certi_ib,
+                'referenceDocuments' => $referenceDocuments
+            ]);
+        }else{
+
+            $ibReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)
+                                ->where('certificate_type',1)
+                                ->where('report_type',1)
+                                ->get();
+
+            return view('certify.ib.save_assessment_ib.report_two.view',[
+                'ibReportInfo' => $ibReportInfo,
+                'assessment' => $assessment,
+                'certi_ib' =>$certi_ib,
+                'referenceDocuments' => $referenceDocuments,
+                'ibReportInfoSigners' => $ibReportInfoSigners,
+            ]);
+        }
+
+    }
+
+    
+    public function storeIbReportTwo(Request $request)
+    {
+        // dd($request->all());
+        $signers = json_decode($request->input('signer'), true);
+        $data = json_decode($request->input('data'), true); // แปลง JSON String เป็น Array
+        $id = $request->id;
+
+        IbReportTwoInfo::where('ib_assessment_id',$id)->delete();
+
+        $assessment = CertiIBSaveAssessment::find($id);
+        
+        // สร้าง array สำหรับ insert
+        $insertData = [
+            'ib_assessment_id' => $id,
+            'eval_riteria_text' => $data[0]['eval_riteria_text'] ?? null,
+            'background_history' => $data[0]['background_history'] ?? null, // แปลงเป็น JSON หากเป็น array
+            'insp_proc' => $data[0]['insp_proc'] ?? null,
+            'evaluation_key_point' => $data[0]['evaluation_key_point'] ?? null,
+            'observation' => $data[0]['observation'] ?? null,
+            'evaluation_result' => $data[0]['evaluation_result'] ?? null,
+            'auditor_suggestion' => $data[0]['auditor_suggestion'] ?? null,
+            'status' => $request->status,
+        ];
+    
+        // ดึงข้อมูล evaluation_detail และแมปเข้าไป
+        foreach ($data[0]['evaluation_detail'] as $key => $value) {
+            $insertData["{$key}_chk"] = $value['chk'] ?? false;
+            $insertData["{$key}_eval_select"] = $value['eval_select'] ?? null;
+            $insertData["{$key}_comment"] = $value['comment'] ?? null;
+        }
+
+        $ibReportInfo = IbReportTwoInfo::create($insertData);
+
+        $config = HP::getConfig();
+        $url  =   !empty($config->url_center) ? $config->url_center : url('');
+        SignAssessmentReportTransaction::where('report_info_id', $ibReportInfo->id)
+                                        ->where('certificate_type',1)
+                                        ->where('report_type',2)
+                                        ->delete();
+        foreach ($signers as $signer) {
+            // ตรวจสอบความถูกต้องของข้อมูล
+            if (!isset($signer['signer_id'], $signer['signer_name'], $signer['signer_position'])) {
+                continue; // ข้ามรายการนี้หากข้อมูลไม่ครบถ้วน
+            }
+
+            SignAssessmentReportTransaction::create([
+                'report_info_id' => $ibReportInfo->id,
+                'signer_id' => $signer['signer_id'],
+                'signer_name' => $signer['signer_name'],
+                'signer_position' => $signer['signer_position'],
+                'signer_order' => $signer['id'],
+                'view_url' => $url . '/certify/save_assessment-ib/ib-report-two-create/'. $id,
+                'certificate_type' => 1,
+                'report_type' => 2,
+                'app_id' => $assessment->CertiIBCostTo->app_no,
+            ]);
+        }
+        return response()->json(['ibReportInfo' => $ibReportInfo]);
+    }
+
+
+    public function checkCompleteReportOneSign(Request $request)
+    {
+        $assessmentId = $request->assessment_id;
+        $ibReportInfo = IbReportInfo::where('ib_assessment_id' ,$assessmentId)->first();
+
+        $signedCount = SignAssessmentReportTransaction::where('report_info_id', $ibReportInfo->id)
+        ->where('certificate_type',1)
+        ->where('report_type',1)
+        ->where('approval',1)
+        ->count();
+
+
+        $recordCount = SignAssessmentReportTransaction::where('report_info_id', $ibReportInfo->id)
+                        ->where('certificate_type',1)
+                        ->where('report_type',1)
+                        ->count();
+
+        if($signedCount == 3)
+        {
+            return response()->json([
+                'message' => true,
+                'record_count' => 99
+            ]);
+        }else {
+            return response()->json([
+                'message' => false,
+                'record_count' => $recordCount
+            ]);
+        }
+
+       
+    }
+
+    public function checkCompleteReportTwoSign(Request $request)
+    {
+        // dd($request->all());
+        $assessmentId = $request->assessment_id;
+        $ibReportInfo = IbReportTwoInfo::where('ib_assessment_id' ,$assessmentId)->first();
+
+        $signedCount = SignAssessmentReportTransaction::where('report_info_id', $ibReportInfo->id)
+        ->where('certificate_type',1)
+        ->where('report_type',2)
+        ->where('approval',1)
+        ->count();
+
+
+        $recordCount = SignAssessmentReportTransaction::where('report_info_id', $ibReportInfo->id)
+                        ->where('certificate_type',1)
+                        ->where('report_type',2)
+                        ->count();
+        dd($recordCount);
+        if($signedCount == 3)
+        {
+            return response()->json([
+                'message' => true,
+                'record_count' => 99
+            ]);
+        }else {
+            return response()->json([
+                'message' => false,
+                'record_count' => $recordCount
+            ]);
+        }
+
+       
+    }
+
+    public function EmailToIbExpert(Request $request)
+    {
+        //   dd($request->all());
+          $assessment = CertiIBSaveAssessment::find($request->assessmentId);
+          $expertEmails = $request->selectedEmails;
+        //   dd($request->assessmentId);
+          $app = $assessment->CertiIBCostTo;
+
+          
+
+          $config = HP::getConfig();
+          $url  =   !empty($config->url_acc) ? $config->url_acc : url('');
+          $url_center  =  !empty($config->url_center) ? $config->url_center : url('');
+          $dataMail = ['1804'=> 'lab1@tisi.mail.go.th','1805'=> 'lab2@tisi.mail.go.th','1806'=> 'lab3@tisi.mail.go.th'];
+          $EMail =  array_key_exists($app->subgroup,$dataMail)  ? $dataMail[$app->subgroup] :'admin@admin.com';
+
+          // http://127.0.0.1:8081/create-by-expert/1390?token=62FfUJeXwNIBkg9FZmAQwJTO1ODu73_MTczNjc2NTg5Mw==
+          $data_app =  [
+                          'certi_ib'     => $app,
+                          'url'           => $url_center.'/create-by-ib-expert/' . $assessment->id .'?token='.$assessment->expert_token,
+                          'email'         =>  !empty($app->DataEmailCertifyCenter) ? $app->DataEmailCertifyCenter : $EMail,
+                          'email_cc'      =>  !empty($app->DataEmailDirectorLABCC) ? $app->DataEmailDirectorLABCC :  $EMail,
+                          'email_reply'   => !empty($app->DataEmailDirectorLABReply) ? $app->DataEmailDirectorLABReply :  $EMail
+                      ];
+    
+      
+          $log_email =  HP::getInsertCertifyLogEmail( $app->app_no,
+                                                      $app->id,
+                                                      (new CertiIb())->getTable(),
+                                                      $app->id,
+                                                      (new CertiIBSaveAssessment)->getTable(),
+                                                      1,
+                                                      'เพิ่มรายการข้อบกพร่อง / ข้อสังเกต',
+                                                      view('mail.IB.mail_ib_expert', $data_app),
+                                                      $app->created_by,
+                                                      $app->agent_id,
+                                                      auth()->user()->getKey(),
+                                                      !empty($app->DataEmailCertifyCenter) ?  implode(',',(array)$app->DataEmailCertifyCenter)  : $EMail,
+                                                      $app->email,
+                                                      !empty($app->DataEmailDirectorLABCC) ? implode(',',(array)$app->DataEmailDirectorLABCC)   :  $EMail,
+                                                      !empty($app->DataEmailDirectorLABReply) ?implode(',',(array)$app->DataEmailDirectorLABReply)   :  $EMail,
+                                                      null
+                                                      );
+
+          $html = new MailToIbExpert($data_app);
+          $mail = Mail::to($expertEmails)->send($html);
+          if(is_null($mail) && !empty($log_email)){
+              HP::getUpdateCertifyLogEmail($log_email->id);
+          }
+    }
+    
 }

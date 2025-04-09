@@ -15,6 +15,7 @@ use App\Models\Basic\Province;
 use Kyslik\ColumnSortable\Sortable;
 use App\Models\Sso\User AS SSO_User;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Certificate\IbDocReviewAuditor;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Models\Certify\CertiEmailLt;  //E-mail ลท.
 use App\Models\Certify\ApplicantIB\CertiIbExportMapreq;
@@ -91,7 +92,14 @@ class CertiIb extends Model
                              'ib_province_eng',
                              'ib_amphur_eng',
                              'ib_district_eng',
-                             'ib_postcode_eng'
+                             'ib_postcode_eng',
+                             'doc_auditor_assignment',
+                             'doc_review_update',
+                             'doc_review_reject',
+                             'doc_review_reject_message',
+                             'require_scope_update',
+                             'scope_view_signer_id',
+                             'scope_view_status',
                             ];
 
 
@@ -585,4 +593,49 @@ public function basic_district() {
         return Carbon::hasFormat($this->start_date, 'Y-m-d')?Carbon::parse($this->start_date)->addYear(543)->isoFormat('D MMM YYYY'):null;
     }
 
+    public function ibDocReviewAuditor()
+    {
+        return $this->hasOne(IbDocReviewAuditor::class, 'app_certi_ib_id');
+    }
+
+    public function fullyApprovedAuditorNoCancels()
+    {
+        return $this->CertiAuditors()
+         ->whereNull('status_cancel')
+         ->whereDoesntHave('messageRecordTransactions', function ($query) {
+             $query->where('approval', 0);
+         });
+    }
+   
+    public function fullyApprovedAuditors()
+    {
+        return $this->CertiAuditors()->whereDoesntHave('messageRecordTransactions', function ($query) {
+            $query->where('approval', 0);
+        });
+    }
+
+    // แต่งตั้งคณะผู้ตรวจประเมิน
+    public function CertiAuditors()
+    {
+        return $this->hasMany(CertiIBAuditors::class, 'app_certi_ib_id');
+    }
+     
+    public function paidPayIn1BoardAuditors()
+    {
+        $appCertiAssessmentIds = CertiIBPayInOne::where('app_certi_ib_id', $this->id)
+            ->where('status', 1)
+            ->pluck('auditors_id')
+            ->toArray();
+
+        if (!empty($appCertiAssessmentIds)) {
+            
+            $boardAuditors = CertiIBAuditors::whereIn('id', $appCertiAssessmentIds)->get();
+            // dd($boardAuditors);
+            return $boardAuditors;
+        }
+        // ถ้าไม่มีข้อมูล รีเทิร์นค่าเปล่า
+        return null;
+    }
+
+   
 }

@@ -16,14 +16,15 @@
 <div class="row">
     <div class="col-md-12">
         <div class="col-md-9">
- 
-            <div class="form-group {{ $errors->has('certi_no') ? 'has-error' : ''}}">
+            {{-- {{$auditorib->messageRecordTransactions()->count()}} --}}
+            <input type="hidden" name="signaturesJson" id="signaturesJson">
+            <div class="form-group {{ $errors->has('certi_no') ? 'has-error' : ''}}" hidden>
                 {!! HTML::decode(Form::label('certi_no', '<span class="text-danger">*</span>  เลขคำขอ', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
                     @if(isset($app_no))
                     {!! Form::select('app_certi_ib_id', 
                       $app_no, 
-                      null,
+                      !empty($auditorib->app_certi_ib_id) ? $auditorib->app_certi_ib_id : null,
                      ['class' => 'form-control',
                      'id' => 'app_certi_ib_id',
                      'placeholder'=>'- เลขคำขอ -', 
@@ -99,19 +100,19 @@
             <div class="form-group {{ $errors->has('other_attach') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('other_attach', '<span class="text-danger">*</span> บันทึก ลมอ. แต่งตั้งคณะผู้ตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
-                    @if (!is_null($auditorib->FileAuditors1) &&  $auditorib->FileAuditors1 != '')
+                     @if (!is_null($auditorib->FileAuditors1) &&  $auditorib->FileAuditors1 != '')
                         <p id="deleteFlieOtherAttach">
                             <a href="{{url('certify/check/file_ib_client/'.$auditorib->FileAuditors1->file.'/'.( !empty($auditorib->FileAuditors1->file_client_name) ? $auditorib->FileAuditors1->file_client_name :  basename($auditorib->FileAuditors1->file)  ))}}" 
                                     title="{{  !empty($auditorib->FileAuditors1->file_client_name) ? $auditorib->FileAuditors1->file_client_name : basename($auditorib->FileAuditors1->file) }}" target="_blank">
                                 {!! HP::FileExtension($auditorib->FileAuditors1->file)  ?? '' !!}
                             </a>     
-                            <button class="btn btn-danger btn-xs deleteFlie  {{ ($auditorib->vehicle == 1 || $auditorib->status_cancel == 1) ? 'hide' : ''}}" type="button" onclick="deleteFlieOtherAttach({{ $auditorib->FileAuditors1->id}})">
+                            {{-- <button class="btn btn-danger btn-xs deleteFlie  {{ ($auditorib->vehicle == 1 || $auditorib->status_cancel == 1) ? 'hide' : ''}}" type="button" onclick="deleteFlieOtherAttach({{ $auditorib->FileAuditors1->id}})">
                                 <i class="icon-close"></i>
-                            </button>   
+                            </button>    --}}
                         </p> 
                         <div id="AddOtherAttach"></div>           
                     @else
-                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                        {{-- <div class="fileinput fileinput-new input-group" data-provides="fileinput">
                             <div class="form-control" data-trigger="fileinput">
                                 <i class="glyphicon glyphicon-file fileinput-exists"></i>
                                 <span class="fileinput-filename"></span>
@@ -122,10 +123,142 @@
                                 <input type="file" name="other_attach" required class="check_max_size_file">
                             </span>
                             <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
-                        </div>
+                        </div> --}}
                     @endif
                 </div>
             </div>
+
+            {{-- {{$messageRecordTransactions}} --}}
+
+            @if (!isset($messageRecordTransactions))
+
+            
+            <div class="form-group">
+                {!! HTML::decode(Form::label('select_user_id', '<span class="text-danger">*</span> ผู้ลงนามท้ายขอบข่าย', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="select_user_id" id="select_user_id" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนามท้ายขอบข่าย -</option>
+                        @foreach ($signers as $id => $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_1', '<span class="text-danger">*</span> เจ้าหน้าที่ผู้รับผิดชอบ', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_1" id="signer_1" class="form-control" required>
+                        <option value="" selected>- เจ้าหน้าที่ผู้รับผิดชอบ -</option>
+                        @foreach ($signers as $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                        
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_2', '<span class="text-danger">*</span> ผู้ลงนาม (ผก.)', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_2" id="signer_2" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนาม -</option>
+                        @foreach ($signers as $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_3', '<span class="text-danger">*</span> ผู้ลงนาม (ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_3" id="signer_3" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนาม -</option>
+                        @foreach ($signers as $signer)
+                            <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                {!! HTML::decode(Form::label('signer_4', '<span class="text-danger">*</span> ผู้ลงนาม (ลมอ. / ผอ. สก.)', ['class' => 'col-md-5 control-label'])) !!}
+                <div class="col-md-7">
+                    <select name="signer_4" id="signer_4" class="form-control" required>
+                        <option value="" selected>- ผู้ลงนาม -</option>
+                        @foreach ($signers as $signer)
+                        <option value="{{ $signer->id }}" data-position="{{$signer->position}}">{{ $signer->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                
+                    {!! HTML::decode(Form::label('ibAuditorTeam', '<span class="text-danger">*</span> คณะตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                    <div class="col-md-7">
+                        <select name="ibAuditorTeam" id="ibAuditorTeam" class="form-control" required>
+                            <option value="" selected>- คณะตรวจประเมิน -</option>
+                            @foreach ($ibAuditorTeams as $ibAuditorTeam)
+                            <option value="{{ $ibAuditorTeam->id }}" >{{ $ibAuditorTeam->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+            
+
+            </div>
+
+            @endif
+
+            
+            <div class="form-group">
+                
+                @if (!is_null($auditorib->id) != null)
+                {{-- {{$auditorib->ib_auditor_team_id}}  --}}
+                    @if ($auditorib->ib_auditor_team_id)
+                        {!! HTML::decode(Form::label('ibAuditorTeam', '<span class="text-danger">*</span> คณะตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
+                        <div class="col-md-7">
+                            <select name="ibAuditorTeam" id="ibAuditorTeam" class="form-control" required>
+                                <option value="" selected>- คณะตรวจประเมิน -</option>
+                                @foreach ($ibAuditorTeams as $ibAuditorTeam)
+                                <option value="{{ $ibAuditorTeam->id }}" @if ($auditorib->ib_auditor_team_id == $ibAuditorTeam->id )
+                                    selected
+                                @endif >{{ $ibAuditorTeam->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="row">
+                            <label for="ibAuditorTeam" class="col-md-5 control-label"><span class="text-danger">*</span> รายการ</label>
+                            <div class="col-md-7 offset-md-2" > <!-- เพิ่ม offset-md-2 -->
+                                <table class="table color-bordered-table primary-bordered-table"  style="margin-top: 15px">
+                                    <thead>
+                                        <tr>
+                                            <td>ชื่อ-สกุล</td>
+                                            <td>ตำแหน่ง</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($auditorib->CertiIBAuditorsLists as $CertiIBAuditorsList)
+                                            <tr>
+                                                <td>{{$CertiIBAuditorsList->auditorInformation->title_th}}{{$CertiIBAuditorsList->auditorInformation->fname_th}} {{$CertiIBAuditorsList->auditorInformation->lname_th}}</td>
+                                                <td>{{$CertiIBAuditorsList->auditorInformation->position}}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
+            </div>
+
+
+
+
+
+
             <div class="form-group {{ $errors->has('attach') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('attach', '<span class="text-danger">*</span> กำหนดการตรวจประเมิน', ['class' => 'col-md-5 control-label'])) !!}
                 <div class="col-md-7">
@@ -157,10 +290,73 @@
                   @endif
                 </div>
             </div>
+
+
+
+            
+            <div class="form-group {{ $errors->has('auditor') ? 'has-error' : '' }}">
+                <label for="auditor" class="col-md-5 control-label">
+                    <span class="text-danger">*</span> บันทึกแต่งตั้ง
+                </label>
+                <div class="col-md-7">
+                    {{-- {{$auditorib->messageRecordTransactions()->count()}} --}}
+                    @if ($auditorib->messageRecordTransactions()->count() != 0)
+                        @if ($auditorib->message_record_status == 1)
+                                <a href="{{route('certify.create_ib_message_record',['id' => $auditorib->id])}}"
+                                    title="บันทึกแต่งตั้ง" class="btn btn-warning ">
+                                    <i class="fa fa-book" aria-hidden="true"> </i>
+                                </a>
+                            @elseif($auditorib->message_record_status == 2)
+
+                                <a href="{{route('view.create_ib_message_record',['id' => $auditorib->id])}}"
+                                    title="บันทึกแต่งตั้ง" class="btn btn-info ">
+                                    <i class="fa fa-book" aria-hidden="true"> </i>
+                                </a>
+                        @endif
+                        
+                    @endif
+                </div>
+            </div>
+
+            <div class="form-group {{ $errors->has('auditor') ? 'has-error' : '' }}">
+                <label for="auditor" class="col-md-5 control-label">
+                    <span class="text-danger">*</span> คณะตรวจประเมิน
+                </label>
+                <div class="col-md-7">
+                    @if (isset($messageRecordTransactions))
+                        @if ($messageRecordTransactions->count() != 0)
+                        <table class="table color-bordered-table primary-bordered-table" style="margin-top: 10px">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%">ชื่อ-สกุล</th>
+                                    <th style="width: 45%">ตำแหน่ง</th>
+                                    <th style="width: 20%">สถานะ</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($messageRecordTransactions as $key => $item)
+                                        <tr>
+                                        
+                                            <td>{{ $item->signer_name }}</td>
+                                            <td>{{ $item->signer_position }}</td>
+                                            <td>
+                                                <span class="badge {{ $item->approval == 1 ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ $item->approval == 1 ? 'ลงนามแล้ว' : 'รอดำเนินการ' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                        </table>
+                        @endif
+                    @endif
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
-<div class="col-md-12 repeater">
+{{-- <div class="col-md-12 repeater">
     <button type="button" class="btn btn-success btn-sm pull-right clearfix  {{ ($auditorib->vehicle == 1 || $auditorib->status_cancel == 1) ? 'hide' : ''}}" id="plus-row">
         <i class="icon-plus" aria-hidden="true"></i>
         เพิ่ม
@@ -171,7 +367,6 @@
     <table class="table color-bordered-table primary-bordered-table">
         <thead>
         <tr>
-            {{-- <th class="text-center">ลำดับ</th>  --}}
             <th class="text-center">สถานะผู้ตรวจประเมิน</th>
             <th class="text-center">ชื่อผู้ตรวจประเมิน</th>
             <th class="text-center"></th>
@@ -196,7 +391,6 @@
                 </div>
             </td>
 
-            {{-- จะแสดงข้อมูลชื่อผู้ทบทวนฯ จากการติ๊กเลือกใน popup  --}}
             <td class="align-right text-top ">
                 <div class="td-users">
                     @if(count($item->CertiIBAuditorsLists) > 0)
@@ -216,12 +410,11 @@
                 </div>
                 <div class="div-users"></div>
             </td>
-            {{-- จะแสดงข้อมูลใน popup ก็ต้องเมื่อเลือก "สถานะผู้ทบทวนผลการประเมิน" --}}
+
             <td class="text-top">
                 <button type="button" class="btn btn-primary repeater-modal-open exampleModal {{ ($auditorib->vehicle == 1 || $auditorib->status_cancel == 1) ? 'hide' : ''}}" data-toggle="modal" data-target="#exampleModal"  {{ !is_null($item->status) ? '' : 'disabled' }} 
                         data-whatever="@mdo"> select
                 </button>
-                <!--   popup ข้อมูลผู้ตรวจการประเมิน   -->
                 <div class="modal fade repeater-modal exampleModal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
@@ -231,7 +424,6 @@
                                 <h4 class="modal-title" id="exampleModalLabel1">ผู้ตรวจประเมิน</h4>
                             </div>
                             <div class="modal-body">
-                                {{-- ------------------------------------------------------------------------------------------------- --}}
                                 <div class="white-box">
                                     <div class="row">
                                         <div class="form-group {{ $errors->has('myInput') ? 'has-error' : ''}}">
@@ -326,7 +518,7 @@
           @endforeach
         </tbody>
     </table>
-</div>
+</div> --}}
 
 
 
@@ -465,6 +657,84 @@
     <script src="{{ asset('js/croppie.js') }}"></script>
     <script type="text/javascript">
         function  submit_form(){
+
+            var selectUserId = $('#select_user_id').val();
+            var signer1 = $('#signer_1').val();
+            var signer2 = $('#signer_2').val();
+            var signer3 = $('#signer_3').val();
+            var signer4 = $('#signer_4').val();
+
+            if (selectUserId === "") {
+                alert('กรุณาเลือกผู้ลงนามท้ายขอบข่าย');
+                return
+            }
+
+            if (![signer1, signer2, signer3, signer4].every(function(signer) { return signer !== ""; })) {
+                alert('กรุณาเลือกเจ้าหน้าที่ผู้ลงนาม');
+                return;
+            }
+
+            const signatures = [
+                {
+                    id: 'Signature1',
+                    enable: false,
+                    show_name: false,
+                    show_position: false,
+                    signer_name: "",
+                    signer_id: "",
+                    signer_position: "ตำแหน่ง ผู้จัดการทั่วไป",    
+                    line_space: 20
+                },
+                {
+                    id: 'Signature2',
+                    enable: false,
+                    show_name: true,
+                    show_position: false,
+                    signer_name: "",
+                    signer_id: "",
+                    signer_position: "ตำแหน่ง ปฏิบัติราชการแทน",
+                    line_space: 5
+                },
+                {
+                    id: 'Signature3',
+                    enable: false,
+                    show_name: true,
+                    show_position: true,
+                    signer_name: "",
+                    signer_id: "",
+                    signer_position: "ตำแหน่ง นักเรียนโอลิมปิกเคมี",
+                    line_space: 20
+                },
+                {
+                    id: 'Signature4',
+                    enable: false,
+                    show_name: true,
+                    show_position: true,
+                    signer_name: "",
+                    signer_id: "",
+                    signer_position: "ตำแหน่ง กำลังจะสอบ ม.1",
+                    line_space: 20
+                }
+            ];
+
+            // ดึงค่าที่ถูกเลือกและอัปเดต signatures
+            for (let i = 1; i <= 4; i++) {
+                const selectElement = $(`#signer_${i}`);
+                const selectedId = selectElement.val();
+                const selectedName = selectElement.find('option:selected').text();
+                const selectedPosition = selectElement.find('option:selected').data('position');
+
+                // อัปเดตใน signatures
+                signatures[i - 1].signer_id = selectedId || "";
+                signatures[i - 1].signer_name = selectedName || "";
+                signatures[i - 1].signer_position = selectedPosition || "";
+            }
+
+            console.log("Updated signatures:", signatures);
+
+            // return;
+
+            $('#signaturesJson').val(JSON.stringify(signatures));
             Swal.fire({
                 title: 'ยืนยันทำรายการ !',
                 icon: 'warning',
@@ -477,7 +747,22 @@
                     if (result.value) {
                         $('#form_auditor').submit();
                     }
-                })
+            })
+
+
+            // Swal.fire({
+            //     title: 'ยืนยันทำรายการ !',
+            //     icon: 'warning',
+            //     showCancelButton: true,
+            //     confirmButtonColor: '#3085d6',
+            //     cancelButtonColor: '#d33',
+            //     confirmButtonText: 'บันทึก',
+            //     cancelButtonText: 'ยกเลิก'
+            //     }).then((result) => {
+            //         if (result.value) {
+            //             $('#form_auditor').submit();
+            //         }
+            //     })
         }
     
 
@@ -746,6 +1031,11 @@
                             $('#app_id').val('');
                     }
                 });
+
+            var certi_ib_change = '{{  !empty($auditorib->certi_ib_change)  ? 1 : null  }}';
+            if(certi_ib_change == 1){
+                $('#app_certi_ib_id').change();
+            }
 
             //เพิ่มวันที่ตรวจประเมิน
             $("#add_date").click(function() {

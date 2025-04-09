@@ -26,7 +26,6 @@
             opacity: 0.9; /* กำหนดความทึบของ textarea */
         }
     </style>
-    </style>
 @endpush
 
 <div class="modal fade" id="modal-email-to-expert">
@@ -107,7 +106,7 @@
                         @endif
                     </div>
                    @if ($assessment !== null)
-                   <input type="text" id="assessmentId" value="{{$assessment->id}}">
+                   <input type="hidden" id="assessmentId" value="{{$assessment->id}}">
                    <div class="col-md-12 mt-2">
                         <hr>
                     <span style="font-weight:600">หมายเหตุ:</span> ท่านสามารถใช้ลิงก์เพื่อจัดส่งให้ผู้เชี่ยวชาญในช่องทางอื่น
@@ -185,13 +184,22 @@
                     </div>
                 </div>
             </div> --}}
+            {{-- {{$assessment}} --}}
+            {{-- @php
+                dd($assessment)
+            @endphp --}}
             @if ($assessment != null)
+                <input type="hidden" id="assessment_id" value="{{$assessment->id}}">
                 <div class="col-md-6">
-                    <label class="col-md-4 text-right">แจ้งผู้เชี่ยวชาญ : </label>
+                    <label class="col-md-4 text-right">แจ้งผู้เชี่ยวชาญ :</label>
                     
                     <div class="col-md-8">
                         <button type="button" class="btn btn-info" id="show-modal-email-to-expert"><i class="fa fa-envelope"></i> อีเมล</button>
+
+
                     </div>
+
+                    
                 </div>
             @endif
 
@@ -226,20 +234,47 @@
             <div class="col-md-6">
                 <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน : </label>
                 <div class="col-md-8">
+
+                    @if ($assessment !== null)
+                        @if ($assessment->cbReportInfo->status === "1")
+                                <a href="{{route('save_assessment.cb_report_create',['id' => $assessment->id])}}"
+                                    title="จัดทำรายงาน" class="btn btn-warning">
+                                    รายงานที่1
+                                </a>
+                            @else
+                                <a href="{{route('save_assessment.cb_report_create',['id' => $assessment->id])}}"
+                                    title="จัดทำรายงาน" class="btn btn-info">
+                                    รายงานที่1
+                                </a>
+                        @endif 
+                    {{-- @else      --}}
+                        {{-- <a href="{{route('save_assessment.view_cb_info',['id' => $assessment->id])}}"
+                            title="จัดทำรายงาน" class="btn btn-warning">
+                            รายงานที่1
+                        </a> --}}
+                        {{-- <a href="{{route('save_assessment.cb_report_create',['id' => $assessment->id ])}}" class="btn btn-warning">
+                            รายงานที่1
+                        </a> --}}
+                    @endif
+
                     @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) 
-                          <p id="RemoveFlie">
+                          {{-- <p id="RemoveFlie"> --}}
                             {{-- @if($assessment->FileAttachAssessment1To->file !='' && HP::checkFileStorage($attach_path. $assessment->FileAttachAssessment1To->file)) --}}
                                   <a href="{{url('certify/check/file_cb_client/'.$assessment->FileAttachAssessment1To->file.'/'.( !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name : 'null' ))}}" 
                                     title="{{ !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name :  basename($assessment->FileAttachAssessment1To->file) }}" target="_blank">
                                     {!! HP::FileExtension($assessment->FileAttachAssessment1To->file)  ?? '' !!}
                                 </a>
                             {{-- @endif --}}
-                            <button class="btn btn-danger btn-xs div_hide" type="button"
+                            {{-- <button class="btn btn-danger btn-xs div_hide" type="button"
                              onclick="RemoveFlie({{$assessment->FileAttachAssessment1To->id}})">
                                <i class="icon-close"></i>
-                           </button>   
-                        </p>
-                        <div id="AddFile"></div>      
+                           </button>    --}}
+                        {{-- </p> --}}
+                        <div id="AddFile"></div>    
+                        
+                        
+
+
                     @else 
                         {{-- <div class="fileinput fileinput-new input-group" data-provides="fileinput" >
                             <div class="form-control" data-trigger="fileinput">
@@ -515,16 +550,19 @@
     <div class="form-group">
         <div class="col-md-offset-4 col-md-4">
             <input type="hidden" name="previousUrl" id="previousUrl" value="{{ $previousUrl ?? null}}">
-            <div  class="status_bug_report"> 
+            {{-- <div  class="status_bug_report"> 
                 <label>{!! Form::checkbox('main_state', '2', false, ['class'=>'check','data-checkbox'=>"icheckbox_flat-red"]) !!} 
                     &nbsp;ปิดผลการตรวจประเมิน&nbsp;
                 </label>
-            </div> 
+            </div>  --}}
     
             <div id="degree_btn"></div>
                 <input type="hidden" id="submit_type" name="submit_type">
                 <div id="degree_btn"></div>
-                <button class="btn btn-success " type="button"  id="confirm" onclick="submit_form('1','confirm');return false;" style="visibility: hidden">
+                {{-- <button class="btn btn-success " type="button"  id="confirm" onclick="submit_form('1','confirm');return false;" style="visibility: hidden">
+                    <i class="fa fa-save"></i><span id="confirm_text" style="padding-left:5px">ยืนยัน</span>
+                </button> --}}
+                <button class="btn btn-success " type="button"  id="confirm" onclick="submit_form('1','confirm');return false;" style="display: none">
                     <i class="fa fa-save"></i><span id="confirm_text" style="padding-left:5px">ยืนยัน</span>
                 </button>
                 <button class="btn btn-primary " type="button" id="save"  onclick="submit_form('1','save');return false;">
@@ -556,6 +594,12 @@
     <script src="{{asset('plugins/components/sweet-alert2/sweetalert2.all.min.js')}}"></script>
     <script>
         var auditorId = @json($auditorId);
+        var assessment_id = $('#assessment_id').val();
+
+        if (assessment_id) {
+                document.getElementById('confirm').style.display = '';
+            }
+
         $(document).ready(function () {
              check_max_size_file();
             //เพิ่มไฟล์แนบ
@@ -652,23 +696,77 @@
                     l = 1;
                 }
             
-                Swal.fire({
-                    title:title,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'บันทึก',
-                    cancelButtonText: 'ยกเลิก',
-                    customClass: {
-                        popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
-                    }
-                    }).then((result) => {
-                        if (result.value) {
-                            $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
-                            $('#form_assessment').submit();
-                        }
-                })
+                // Swal.fire({
+                //     title:title,
+                //     icon: 'warning',
+                //     showCancelButton: true,
+                //     confirmButtonColor: '#3085d6',
+                //     cancelButtonColor: '#d33',
+                //     confirmButtonText: 'บันทึก',
+                //     cancelButtonText: 'ยกเลิก',
+                //     customClass: {
+                //         popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
+                //     }
+                //     }).then((result) => {
+                //         if (result.value) {
+                //             $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                //             $('#form_assessment').submit();
+                //         }
+                // })
+                const _token = $('input[name="_token"]').val();
+                            
+                            
+                            Swal.fire({
+                                title: title,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: 'บันทึก',
+                                cancelButtonText: 'ยกเลิก',
+                                customClass: {
+                                    popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
+                                }
+                            }).then((result) => {
+                                if (result.value) {
+                                    if(submit_type == 'confirm'){
+                                        $.ajax({
+                                            url: "{{route('save_assessment.check_complete_cb_report_one_sign')}}",
+                                            method: "POST",
+                                            data: {
+                                                _token: _token,
+                                                assessment_id:assessment_id
+                                            },
+                                            success: function(result) {
+                                                console.log(result);
+                                                if (result.message == true) {
+                                                    $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                                    $('#form_assessment').submit();
+                                                }else{
+                                                    
+                                                    if (result.record_count == 0) {
+                                                        alert('ยังไม่ได้สร้างรายงานการตรวจประเมิน(รายงานที่1)');
+                                                       
+                                                        if (!assessment_id) {
+                                                            window.location.href = window.location.origin + '/certify/save_assessment-cb/create/' + id;
+                                                        }else{
+                                                            window.location.href = window.location.origin + '/certify/save_assessment-cb/view-cb-info/' + assessment_id;
+                                                        }
+                                                    }else{
+                                                        alert('อยู่ระหว่างการลงนามรายงานการตรวจประเมิน(รายงานที่1)');
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                    }else if(submit_type == 'save'){
+                                        // console.log(submit_type)
+                                            $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                            $('#form_assessment').submit();
+                                    }
+
+                                }
+                            });
             }   
     
         } 
@@ -687,7 +785,7 @@
                             $('#applicant_name').val(certi_cb.name); 
                             $('#laboratory_name').val(certi_cb.name_standard);
                             $('#Tis').html(certi_cb.tis); 
-                            $('#app_certi_cb_id').val(certi_cb.app_certi_cb_id); 
+                            $('#app_certi_cb_id').val(certi_cb.id); 
                         }else{
                             $('#app_no').val(''); 
                             $('#applicant_name').val(''); 
@@ -830,7 +928,11 @@
                     $('#checkbox_document').hide(400); 
                     $('.file_scope_required').prop('required', false);
                     $('#confirm').css('visibility', 'visible');
-                    $('#save_text').html('ฉบับร่าง');
+                    if (assessment_id) {
+                        $('#save_text').html('ฉบับร่าง');
+                    }else{
+                        $('#save_text').html('บันทึก');
+                    }
                 } else{
                     $('.status_bug_report').hide(400);
                     $('#submit_draft').hide(400); 

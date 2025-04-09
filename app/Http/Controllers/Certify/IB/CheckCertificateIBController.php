@@ -2,50 +2,52 @@
 
 namespace App\Http\Controllers\Certify\IB;
 
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-
-use App\CheckCertificateIB;
-use Illuminate\Http\Request;
-use stdClass;
-use Storage;
-use HP;
 use DB;
+use HP;
+
 use PDF;
 use File;
-use HP_API_PID;
+use Storage;
 use App\User;
+use stdClass;
+use HP_API_PID;
+use Carbon\Carbon;
+use App\Http\Requests;
+use App\CheckCertificateIB;
 use App\IpaymentCompanycode;
+use Illuminate\Http\Request;
 
-use App\Models\Certify\ApplicantIB\CertiIb;
-use App\Models\Certify\ApplicantIB\CertiIBStatus;
-use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
-use App\Models\Certify\ApplicantIB\CertiIBCheck;
-use App\Models\Certify\ApplicantIB\CertiIbHistory;
-use App\Models\Certify\ApplicantIB\CertiIBCost; // ประมาณการค่าใช้จ่าย
-use App\Models\Certify\ApplicantIB\CertiIBAuditors;
-use App\Models\Certify\ApplicantIB\CertiIBPayInOne;
-use App\Models\Certify\ApplicantIB\CertiIBReview;
-use App\Models\Certify\ApplicantIB\CertiIBReport;
-use App\Models\Certify\ApplicantIB\CertiIBFileAll; 
-use App\Models\Certify\ApplicantIB\CertiIBPayInTwo;
-use App\Models\Certify\ApplicantIB\CertiIbExportMapreq;
-use App\Models\Certify\ApplicantIB\CertiIBExport;
-
-use App\Models\Certify\TransactionPayIn;
-use App\Models\Certify\CertiSettingPayment;
-use App\Models\Certify\PayInAll;
-use App\Models\Basic\Feewaiver;
-use App\Models\Sso\User AS SSO_User;
-
-use Illuminate\Support\Facades\Mail;
-use App\Mail\IB\IBAssignStaffMail;
-use App\Mail\IB\IBDocumentsMail;
+use App\Mail\IB\IBReportMail;
 use App\Mail\IB\IBRequestMail;
 use App\Mail\IB\IBPayInOneMail;
-use App\Mail\IB\IBInformPayInOne;
-use App\Mail\IB\IBReportMail;
 use App\Mail\IB\IBPayInTwoMail;
+use App\Models\Basic\Feewaiver;
+use App\Mail\IB\IBDocumentsMail;
+use App\Models\Certify\PayInAll;
+use App\Mail\IB\IBInformPayInOne;
+use App\Mail\IB\IBAssignStaffMail;
+use App\Http\Controllers\Controller;
+use App\Models\Sso\User AS SSO_User;
+use Illuminate\Support\Facades\Mail;
+use App\Models\Certify\TransactionPayIn;
+use App\Models\Certify\ApplicantIB\CertiIb;
+
+use App\Models\Certify\CertiSettingPayment;
+use App\Models\Certificate\IbScopeTransaction;
+use App\Models\Certify\ApplicantIB\CertiIBCheck;
+use App\Models\Certify\ApplicantIB\CertiIBExport;
+use App\Models\Certify\ApplicantIB\CertiIBReport;
+
+use App\Models\Certify\ApplicantIB\CertiIBReview;
+use App\Models\Certify\ApplicantIB\CertiIBStatus;
+use App\Models\Certify\ApplicantIB\CertiIbHistory;
+use App\Models\Certify\ApplicantIB\CertiIBAuditors;
+use App\Models\Certify\ApplicantIB\CertiIBFileAll; 
+use App\Models\Certify\ApplicantIB\CertiIBPayInOne;
+use App\Models\Certify\ApplicantIB\CertiIBPayInTwo;
+use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
+use App\Models\Certify\ApplicantIB\CertiIbExportMapreq;
+use App\Models\Certify\ApplicantIB\CertiIBCost; // ประมาณการค่าใช้จ่าย
 
 class CheckCertificateIBController extends Controller
 {
@@ -250,14 +252,25 @@ class CheckCertificateIBController extends Controller
 
     public function showCertificateIbDetail($certiIb)
     {
+        // dd('ok');
         $previousUrl = app('url')->previous();
         $certi_ib = CertiIb::where('app_no',$certiIb)->first();
         $tis_data = SSO_User::find($certi_ib->created_by);
-        return view('certify/ib/check_certificate_ib.detail', compact('certi_ib','previousUrl','tis_data'));
+        $ibScopeTransactions = IbScopeTransaction::where('certi_ib_id', $certi_ib->id)
+        ->with([
+            'ibMainCategoryScope',
+            'ibSubCategoryScope',
+            'ibScopeTopic',
+            'ibScopeDetail'
+        ])
+        ->get();
+
+        return view('certify/ib/check_certificate_ib.detail', compact('certi_ib','previousUrl','tis_data','ibScopeTransactions'));
     }
 
     public function show($token)
     {
+        // dd('ok');
         $model = str_slug('checkcertificateib','-');
         if(auth()->user()->can('view-'.$model)) {
             $certi_ib = CertiIb::where('token',$token)->first();
@@ -456,6 +469,48 @@ class CheckCertificateIBController extends Controller
         abort(403);
 
     }
+
+
+    public function copyScopeIbFromAttachement($certiIbId)
+    {
+        $copiedScoped = null;
+        $fileSection = null;
+    
+        $app = CertiIb::find($certiIbId);
+    
+        $latestRecord = CertiIBAttachAll::where('app_certi_ib_id', $certiIbId)
+        ->where('file_section', 3)
+        ->where('table_name', 'app_certi_ib')
+        ->orderBy('created_at', 'desc') // เรียงลำดับจากใหม่ไปเก่า
+        ->first();
+    
+        $existingFilePath = 'files/applicants/check_files_ib/' . $latestRecord->file ;
+    
+        // ตรวจสอบว่าไฟล์มีอยู่ใน FTP และดาวน์โหลดลงมา
+        if (HP::checkFileStorage($existingFilePath)) {
+            $localFilePath = HP::getFileStoragePath($existingFilePath); // ดึงไฟล์ลงมาที่เซิร์ฟเวอร์
+            $no  = str_replace("RQ-","",$app->app_no);
+            $no  = str_replace("-","_",$no);
+            $dlName = 'scope_'.basename($existingFilePath);
+            $attach_path  =  'files/applicants/check_files_ib/'.$no.'/';
+    
+            if (file_exists($localFilePath)) {
+                $storagePath = Storage::putFileAs($attach_path, new \Illuminate\Http\File($localFilePath),  $dlName );
+                $filePath = $attach_path . $dlName;
+                if (Storage::disk('ftp')->exists($filePath)) {
+                    $list  = new  stdClass;
+                    $list->attachs =  $no.'/'.$dlName;
+                    $list->file_client_name =  $dlName;
+                    $scope[] = $list;
+                    $copiedScoped = json_encode($scope);
+                } 
+                unlink($localFilePath);
+            }
+        }
+    
+        return $copiedScoped;
+    }
+
     public function GetIBPayInOne($id = null,$token = null)
     {
          
@@ -524,7 +579,13 @@ try {
                                                         "verify_peer_name" => false,
                                                     );
                     }
-                    $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$certi_ib->app_no-$PayIn->auditors_id", false, stream_context_create($arrContextOptions));
+
+                    $app_no          =  $certi_ib->app_no;
+                    $timestamp = Carbon::now()->timestamp;
+                    $refNo = $app_no.'-'.$PayIn->auditors_id.$timestamp;
+
+                    // $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$certi_ib->app_no-$PayIn->auditors_id", false, stream_context_create($arrContextOptions));
+                    $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$refNo", false, stream_context_create($arrContextOptions));
 
                     $api = json_decode($content);
 
@@ -535,8 +596,6 @@ try {
                     $certi_ib_attach_more->file_section         = '1';
                     $certi_ib_attach_more->file_desc            = 'เรียกเก็บค่าธรรมเนียม';
 
-                    
-                    
 
                     // if(strpos($setting_payment->data, '127.0.0.1')===0){ฃ
                     if (!filter_var(parse_url($setting_payment->data, PHP_URL_HOST), FILTER_VALIDATE_IP)) {
@@ -552,7 +611,9 @@ try {
                     $certi_ib_attach_more->token                =  str_random(16);
                     $certi_ib_attach_more->save();
     
-                    $transaction = HP::TransactionPayIn1($PayIn->id,$tb->getTable(),'2','1',$api,$certi_ib->app_no.'-'.$PayIn->auditors_id);
+                    $transaction = HP::TransactionPayIn1($PayIn->id,$tb->getTable(),'2','1',$api,$app_no.'-'.$PayIn->auditors_id,$timestamp);
+
+                    // $transaction = HP::TransactionPayIn1($PayIn->id,$tb->getTable(),'2','1',$api,$certi_ib->app_no.'-'.$PayIn->auditors_id);
 
                      $file =  $PayIn->FileAttachPayInOne1To->file ?? null;
                      if(!is_null($file) && HP::checkFileStorage($attach_path.$file)){
@@ -1652,13 +1713,16 @@ public function storeFilePayinDemo($setting_payment, $app_no = 'files_ib', $audi
                 $certi_ib = CertiIb::findOrFail($pay_in->app_certi_ib_id);
                 $app_no =  $certi_ib->app_no;
 
+                $data_ref1 = $app_no.'-'.$pay_in->auditors_id;
+
                 if(strpos($setting_payment->data, 'https')===0){//ถ้าเป็น https
                     $arrContextOptions["ssl"] = array(
                                                     "verify_peer" => false,
                                                     "verify_peer_name" => false,
                                                 );
                 }
-                $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$app_no-$pay_in->auditors_id", false, stream_context_create($arrContextOptions));
+                // $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$app_no-$pay_in->auditors_id", false, stream_context_create($arrContextOptions));
+                $content =  file_get_contents("$setting_payment->data?pid=$setting_payment->pid&out=json&Ref1=$data_ref1", false, stream_context_create($arrContextOptions));
                 // $pay_in->amount         = null;
                 // $pay_in->amount_bill    = null;
                 // $pay_in->start_date     = null;

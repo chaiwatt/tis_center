@@ -120,7 +120,7 @@
 <div class="clearfix"></div>
 <div class="row form-group">
     <div class="col-md-12">
-        <div class="white-box" style="border: 2px solid #e5ebec;">
+        {{-- <div class="white-box" style="border: 2px solid #e5ebec;">
         <legend><h3>ขอบข่ายที่ขอรับการรับรอง (Scope)</h3></legend>
                     <div id="attach-box">
                         <div class="form-group other_attach_item">
@@ -173,7 +173,7 @@
                     </div>
 
            <div class="clearfix"></div>
-        </div>
+        </div> --}}
     </div>
 </div>
 @endif

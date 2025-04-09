@@ -2,38 +2,46 @@
 
 namespace App\Http\Controllers\Certify\IB;
 
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-
-
-use stdClass;
-use Storage;
-use HP;
 use DB;
-use Carbon\Carbon;
+use HP;
+
+
+use Storage;
 use App\User;
-
-use App\Models\Certify\Applicant\CostDetails;
-use  App\Models\Bcertify\StatusAuditor;
-use App\Models\Certify\ApplicantIB\CertiIBAuditors;
-use App\Models\Certify\ApplicantIB\CertiIBAuditorsDate;
-use App\Models\Certify\ApplicantIB\CertiIBAuditorsCost;
-use App\Models\Certify\ApplicantIB\CertiIBAuditorsStatus;
-use App\Models\Certify\ApplicantIB\CertiIBAuditorsList;
-use App\Models\Certify\ApplicantIB\CertiIBCheck;
-use App\Models\Certify\ApplicantIB\CertiIBPayInOne; 
-
-use App\Models\Certify\ApplicantIB\CertiIb;
-use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
-use App\Models\Certify\ApplicantIB\CertiIbHistory;
-use App\Models\Certify\ApplicantIB\CertiIBCost; // ประมาณการค่าใช้จ่าย
-use App\Models\Certify\ApplicantIB\CertiIBSaveAssessment;
-use App\Models\Certify\ApplicantIB\CertiIBReview;
-use App\Models\Bcertify\AuditorExpertise;
+use stdClass;
+use Carbon\Carbon;
+use App\Http\Requests;
 use Illuminate\Http\Request;
 
-use Illuminate\Support\Facades\Mail;
+use App\Models\Besurv\Signer;
+use App\Certify\IbAuditorTeam;
 use App\Mail\IB\IBAuditorsMail;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use  App\Models\Bcertify\StatusAuditor;
+use App\Models\Bcertify\AuditorExpertise;
+use App\Models\Bcertify\AuditorInformation;
+use App\Models\Certify\ApplicantIB\CertiIb;
+
+use App\Models\Certify\Applicant\CostDetails;
+use App\Models\Certificate\IbDocReviewAuditor;
+use App\Models\Bcertify\HtmlIbMemorandumRequest;
+use App\Models\Certify\ApplicantIB\CertiIBCheck;
+use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Certify\ApplicantIB\CertiIBReview;
+use App\Models\Certify\ApplicantIB\CertiIbHistory;
+use App\Models\Bcertify\IbBoardAuditorMsRecordInfo;
+
+use App\Models\Certify\ApplicantIB\CertiIBAuditors;
+use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
+use App\Models\Certify\ApplicantIB\CertiIBPayInOne; 
+use App\Models\Certify\ApplicantIB\CertiIBAuditorsCost;
+use App\Models\Certify\ApplicantIB\CertiIBAuditorsDate;
+use App\Models\Certify\ApplicantIB\CertiIBAuditorsList;
+use App\Models\Certify\ApplicantIB\CertiIBAuditorsStatus;
+use App\Models\Certify\ApplicantIB\CertiIBSaveAssessment;
+use App\Models\Certify\ApplicantIB\CertiIBCost; // ประมาณการค่าใช้จ่าย
+
 class AuditorIBController extends Controller
 {
 
@@ -104,8 +112,9 @@ class AuditorIBController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create($id)
     {
+        // dd('ok');
         $model = str_slug('auditorib','-');
         if(auth()->user()->can('add-'.$model)) {
             $previousUrl = app('url')->previous();
@@ -124,12 +133,30 @@ class AuditorIBController extends Controller
                                        ->orderby('id','desc')
                                        ->pluck('app_no', 'id');
            }
+
+           $signers = Signer::all();
+           $ibAuditorTeams = IbAuditorTeam::where('state',1)->get();
+
+           $selectUserIds  = User::whereIn('reg_subdepart',[1803])
+           ->pluck('runrecno')
+           ->toArray();
+
+           $select_users = Signer::whereIn('user_register_id',$selectUserIds)->get();
+
             $auditorib = new CertiIBAuditors;
             $auditors_status = [new CertiIBAuditorsStatus];
-            return view('certify/ib.auditor_ib.create',['app_no' => $app_no,
+            // if(!empty($request->certiib_id)){
+                $auditorib->app_certi_ib_id = $id;
+                $auditorib->certi_ib_change =  true;
+            // } 
+
+            return view('certify.ib.auditor_ib.create',['app_no' => $app_no,
+                                                        'ibAuditorTeams'=>$ibAuditorTeams,
+                                                        'signers'=>$signers,
                                                          'auditorib' => $auditorib,
                                                         'auditors_status' => $auditors_status,
-                                                        'previousUrl' => $previousUrl
+                                                        'previousUrl' => $previousUrl,
+                                                        'select_users' => $select_users
                                                         ]);
         }
         abort(403);
@@ -145,7 +172,11 @@ class AuditorIBController extends Controller
      */
     public function store(Request $request)
     {
+        $ibAuditorTeam = IbAuditorTeam::find($request->ibAuditorTeam);
+        
+        $auditorTeamData = json_decode($ibAuditorTeam->auditor_team_json, true);
 
+        // dd($request->all());
         $model = str_slug('auditorib','-');
         if(auth()->user()->can('add-'.$model)) {
             $request->validate([
@@ -162,6 +193,7 @@ class AuditorIBController extends Controller
 
                     $request->request->add(['created_by' => auth()->user()->getKey()]); //user create
                     $requestData = $request->all();
+                    $requestData['ib_auditor_team_id'] =   $request->ibAuditorTeam ;
                     $requestData['vehicle'] = isset($request->vehicle) ? 1 : null ;
                     $requestData['status']  =   null ;
                     $requestData['step_id'] =  2  ;//ขอความเห็นแต่งคณะผู้ตรวจประเมิน
@@ -178,11 +210,17 @@ class AuditorIBController extends Controller
                     //วันที่ตรวจประเมิน
                     $this->DataCertiIBAuditorsDate($auditors->id,$request);
 
+                //    dd($auditorTeamData);
 
-                    $this->storeStatus($auditors->id,(array)$requestData['list']);
+                    $this->storeStatusFromIbAuditorTeam($auditors->id,$auditorTeamData);
+
+                    // dd("ok");
+                    // $this->storeStatus($auditors->id,(array)$requestData['list']);
 
                     //ค่าใช้จ่าย
                     $this->storeItems($auditors->id,$request);
+                    $certi_ib = CertiIb::findOrFail($auditors->app_certi_ib_id);
+                    $this->saveSignature($request,$auditors->id,$certi_ib);
 
                     $certi_ib = CertiIb::findOrFail($auditors->app_certi_ib_id);
                     if(!is_null($certi_ib->email)){
@@ -197,6 +235,8 @@ class AuditorIBController extends Controller
                             $certi_ib->update(['status'=>10]); //  อยู่ระหว่างดำเนินการ
                         }
                     }
+
+                    // dd("ok");
 
                     if($request->previousUrl){
                         return redirect("$request->previousUrl")->with('flash_message', 'เรียบร้อยแล้ว!');
@@ -232,7 +272,15 @@ class AuditorIBController extends Controller
                 $auditors_status = [new CertiIBAuditorsStatus];
             }
 
-            return view('certify/ib.auditor_ib.edit', compact('auditorib','auditors_status','previousUrl'));
+            $attach_path = $this->attach_path;//path ไฟล์แนบ
+            $signers = Signer::all();
+            $ibAuditorTeams = IbAuditorTeam::where('state',1)->get();
+
+            $messageRecordTransaction = MessageRecordTransaction::where('board_auditor_id',$id)->where('certificate_type',1)->first();
+          $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$id)->where('certificate_type',1)->get();
+        //   dd($messageRecordTransactions);
+
+            return view('certify/ib.auditor_ib.edit', compact('messageRecordTransaction','messageRecordTransactions','ibAuditorTeams','signers','auditorib','auditors_status','previousUrl','attach_path'));
         }
         abort(403);
     }
@@ -271,7 +319,7 @@ class AuditorIBController extends Controller
                 //วันที่ตรวจประเมิน
                 $this->DataCertiIBAuditorsDate($auditors->id,$request);
     
-                $this->storeStatus($auditors->id,(array)$requestData['list']);
+                // $this->storeStatus($auditors->id,(array)$requestData['list']);
     
                  //ค่าใช้จ่าย
                 $this->storeItems($auditors->id,$request);
@@ -357,6 +405,38 @@ class AuditorIBController extends Controller
       CertiIBAuditorsDate::create($input);
      }
    }
+
+   public function storeStatusFromIbAuditorTeam($baId, $auditorTeamData) 
+   {
+      
+      CertiIBAuditorsStatus::where('auditors_id',$baId)->delete();
+  
+        foreach($auditorTeamData['status'] as $key => $itme) {
+            
+          if($itme != null){
+              $input = [];
+              $input['auditors_id'] = $baId;
+              $input['status'] =  $itme;
+              
+              $auditors_status =  CertiIBAuditorsStatus::create($input);
+            //   dd($auditors_status,$auditorTeamData['temp_users'][$key]);
+            //   $this->storeList($auditors_status,
+            //                   $auditorTeamData['temp_users'][$auditors_status->status],
+            //                   $auditorTeamData['user_id'][$auditors_status->status],
+            //                   $auditorTeamData['temp_departments'][$auditors_status->status]
+            //                 );
+            $this->storeList($auditors_status,
+                            $auditorTeamData['temp_users'][$key],
+                            $auditorTeamData['user_id'][$key],
+                            $auditorTeamData['temp_departments'][$key]
+                          );              
+          }
+        }
+
+        // dd($auditorTeamData['status']);
+   } 
+
+
    public function storeStatus($baId, $list) {
      CertiIBAuditorsStatus::where('auditors_id',$baId)->delete();
      CertiIBAuditorsList::where('auditors_id',$baId)->delete();
@@ -374,7 +454,66 @@ class AuditorIBController extends Controller
         }
       }
    }
+
+
+   public function saveSignature($request,$baId,$app)
+   {
+       IbBoardAuditorMsRecordInfo::where('board_auditor_id',$baId)->delete();
+       CertiIBAuditors::find($baId)->update([
+           'message_record_status' => 1
+       ]);
+
+       $check = MessageRecordTransaction::where('board_auditor_id',$baId)
+       ->where('certificate_type',1)
+       ->get();
+       
+       if($check->count() == 0){
+           $signatures = json_decode($request->input('signaturesJson'), true);
+        //    dd($signatures);
+           $viewUrl = url('/certify/auditor-ib/view-ib-message-record/'.$baId);
+           if ($signatures) {
+               foreach ($signatures as $signatureId => $signature) {
+                   try {
+                       // ลองสร้างข้อมูลในฐานข้อมูล
+                       MessageRecordTransaction::create([
+                           'board_auditor_id' => $baId,
+                           'signer_id' => $signature['signer_id'],
+                           'certificate_type' => 1,
+                           'app_id' => $app->app_no,
+                           'view_url' => $viewUrl,
+                           'signature_id' => $signature['id'],
+                           'is_enable' => false,
+                           'show_name' => false,
+                           'show_position' => false,
+                           'signer_name' => $signature['signer_name'],
+                           'signer_position' => $signature['signer_position'],
+                           'signer_order' => preg_replace('/[^0-9]/', '', $signatureId),
+                           'file_path' => null,
+                           'page_no' => 0,
+                           'pos_x' => 0,
+                           'pos_y' => 0,
+                           'linesapce' => 20,
+                           'approval' => 0,
+                       ]);
+                   } catch (\Exception $e) {
+                       // จัดการข้อผิดพลาดหากล้มเหลว
+                       echo "เกิดข้อผิดพลาด: " . $e->getMessage();
+                   }
+               } 
+           }
+       }else{
+          MessageRecordTransaction::where('board_auditor_id',$baId)->where('certificate_type',1)->update([
+               'approval' => 0
+           ]);
+       }
+    
+      //  $board  =  BoardAuditor::findOrFail($baId);
+      //  $this->sendMailToExaminer($board,$board->CertiLabs); 
+   }
+
+
    public function storeList($status,$temp_users,$user_id,$temp_departments) {
+    
       foreach($temp_users as $key => $itme) {
         if($itme != null){
             $input = [];
@@ -583,6 +722,360 @@ class AuditorIBController extends Controller
      }
      abort(403);
  }
+
+ public function auditor_ib_doc_review($id)
+ {
+    $model = str_slug('auditorib','-');
+    if(auth()->user()->can('add-'.$model)) {
+        $previousUrl = app('url')->previous();
+        $app_no = [];
+        //เจ้าหน้าที่ IB และไม่มีสิทธิ์ admin , ผอ , ผก , ลท.
+       if(in_array("27",auth()->user()->RoleListId) && auth()->user()->SetRolesAdminCertify() == "false" ){
+           $check = CertiIBCheck::where('user_id',auth()->user()->runrecno)->pluck('app_certi_ib_id'); // เช็คเจ้าหน้าที่ IB
+           if(count($check) > 0 ){
+               $app_no= CertiIb::whereIn('id',$check)
+                                ->whereIn('status',[9,10,11])
+                                ->orderby('id','desc')
+                                ->pluck('app_no', 'id');
+            }
+       }else{
+               $app_no = CertiIb::whereIn('status',[9,10,11])
+                                   ->orderby('id','desc')
+                                   ->pluck('app_no', 'id');
+       }
+        $auditorib = new CertiIBAuditors;
+        $auditors_status = [new CertiIBAuditorsStatus];
+        $certiIb = CertiIb::find($id);
+        return view('certify.ib.auditor_ib_doc_review.create',['app_no' => $app_no,
+                                                     'auditorib' => $auditorib,
+                                                    'auditors_status' => $auditors_status,
+                                                    'previousUrl' => $previousUrl,
+                                                    'certiIb' => $certiIb,
+                                                    ]);
+    }
+    abort(403);
+ }
+
+ public function auditor_ib_doc_review_store(Request $request)
+ {
+
+    $request->validate([
+        'ib_id' => 'required|string',
+        'auditor' => 'required|string',
+        'start_date' => 'required|array',
+        'end_date' => 'required|array',
+        'assessment_type' => 'required|string',
+        'list' => 'required|array',
+    ]);
+  
+        // จัดการค่าของ auditors (แปลง list เป็น JSON)
+        $auditors = [];
+
+        if (isset($request->list['status'])) {
+            foreach ($request->list['status'] as $index => $status) {
+                $key = $status; // ใช้ status เป็น key แทน index
+                $auditors[] = [
+                    'status' => $status,
+                    'user_id' => $request->list['user_id'][$key] ?? [],
+                    'temp_users' => $request->list['temp_users'][$key] ?? [],
+                    'temp_departments' => $request->list['temp_departments'][$key] ?? [],
+                ];
+            }
+        }
+        // dd($request->all(),$auditors);
+  
+        // อัปโหลดไฟล์ถ้ามี
+        $filePath = null;
+        $fileName = null;
+  
+        if ($request->hasFile('attach')) {
+            $file = $request->file('attach');
+            $filePath = $this->storeFile($file,'doc_review_file_ib');
+            $fileName = basename($filePath);
+        }
+  
+        $from_date = isset($request->start_date[0]) ? $this->convertThaiYearToAD($request->start_date[0]) : null;
+        $to_date = isset($request->end_date[0]) ? $this->convertThaiYearToAD($request->end_date[0]) : null;
+    
+        // บันทึกข้อมูลลงในฐานข้อมูล
+        $ibDocReviewAuditor = IbDocReviewAuditor::create([
+            'app_certi_ib_id' => $request->ib_id,
+            'team_name' => $request->auditor,
+            'from_date' => $from_date,
+            'to_date' => $to_date,
+            'type' => $request->assessment_type,
+            'file' => $filePath,
+            'filename' => $fileName,
+            'auditors' => json_encode($auditors, JSON_UNESCAPED_UNICODE),
+            'status' => '0', 
+        ]);
+  
+
+  $certiIb = CertiIb::find($request->ib_id);
+      return redirect()->to('/certify/check_certificate-ib/' . $certiIb->token);
+ }
+
+   // ฟังก์ชันแปลงวันที่จาก พ.ศ. → ค.ศ.
+private function convertThaiYearToAD($thaiDate)
+{
+    // แปลงวันที่จาก "08/02/2568" → "08/02/2025"
+    $dateParts = explode('/', $thaiDate);
+    if (count($dateParts) == 3) {
+        $year = (int)$dateParts[2] - 543; // แปลง พ.ศ. → ค.ศ.
+        return $year . '-' . $dateParts[1] . '-' . $dateParts[0]; // YYYY-MM-DD
+    }
+    return null;
+}
+
+public function auditor_ib_doc_review_edit ($id)
+{
+    $model = str_slug('auditorib','-');
+    if(auth()->user()->can('add-'.$model)) {
+        $previousUrl = app('url')->previous();
+        $app_no = [];
+        //เจ้าหน้าที่ IB และไม่มีสิทธิ์ admin , ผอ , ผก , ลท.
+       if(in_array("27",auth()->user()->RoleListId) && auth()->user()->SetRolesAdminCertify() == "false" ){
+           $check = CertiIBCheck::where('user_id',auth()->user()->runrecno)->pluck('app_certi_ib_id'); // เช็คเจ้าหน้าที่ IB
+           if(count($check) > 0 ){
+               $app_no= CertiIb::whereIn('id',$check)
+                                ->whereIn('status',[9,10,11])
+                                ->orderby('id','desc')
+                                ->pluck('app_no', 'id');
+            }
+       }else{
+               $app_no = CertiIb::whereIn('status',[9,10,11])
+                                   ->orderby('id','desc')
+                                   ->pluck('app_no', 'id');
+       }
+        $auditorib = new CertiIBAuditors;
+        $auditors_status = [new CertiIBAuditorsStatus];
+        $certiIb = CertiIb::find($id);
+        $ibDocReviewAuditor = IbDocReviewAuditor::where('app_certi_ib_id',$id)->first();
+        return view('certify.ib.auditor_ib_doc_review.edit',['app_no' => $app_no,
+                                                     'auditorib' => $auditorib,
+                                                    'auditors_status' => $auditors_status,
+                                                    'previousUrl' => $previousUrl,
+                                                    'certiIb' => $certiIb,
+                                                    'ibDocReviewAuditor' => $ibDocReviewAuditor ,
+                                                    'doc_review_auditors' => json_decode($ibDocReviewAuditor->auditors, true),
+                                                    ]);
+    }
+    abort(403);
+}
+
+public function reject_doc_review(Request $request)
+{
+    // dd($request->all());
+  CertiIb::find($request->certiIbId)->update([
+    'doc_review_reject' => 1,
+    'doc_review_reject_message' => $request->rejectText,
+  ]);
+}
+
+public function accept_doc_review(Request $request)
+{
+    // dd($request->all());
+    CertiIb::find($request->certiIbId)->update([
+    'doc_auditor_assignment' => 2,
+    'doc_review_reject' => null,
+    'doc_review_reject_message' => null,
+  ]);
+}
+
+public function cancel_doc_review_team(Request $request)
+{
+    // dd($request->all());
+  IbDocReviewAuditor::where('app_certi_ib_id',$request->certiIbId)->delete();
+}
+
+ public function bypass_doc_auditor_assignment(Request $request)
+ {
+    CertiIb::find($request->certiIbId)->update([
+      'doc_auditor_assignment' => 2
+    ]);
+ }
+
+ public function CreateIbMessageRecord($id)
+  {
+    
+      // สำหรับ admin และเจ้าหน้าที่ lab
+      if (!in_array(auth()->user()->role, [6, 7, 11, 28])) {
+          abort(403);
+      }
+
+      $boardAuditor = CertiIBAuditors::find($id);
+
+      $auditorIds = []; // สร้าง array ว่างเพื่อเก็บ auditor_id
+
+      $statusAuditorMap = []; // สร้าง array ว่างสำหรับเก็บข้อมูล
+
+
+      $uniqueAuditorIds = array_unique($auditorIds);
+
+      $auditorInformations = AuditorInformation::whereIn('id',$uniqueAuditorIds)->get();
+
+      $certi_ib = CertiIb::find($boardAuditor->app_certi_ib_id);
+
+   
+
+      $boardAuditorDate = CertiIBAuditorsDate::where('auditors_id',$id)->first();
+      $dateRange = "";
+
+      
+
+      if (!empty($boardAuditorDate->start_date) && !empty($boardAuditorDate->end_date)) {
+          if ($boardAuditorDate->start_date == $boardAuditorDate->end_date) {
+              // ถ้าเป็นวันเดียวกัน
+              $dateRange = "ในวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date);
+          } else {
+              // ถ้าเป็นคนละวัน
+              $dateRange = "ตั้งแต่วันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date) . 
+                          " ถึงวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->end_date);
+          }
+      }
+      
+
+
+      $data = new stdClass();
+
+      $data->header_text1 = '';
+      $data->header_text2 = '';
+      $data->header_text3 = '';
+      $data->header_text4 = $certi_ib->app_no;
+      $data->lab_type = $certi_ib->lab_type == 3 ? 'ทดสอบ' : ($certi_ib->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
+      $data->name_standard = $certi_ib->name_standard;
+      $data->app_no =  $certi_ib->app_no;
+      $data->certificate_no = '13-LB0037';
+      $data->register_date = HP::formatDateThaiFullNumThai($certi_ib->created_at);
+      $data->get_date = HP::formatDateThaiFullNumThai($certi_ib->get_date);
+
+      $data->date_range = $dateRange;
+      $data->statusAuditorMap = $statusAuditorMap;
+      $data->fix_text1 = <<<HTML
+                  <div class="section-title">๒. ข้อกฎหมาย/กฎระเบียบที่เกี่ยวข้อง</div>
+                  <div style="text-indent:125px">๒.๑ พระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศในราชกิจจานุเบกษา วันที่ ๔ มีนาคม ๒๕๕๑) มาตรา ๒๘ วรรค ๒ ระบุ "การขอใบรับรอง การตรวจสอบและการออกใบรับรองตามวรรคหนึ่ง ให้เป็นไปตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการประกาศกำหนด"</div>
+                  <div style="text-indent:125px">๒.๒ ประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไข วันที่ ๔ มีนาคม ๒๕๕๑ การรับรองหน่วยรับรองระบบงาน (ประกาศในราชกิจจานุเบกษา วันที่ ๑๗ พฤษภาคม ๒๕๖๔)"</div>
+                  <div style="text-indent:150px">ข้อ ๖.๑.๒.๑ (๑) ระบุว่า "แต่งตั้งคณะผู้ตรวจประเมิน ประกอบด้วย หัวหน้าคณะผู้ตรวจ ประเมิน ผู้ตรวจประเมินด้านวิชาการ และผู้ตรวจประเมิน ซึ่งอาจมีผู้เชี่ยวชาญร่วมด้วยตามความเหมาะสม"</div>
+                  <div style="text-indent:150px">และข้อ ๖.๑.๒.๑ (๑) "คณะผู้ตรวจประเมินจะทบทวนและประเมินและประเมินเอกสารต่างๆ ของหน่วยตรวจ ตรวจประเมินความสามารถและ ประสิทธิผลของการดำเนินงานของหน่วยตรวจ โดยพิจารณาหลักฐานและเอกสารที่เกี่ยวข้อง การสัมภาษณ์รวมทั้งการสังเกตการปฎิบัติตามมาตรฐานการตรวจสอบและรับรองที่เกี่ยวข้อง ณ สถานประกอบการของผู้ยื่นคำขอ และสถานที่ทำการอื่นในสาขาที่ขอรับการรับรอง"</div>
+                  <div style="text-indent:125px">๒.๓ คำสั่งสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม ที่ ๓๔๒/๒๕๖๖ เรื่อง มอบอำนาจให้ข้าราชการสั่งและปฏิบัติราชการแทนเลขาธิการสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม (สั่ง ณ วันที่ ๑๓ พฤศจิกายน ๒๕๖๖) ข้อ ๓ ระบุว่า "ให้ผู้อำนวยการสำนักงานคณะกรรมการการมาตรฐานแห่งชาติ เป็นผู้มีอำนาจพิจารณาแต่งตั้งคณะผู้ตรวจประเมิน ตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑" </div>
+              HTML;
+
+      $data->fix_text2 = <<<HTML
+                  <div class="section-title">๓. สาระสำคัญและข้อเท็จจริง</div>
+                  <div style="text-indent:125px">ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการรับรองหน่วยตรวจ พ.ศ.๒๕๖๔ สำนักงานจะตรวจติดตามผลรับรองหน่วยตรวจอย่างน้อย ๑ ครั้ง ภายใน ๒ ปี โดยแต่ละครั้งอาจจะตรวจประเมินเพียงบางส่วนหรือทุกข้อกำหนดก็ได้ตามความเหมาะสม และก่อนครบการรับรอง ๕ ปี ต้องตรวจประเมินให้ครบทุกข้อกำหนด</div>
+              HTML;
+      
+
+      return view('certify.ib.auditor_ib.initial-message-record', [
+          'data' => $data,
+          'id' => $id,
+          'certi_ib' => $certi_ib,
+          'boardAuditor' => $boardAuditor,
+      ]);
+  }
+
+  public function SaveIbMessageRecord(Request $request)
+  {
+    // dd($request->id);
+     // สร้างและบันทึกข้อมูลโดยตรง
+     $record = new IbBoardAuditorMsRecordInfo([
+        'board_auditor_id' => $request->id,
+        'header_text1' => $request->header_text1,
+        'header_text2' => $request->header_text2,
+        'header_text3' => $request->header_text3,
+        'header_text4' => $request->header_text4,
+        'body_text1'   => $request->body_text1,
+        'body_text2'   => $request->body_text2,
+    ]);
+
+
+    // บันทึกลงฐานข้อมูล
+    $record->save();
+
+    CertiIBAuditors::find($request->id)->update([
+        'message_record_status' => 2
+    ]);
+    $auditor = CertiIBAuditors::find($request->id);
+
+    return response()->json([
+      'auditor'=> $auditor
+    ]);
+  }
+
+  public function viewIbMessageRecord($id)
+  {
+
+      $boardAuditor = CertiIBAuditors::find($id);
+    //   dd($boardAuditor);
+      $boardAuditorMsRecordInfo = $boardAuditor->ibBoardAuditorMsRecordInfos->first();
+
+      $auditorIds = []; // สร้าง array ว่างเพื่อเก็บ auditor_id
+
+      $statusAuditorMap = []; // สร้าง array ว่างสำหรับเก็บข้อมูล
+
+
+      $uniqueAuditorIds = array_unique($auditorIds);
+
+      $auditorInformations = AuditorInformation::whereIn('id',$uniqueAuditorIds)->get();
+
+      $certi_ib = CertiIb::find($boardAuditor->app_certi_ib_id);
+
+
+      
+      $boardAuditorDate = CertiIBAuditorsDate::where('auditors_id',$id)->first();
+      $dateRange = "";
+
+      
+
+      if (!empty($boardAuditorDate->start_date) && !empty($boardAuditorDate->end_date)) {
+          if ($boardAuditorDate->start_date == $boardAuditorDate->end_date) {
+              // ถ้าเป็นวันเดียวกัน
+              $dateRange = "ในวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date);
+          } else {
+              // ถ้าเป็นคนละวัน
+              $dateRange = "ตั้งแต่วันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->start_date) . 
+                          " ถึงวันที่ " . HP::formatDateThaiFullNumThai($boardAuditorDate->end_date);
+          }
+      }
+      
+
+    $data = new stdClass();
+
+
+    $data->header_text1 = '';
+    $data->header_text2 = '';
+    $data->header_text3 = '';
+    $data->header_text4 = $certi_ib->app_no;
+    $data->name_standard = $certi_ib->name_standard;
+    $data->app_no = $certi_ib->app_no;
+    $data->certificate_no = '13-LB0037';
+    $data->register_date = HP::formatDateThaiFullNumThai($certi_ib->created_at);
+    $data->get_date = HP::formatDateThaiFullNumThai($certi_ib->get_date);
+
+    $data->date_range = $dateRange;
+    $data->statusAuditorMap = $statusAuditorMap;
+
+
+
+      $htmlLabMemorandumRequest = HtmlIbMemorandumRequest::where('type',"ia")->first();
+
+      $data->fix_text1 = <<<HTML
+             $htmlLabMemorandumRequest->text1
+          HTML;
+
+      $data->fix_text2 = <<<HTML
+             $htmlLabMemorandumRequest->text2
+          HTML;
+
+
+
+      return view('certify.ib.auditor_ib.view-message-record', [
+          'data' => $data,
+          'id' => $id,
+          'boardAuditorMsRecordInfo' => $boardAuditorMsRecordInfo,
+          'boardAuditor' =>  $boardAuditor
+      ]);
+  }
 
 
 }

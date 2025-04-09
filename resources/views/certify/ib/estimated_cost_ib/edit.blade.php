@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ระบบการประมาณค่าใช้จ่าย (IB) </h3>
+                    <h3 class="box-title pull-left">ระบบการประมาณค่าใช้จ่าย (IB) landing</h3>
                     @can('view-'.str_slug('estimatedcostib'))
                         <a class="btn btn-success pull-right loading_state" href="{{ url('/certify/estimated_cost-ib') }}">
                             <i class="icon-arrow-left-circle" aria-hidden="true"></i> กลับ

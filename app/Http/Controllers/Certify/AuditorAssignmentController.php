@@ -13,10 +13,12 @@ use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Certify\Applicant\CertiLab;
 use App\Services\CreateCbMessageRecordPdf;
+use App\Services\CreateIbMessageRecordPdf;
 use App\Services\CreateLabMessageRecordPdf;
 use App\Models\Certify\Applicant\CheckExaminer;
 use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBAuditors;
+use App\Models\Certify\ApplicantIB\CertiIBAuditors;
 use App\Models\Certify\LabMessageRecordTransaction;
 
 class AuditorAssignmentController extends Controller
@@ -199,9 +201,7 @@ class AuditorAssignmentController extends Controller
 
         }else if($messageRecordTransaction->certificate_type == 0)
         {
-           
             $cbBoardAuditorMsRecordInfo = $boardAuditor->cbBoardAuditorMsRecordInfos->first();
-            
             if($cbBoardAuditorMsRecordInfo == null)
             {
                 return response()->json([
@@ -226,6 +226,32 @@ class AuditorAssignmentController extends Controller
                 $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
             }    
 
+        }else if($messageRecordTransaction->certificate_type == 1)
+        {
+            $ibBoardAuditorMsRecordInfo = $boardAuditor->ibBoardAuditorMsRecordInfos->first();
+            if($ibBoardAuditorMsRecordInfo == null)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'บันทึกข้อความยังไม่ได้สร้าง'
+                ]);
+            }
+            // dd($cbBoardAuditorMsRecordInfo);
+            MessageRecordTransaction::find($request->id)->update([
+                'approval' => 1
+            ]);
+            // CB
+            $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id',$messageRecordTransaction->board_auditor_id)
+                    ->whereNotNull('signer_id')
+                    ->where('certificate_type',1)
+                    ->where('approval',0)
+                    ->get();           
+
+            if($messageRecordTransactions->count() == 0){
+                $board = CertiIBAuditors::find($messageRecordTransaction->board_auditor_id);
+                $pdfService = new CreateIbMessageRecordPdf($board,"ia");
+                $pdfContent = $pdfService->generateBoardAuditorMessageRecordPdf();
+            }  
         }
         return response()->json([
             'success' => true,

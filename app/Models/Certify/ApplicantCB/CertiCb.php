@@ -705,39 +705,7 @@ public function app_certi_cb_export()
         return null;
     }
 
-    // public function fullyApproveReport()
-    // {
-    //     $auditors = $this->paidPayIn1BoardAuditors();
-    //     if($auditors !== null)
-    //     {
-    //         $auditorIds = $this->paidPayIn1BoardAuditors()->pluck('id')->toArray();
-        
-    //         // $assessment = $boardAuditor->certiCBSaveAssessment();
-    //         $certiCBSaveAssessmentIds = CertiCBSaveAssessment::whereIn('auditors_id',$auditorIds)->pluck('id');
-           
-    //         $cbReportInfos = CbReportInfo::whereIn('cb_assessment_id',$certiCBSaveAssessmentIds)->get();
-    //         // dd($cbReportInfos);
-    //         foreach ($cbReportInfos as $cbReportInfo)
-    //         {
-    //             $signAssessmentReportTransaction = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
-    //             ->where('certificate_type',0)
-    //             ->first();
-    //             if($signAssessmentReportTransaction == null){
-    //                 return false;
-    //             }else{
-    //                 $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
-    //                 ->where('certificate_type',0)
-    //                 ->where('approval',0)
-    //                 ->get();  
-    //                 if($signAssessmentReportTransactions->count() != 0){
-    //                     return false;
-    //                 }
-    //             }
-    //         }
-    //         return true;
-    //     }
-    //     return false;
-    // }
+
 
     public function fullyApproveReport()
     {

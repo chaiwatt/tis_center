@@ -100,19 +100,7 @@
      
         </div>
 
-        <div class="form-group">
-            <label for="auditor" class="col-md-5 control-label">
-                <span class="text-danger">*</span> วันที่ตรวจประเมิน : 
-            </label>
-            <label  class="col-md-7 control-label" style="text-align: left">
-                <span class="text-danger"> </span> @if ($cbDocReviewAuditor->type == 1)
-                ตรวจประเมิน ณ สถานประกอบการ
-                @elseif($cbDocReviewAuditor->type == 2)
-                ตรวจประเมิน ณ สมอ.
-                @endif
-            </label>
-     
-        </div>
+
 
         <div class="form-group">
             <label for="auditor" class="col-md-5 control-label">

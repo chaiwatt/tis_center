@@ -1,9 +1,19 @@
 
+<style>
+    .table tr:hover {
+    background-color: inherit !important;
+    transition: none !important;
+}
+
+.table td {
+    border: none !important;
+}
+</style>
 <div class="row form-group">
     <div class="col-md-12">
         <div class="white-box" style="border: 2px solid #e5ebec;">
-            <legend><h4> 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought) <span class="text-danger">ไฟล์แนบ Word</span><span class="text-danger" style="font-size: 13px;"> (doc,docx)</span></h4></legend>
- 
+            <legend><h4> 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought)</h4></legend>
+ {{-- {{$certi_ib->FileAttach3->count()}} --}}
 
                 <div class="clearfix"></div>
                 @if (isset($certi_ib) && $certi_ib->FileAttach3->count() > 0)
@@ -24,9 +34,21 @@
                         </div>
                         @endif
                      @endforeach
+                     <div class="col-md-12">
+                        <table class="table" style="border: none; background-color: inherit;margin-top:15px">
+                            <tr>
+                                <th>หมวดหมู่ / สาขาการตรวจ </th>
+                                <th>ขั้นตอนและช่วงการตรวจ </th>
+                                <th>ข้อกำหนดที่ใช้ </th>
+                            </tr>
+                            <tbody id="ib_scope_wrapper"></tbody>
+                            
+                        </table>
+                    </div>
                   </div>
                 @endif
-        
+
       </div>  
+
     </div>
 </div>
