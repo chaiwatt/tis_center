@@ -1474,7 +1474,7 @@
                         </td>
                         <td>
                             <span >
-                                พบข้อบกพร่อง จำนวน<input type="text" class="input-no-border" placeholder="" style="width: 100px;text-align:center" name="3_0_issue_count" id="3_0_issue_count">รายการ และข้อสังเกต จำนวน <input type="text" class="input-no-border" placeholder="" style="width: 100px;text-align:center" name="3_0_remarks_count" id="3_0_remarks_count">  พบข้อบกพร่อง จำนวน<input type="text" class="input-no-border" placeholder="" style="width: 50px;text-align:center" name="3_0_deficiencies_details" id="3_0_deficiencies_details">รายการ ดังสำเนารายงานข้อบกพร่องที่แนบ 
+                                พบข้อบกพร่อง จำนวน<input type="text" class="input-no-border" placeholder="" style="width: 100px;text-align:center" name="3_0_issue_count" id="3_0_issue_count">รายการ และข้อสังเกต จำนวน <input type="text" class="input-no-border" placeholder="" style="width: 100px;text-align:center" name="3_0_remarks_count" id="3_0_remarks_count">  <input type="text" class="input-no-border" placeholder="" style="width: 50px;text-align:center" name="3_0_deficiencies_details" id="3_0_deficiencies_details" hidden> ดังสำเนารายงานข้อบกพร่องที่แนบ 
                             </span>
                         </td>
                     </tr>
