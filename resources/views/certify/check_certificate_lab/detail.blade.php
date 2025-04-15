@@ -424,6 +424,7 @@
             {{-- @if ($applicant->status == 20)
                 ต้องเพิ่มการทำรายงาน (ID20)
             @endif --}}
+
             @if(!empty($applicant->report_to)  && $applicant->status >= 20)
                 @php  
                         $report  = $applicant->report_to;

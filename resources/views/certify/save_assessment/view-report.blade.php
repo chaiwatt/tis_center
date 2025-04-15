@@ -404,11 +404,12 @@
             <div class="right-box">รายงานที่ 1</div>
         </div>
         <div class="header">
-            รายงานการตรวจประเมินความสามารถของห้องปฏิบัติการทดสอบ/สอบเทียบ<br>
-            ตามมาตรฐานเลขที่ มอก. 17025-2561  landing
+            รายงานการตรวจประเมินความสามารถของห้องปฏิบัติการทดสอบ/สอบเทียบ check<br>
+            ตามมาตรฐานเลขที่ มอก. 17025-2561
         </div>
 
         <div class="checkbox-section">
+            {{$certi_lab->purpose_type}}
             <label>
                 <input type="checkbox" 
                     @if ($certi_lab->purpose_type == 1)
@@ -544,7 +545,8 @@
             </div>
             <div style="margin-top:10px;">
                     <span style="font-weight: 600">2.3 วันที่ตรวจประเมิน :</span>  
-                    <span >{{HP::formatDateThaiFullPoint($notice->assessment_date)}}</span>  
+                    <span >{{HP::formatDateThaiFullPoint($boardAuditor->board_auditors_date->start_date)}}</span>  
+                    {{-- {{$boardAuditor->board_auditors_date->start_date}} --}}
             </div>
             <div style="margin-top:10px;">
                 <span style="font-weight: 600">2.4 บุคคลที่พบ :</span>

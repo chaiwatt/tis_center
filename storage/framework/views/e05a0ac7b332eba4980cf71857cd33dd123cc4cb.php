@@ -358,6 +358,7 @@
             
 
             
+
             <?php if(!empty($applicant->report_to)  && $applicant->status >= 20): ?>
                 <?php  
                         $report  = $applicant->report_to;
