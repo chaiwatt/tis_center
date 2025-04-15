@@ -12,7 +12,7 @@
  @if(!is_null($history->DataBoardAuditorDateTitle)) 
  <div class="row">
    <div class="col-md-4 text-right">
-      <p class="text-nowrap">วันที่ตรวจประเมิน :</p>
+      <p class="text-nowrap">วันที่ตรวจประเมิน ddd:</p>
    </div>
    <div class="col-md-7">
      <span>   {!!  @$history->DataBoardAuditorDateTitle  ?? '-' !!}  </span> 
@@ -21,20 +21,51 @@
 @endif  
 
 
+@php
+    $ba = $history->boardAuditor;
+@endphp
+
 @if(!is_null($history->file)) 
 <div class="row">
   <div class="col-md-4 text-right">
      <p class="text-nowrap">บันทึก ลมอ.  แต่งตั้งคณะผู้ตรวจประเมิน :</p>
   </div>
   <div class="col-md-7">
-    <span>  
+    @if ($ba !== null)
+
+       {{-- @php
+           dd($ba->messageRecordTransactions);
+       @endphp --}}
+
+        @if (!is_null($ba->file) &&  $ba->file != '')
+
+            @php
+                $allApproved = $ba->messageRecordTransactions->every(function ($item) {
+                    return $item->approval == 1;
+                });
+            @endphp
+
+            @if ($allApproved)
+                <a href="{{url('certify/check/file_client/'.$ba->file.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($ba->file) ))}}" title="{{ !empty($ba->file_client_name) ? $ba->file_client_name :  basename($ba->file) }}" target="_blank">
+                    {!! HP::FileExtension($ba->file)  ?? '' !!}
+                </a>
+            @else  
+                
+                <span class="text-warning">รอจัดทำเอกสารแต่งตั้ง</span>  
+            @endif
+        @endif
+        
+    @endif
+    {{-- <span>  
         <a href="{{url('certify/check/file_client/'.$history->file.'/'.( !empty($history->file_client_name) ? $history->file_client_name :   basename($history->file) ))}}" target="_blank">
            {!! HP::FileExtension($history->file)  ?? '' !!}
        </a>
-   </span> 
+   </span>  --}}
   </div>
  </div>
 @endif  
+
+
 
 @if(!is_null($history->attachs)) 
 <div class="row">

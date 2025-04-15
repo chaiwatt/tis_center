@@ -2340,7 +2340,8 @@ function submit_form(status)
     formData.append('signer', JSON.stringify(signer));
     formData.append('status', status);
     
-
+    // alert('ok');
+    // return;
     $('#loadingStatus').show();
     $('#btn_draft_submit, #btn_submit').prop('disabled', true);
     $.ajax({
@@ -2358,7 +2359,7 @@ function submit_form(status)
 
             const token = certi_cb.token;
             const appId = certi_cb.id;
-           //window.location.href = `${baseUrl}/${token}/show/${appId}`;
+           window.location.href = `${baseUrl}/${token}/show/${appId}`;
             $('#loadingStatus').hide();
         }
     });

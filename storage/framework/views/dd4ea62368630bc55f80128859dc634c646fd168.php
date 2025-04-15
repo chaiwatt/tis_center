@@ -12,7 +12,7 @@
  <?php if(!is_null($history->DataBoardAuditorDateTitle)): ?> 
  <div class="row">
    <div class="col-md-4 text-right">
-      <p class="text-nowrap">วันที่ตรวจประเมิน :</p>
+      <p class="text-nowrap">วันที่ตรวจประเมิน ddd:</p>
    </div>
    <div class="col-md-7">
      <span>   <?php echo @$history->DataBoardAuditorDateTitle  ?? '-'; ?>  </span> 
@@ -21,21 +21,46 @@
 <?php endif; ?>  
 
 
+<?php
+    $ba = $history->boardAuditor;
+?>
+
 <?php if(!is_null($history->file)): ?> 
 <div class="row">
   <div class="col-md-4 text-right">
      <p class="text-nowrap">บันทึก ลมอ.  แต่งตั้งคณะผู้ตรวจประเมิน :</p>
   </div>
   <div class="col-md-7">
-    <span>  
-        <a href="<?php echo e(url('certify/check/file_client/'.$history->file.'/'.( !empty($history->file_client_name) ? $history->file_client_name :   basename($history->file) ))); ?>" target="_blank">
-           <?php echo HP::FileExtension($history->file)  ?? ''; ?>
+    <?php if($ba !== null): ?>
 
-       </a>
-   </span> 
+       
+
+        <?php if(!is_null($ba->file) &&  $ba->file != ''): ?>
+
+            <?php
+                $allApproved = $ba->messageRecordTransactions->every(function ($item) {
+                    return $item->approval == 1;
+                });
+            ?>
+
+            <?php if($allApproved): ?>
+                <a href="<?php echo e(url('certify/check/file_client/'.$ba->file.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($ba->file) ))); ?>" title="<?php echo e(!empty($ba->file_client_name) ? $ba->file_client_name :  basename($ba->file)); ?>" target="_blank">
+                    <?php echo HP::FileExtension($ba->file)  ?? ''; ?>
+
+                </a>
+            <?php else: ?>  
+                
+                <span class="text-warning">รอจัดทำเอกสารแต่งตั้ง</span>  
+            <?php endif; ?>
+        <?php endif; ?>
+        
+    <?php endif; ?>
+    
   </div>
  </div>
 <?php endif; ?>  
+
+
 
 <?php if(!is_null($history->attachs)): ?> 
 <div class="row">

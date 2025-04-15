@@ -1757,11 +1757,13 @@ class HP
 
    static function getExpertInfo($groupId, $auditorId)
     {
-        
+   
         $boardAuditorGroup = BoardAuditorGroup::find($groupId);
         $auditorInformation = AuditorInformation::find($auditorId);
-        $statusAuditor= StatusAuditor::find($boardAuditorGroup->status_auditor_id);
-        // dd($statusAuditor, $auditorInformation);
+
+        $statusAuditor= StatusAuditor::find($groupId);
+        
+        
         return (object)[
             'statusAuditor' => $statusAuditor,
             'auditorInformation' => $auditorInformation

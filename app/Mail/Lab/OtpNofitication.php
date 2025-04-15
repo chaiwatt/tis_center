@@ -24,7 +24,6 @@ class OtpNofitication extends Mailable
         $this->email = $item['email'];
     }
 
-
     public function build()
     {
         return $this->from( config('mail.from.address'), (!empty($this->email)  ? $this->email : config('mail.from.name')) )

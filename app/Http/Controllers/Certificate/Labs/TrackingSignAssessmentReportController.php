@@ -37,7 +37,7 @@ class TrackingSignAssessmentReportController extends Controller
 
     public function dataList(Request $request)
     {
-        
+        // dd('ok');
         $user = auth()->user();
         if (!$user) {
             return response()->json(['error' => 'ผู้ใช้ไม่ได้เข้าสู่ระบบ'], 401);

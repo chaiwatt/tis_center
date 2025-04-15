@@ -173,10 +173,19 @@
                                                         {!! HP::FileExtension($assessment->FileAttachAssessment5To->file)  ?? '' !!} {{$assessment->FileAttachAssessment5To->file_client_name}}
                                                     </a> 
                                              @else
+                                             
+
+                                                @if ($assessment->ibReportTwoInfo->status === "1")
                                                 <a href="{{route('save_assessment.ib_report_two_create',['id' => $assessment->id])}}"
                                                     title="จัดทำรายงาน2" class="btn btn-warning">
                                                     รายงานที่2
                                                 </a>
+                                                 @else
+                                                 <a href="{{route('save_assessment.ib_report_two_create',['id' => $assessment->id])}}"
+                                                    title="จัดทำรายงาน2" class="btn btn-info">
+                                                    รายงานที่2
+                                                </a>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>

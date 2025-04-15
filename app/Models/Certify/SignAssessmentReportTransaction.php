@@ -33,17 +33,6 @@ class SignAssessmentReportTransaction extends Model
     ];
 
 
-    // public function reportInfo()
-    // {
-    //     if ($this->certificate_type == 2) 
-    //     {
-    //         return $this->belongsTo(LabReportInfo::class, 'report_info_id', 'id');
-    //     }else if($this->certificate_type == 0)
-    //     {
-    //         return $this->belongsTo(CbReportInfo::class, 'report_info_id', 'id');
-    //     }
-    // }
-
     public function labReportInfo()
     {
         return $this->belongsTo(LabReportInfo::class, 'report_info_id', 'id');

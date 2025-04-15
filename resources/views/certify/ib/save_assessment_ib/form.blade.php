@@ -674,147 +674,153 @@
   <script>
     function  submit_form(degree,submit_type){ 
         $('#submit_type').val(submit_type);
-var bug_report = $("input[name=bug_report]:checked").val(); 
-var vehicle =  $("input[name=vehicle]:checked").val();
-var main_state =  $("input[name=main_state]:checked").val();
+
+ 
+            var bug_report = $("input[name=bug_report]:checked").val(); 
+            var vehicle =  $("input[name=vehicle]:checked").val();
+            var main_state =  $("input[name=main_state]:checked").val();
 
 
 
-    if(bug_report == 2){
-        let i = 4;
-        Swal.fire({
-                title:"ยืนยันทำรายการ !",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.value) {
-                        $('#degree_btn').html('<input type="text" name="degree" value="'+i+'" hidden>');
-                        $('#form_assessment').submit();
-                    }
-               })
-       
-     }else{
-  
-        if(degree == 0){  // ฉบับร่าง
-            Swal.fire({
-                title:'ยืนยันทำฉบับร่างรายงานข้อบกพร่อง !',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.value) {
-                        $('#degree_btn').html('<input type="text" name="degree" value="' + degree + '" hidden>');
-                        $('#form_assessment').submit();
-                    }
-            })
-        }else{
-            // let title = '';
-            // let l = '';
-            // if(main_state == 2){
-            //     title =  'ยืนยันปิดผลการตรวจประเมิน !';
-            //     l = 8;
-            // }else{
-          
-            //     title =  'ยืนยันทำรายงานข้อบกพร่อง !';
-            //     l = 1;
-            // }
-
-            let title = '';
-                let l = '';
-                if(main_state == 2){
-                    title =  'ยืนยันปิดผลการตรวจประเมิน !';
-                    l = 8;
-                }else{
+            if(bug_report == 2){
+                let i = 4;
+                Swal.fire({
+                        title:"ยืนยันทำรายการ !",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'บันทึก',
+                        cancelButtonText: 'ยกเลิก'
+                        }).then((result) => {
+                            if (result.value) {
+                                $('#degree_btn').html('<input type="text" name="degree" value="'+i+'" hidden>');
+                                $('#form_assessment').submit();
+                            }
+                    })
             
-                    title = 'ยืนยันทำรายงานข้อบกพร่อง<span style="color: #f39c12;">ฉบับร่าง</span> และ<br><span style="color: #f39c12;">อนุญาตให้ผู้ประกอบการยืนยันรายการข้อบกพร่อง</span>'
-                    if(submit_type == 'confirm'){
-                        title = 'ยืนยันทำรายงานข้อบกพร่องและ<br><span style="color: #f39c12;">อนุญาตผู้ประกอบการส่งรายงานแนวทางแก้ไข</span>'
-                    }
-                    l = 1;
-                }
+            }
+            else
+            {
+  
+                if(degree == 0){  // ฉบับร่าง
+                    Swal.fire({
+                        title:'ยืนยันทำฉบับร่างรายงานข้อบกพร่อง !',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'บันทึก',
+                        cancelButtonText: 'ยกเลิก'
+                        }).then((result) => {
+                            if (result.value) {
+                                $('#degree_btn').html('<input type="text" name="degree" value="' + degree + '" hidden>');
+                                $('#form_assessment').submit();
+                            }
+                    })
+                }else{
+                    // let title = '';
+                    // let l = '';
+                    // if(main_state == 2){
+                    //     title =  'ยืนยันปิดผลการตรวจประเมิน !';
+                    //     l = 8;
+                    // }else{
+                
+                    //     title =  'ยืนยันทำรายงานข้อบกพร่อง !';
+                    //     l = 1;
+                    // }
 
-                const _token = $('input[name="_token"]').val();
-                            
-                            
-                            Swal.fire({
-                                title: title,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#3085d6',
-                                cancelButtonColor: '#d33',
-                                confirmButtonText: 'บันทึก',
-                                cancelButtonText: 'ยกเลิก',
-                                customClass: {
-                                    popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
-                                }
-                            }).then((result) => {
-                                if (result.value) {
-                                    if(submit_type == 'confirm'){
-                                        $.ajax({
-                                            url: "{{route('save_assessment.check_complete_ib_report_one_sign')}}",
-                                            method: "POST",
-                                            data: {
-                                                _token: _token,
-                                                assessment_id:assessment_id
-                                            },
-                                            success: function(result) {
-                                                console.log(result);
-                                                if (result.message == true) {
+      
+
+                    let title = '';
+                        let l = '';
+                        if(main_state == 2){
+                            title =  'ยืนยันปิดผลการตรวจประเมิน !';
+                            l = 8;
+                        }else{
+                    
+                            title = 'ยืนยันทำรายงานข้อบกพร่อง<span style="color: #f39c12;">ฉบับร่าง</span> และ<br><span style="color: #f39c12;">อนุญาตให้ผู้ประกอบการยืนยันรายการข้อบกพร่อง</span>'
+                            if(submit_type == 'confirm'){
+                                title = 'ยืนยันทำรายงานข้อบกพร่องและ<br><span style="color: #f39c12;">อนุญาตผู้ประกอบการส่งรายงานแนวทางแก้ไข</span>'
+                            }
+                            l = 1;
+                        }
+
+                        const _token = $('input[name="_token"]').val();
+                                    
+                                    
+                                    Swal.fire({
+                                        title: title,
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#3085d6',
+                                        cancelButtonColor: '#d33',
+                                        confirmButtonText: 'บันทึก',
+                                        cancelButtonText: 'ยกเลิก',
+                                        customClass: {
+                                            popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
+                                        }
+                                    }).then((result) => {
+                                        if (result.value) {
+                                            if(submit_type == 'confirm'){
+                                                $.ajax({
+                                                    url: "{{route('save_assessment.check_complete_ib_report_one_sign')}}",
+                                                    method: "POST",
+                                                    data: {
+                                                        _token: _token,
+                                                        assessment_id:assessment_id
+                                                    },
+                                                    success: function(result) {
+                                                        console.log(result);
+                                                        if (result.message == true) {
+                                                            $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                                                            $('#form_assessment').submit();
+                                                        }else{
+                                                            
+                                                            if (result.record_count == 0) {
+                                                                alert('ยังไม่ได้สร้างรายงานการตรวจประเมิน(รายงานที่1)');
+                                                            
+                                                                if (!assessment_id) {
+                                                                    window.location.href = window.location.origin + '/certify/save_assessment-ib/create/' + id;
+                                                                }else{
+                                                                    window.location.href = window.location.origin + '/certify/save_assessment-ib/view-ib-info/' + assessment_id;
+                                                                }
+                                                            }else{
+                                                                alert('อยู่ระหว่างการลงนามรายงานการตรวจประเมิน(รายงานที่1)');
+                                                            }
+                                                        }
+                                                    }
+                                                });
+
+                                            }else if(submit_type == 'save'){
+                                                // console.log(submit_type)
+                                            
                                                     $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
                                                     $('#form_assessment').submit();
-                                                }else{
-                                                    
-                                                    if (result.record_count == 0) {
-                                                        alert('ยังไม่ได้สร้างรายงานการตรวจประเมิน(รายงานที่1)');
-                                                       
-                                                        if (!assessment_id) {
-                                                            window.location.href = window.location.origin + '/certify/save_assessment-ib/create/' + id;
-                                                        }else{
-                                                            window.location.href = window.location.origin + '/certify/save_assessment-ib/view-ib-info/' + assessment_id;
-                                                        }
-                                                    }else{
-                                                        alert('อยู่ระหว่างการลงนามรายงานการตรวจประเมิน(รายงานที่1)');
-                                                    }
-                                                }
                                             }
-                                        });
 
-                                    }else if(submit_type == 'save'){
-                                        // console.log(submit_type)
-                                     
-                                            $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
-                                            $('#form_assessment').submit();
-                                    }
-
-                                }
-                            });
-         
-            // Swal.fire({
-            //     title:title,
-            //     icon: 'warning',
-            //     showCancelButton: true,
-            //     confirmButtonColor: '#3085d6',
-            //     cancelButtonColor: '#d33',
-            //     confirmButtonText: 'บันทึก',
-            //     cancelButtonText: 'ยกเลิก',
-            //     customClass: {
-            //             popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
-            //         }
-            //     }).then((result) => {
-            //         if (result.value) {
-            //             $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
-            //             $('#form_assessment').submit();
-            //         }
-            // })
-        }   
-  
+                                        }
+                                    });
+                
+                    // Swal.fire({
+                    //     title:title,
+                    //     icon: 'warning',
+                    //     showCancelButton: true,
+                    //     confirmButtonColor: '#3085d6',
+                    //     cancelButtonColor: '#d33',
+                    //     confirmButtonText: 'บันทึก',
+                    //     cancelButtonText: 'ยกเลิก',
+                    //     customClass: {
+                    //             popup: 'custom-swal-popup',  // ใส่คลาส CSS เพื่อจัดการความกว้าง
+                    //         }
+                    //     }).then((result) => {
+                    //         if (result.value) {
+                    //             $('#degree_btn').html('<input type="text" name="degree" value="' + l + '" hidden>');
+                    //             $('#form_assessment').submit();
+                    //         }
+                    // })
+                }   
+        
        } 
     }
     $(document).ready(function () {

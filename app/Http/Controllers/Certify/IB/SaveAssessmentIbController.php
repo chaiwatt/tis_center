@@ -1393,7 +1393,7 @@ if($auditors->main_state == 1){
                         ->where('certificate_type',1)
                         ->where('report_type',2)
                         ->count();
-        dd($recordCount);
+        // dd($recordCount);
         if($signedCount == 3)
         {
             return response()->json([

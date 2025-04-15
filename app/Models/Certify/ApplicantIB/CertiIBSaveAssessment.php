@@ -8,6 +8,7 @@ use HP;
 use App\User;
 use App\Certify\IbReportInfo;
 
+use App\Certify\IbReportTwoInfo;
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -151,5 +152,9 @@ class CertiIBSaveAssessment extends Model
 
     public function ibReportInfo() {
       return $this->hasOne(IbReportInfo::class, 'ib_assessment_id','id');
+    }
+
+    public function ibReportTwoInfo() {
+      return $this->hasOne(IbReportTwoInfo::class, 'ib_assessment_id','id');
     }
 }

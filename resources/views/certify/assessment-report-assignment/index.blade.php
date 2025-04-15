@@ -39,7 +39,7 @@
                     <div class="clearfix"></div>
                     <hr>
 
-                    <div class="row ">
+                    {{-- <div class="row ">
                       <div class="col-md-6 form-group">
                      
                             {!! Form::select('filter_certificate_type',
@@ -50,7 +50,7 @@
                                 'placeholder' => '-- เลือกการรับรอง --']);
                              !!}
                      
-                      </div><!-- /.col-md-4 -->
+                      </div>
                       <div class="col-md-4">
                                {!! Form::select('filter_state',
                                 ['0'=>'รอดำเนินการ','1'=>'ลงนามเรียบร้อย'], 
@@ -58,18 +58,13 @@
                                 ['class' => 'form-control', 
                                 'id'=>'filter_state',
                                 'placeholder' => '-- เลือกสถานะ --']); !!}
-                    </div><!-- /.col-md-1 -->
+                    </div>
                       <div class="col-md-2">
                             <div class="  pull-left">
                                 <button type="button" class="btn btn-info waves-effect waves-light" id="button_search"  style="margin-bottom: -1px;">ค้นหา</button>
                             </div>
-                            {{-- <div class="  pull-left m-l-15">
-                                <button type="button" class="btn btn-warning waves-effect waves-light" id="filter_clear">
-                                    ล้าง
-                                </button>
-                            </div> --}}
                       </div>
-                  </div>
+                  </div> --}}
 
   
                   <div class="row ">

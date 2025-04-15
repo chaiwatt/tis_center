@@ -776,7 +776,7 @@ class SaveAssessmentCBController extends Controller
  }
 public function UpdateAssessment(Request $request, $id)
 {
-    dd($request->all());
+    // dd($request->all());
     $auditors = CertiCbSaveAssessment::findOrFail($id);
     $tb = new CertiCbSaveAssessment;
     $CertiCb = CertiCb::findOrFail($auditors->app_certi_cb_id);

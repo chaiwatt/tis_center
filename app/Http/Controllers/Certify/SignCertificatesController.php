@@ -310,46 +310,44 @@ class SignCertificatesController extends Controller
 
     public static function getOtp(Request $request)
     {
-      
         $send  =  SendCertificateLists::whereIn('id',$request->id)->first();
         if(!is_null($send)){
             if( !empty($send->send_certificates_to->signer_to)){
                     $sign                       =  $send->send_certificates_to->signer_to;
                     // for ($x = 0; $x <= 100; $x++) {
                         $input                  = [];
-                        $input['Ref_otp']       =   self::quickRandom(6);
-                        $input['otp']           =   rand(100000,999999);  
-                        $input['Req_date']      =    date('Y-m-d H:i:s'); 
-                        $input['Req_by']        =   auth()->user()->getKey(); 
-                        $input['state']         =  1; 
+                        $input['Ref_otp']       = self::quickRandom(6);
+                        $input['otp']           = rand(100000,999999);  
+                        $input['Req_date']      = date('Y-m-d H:i:s'); 
+                        $input['Req_by']        = auth()->user()->getKey(); 
+                        $input['state']         = 1; 
                         $detail =    SignCertificateOtp::where('Ref_otp',$input['Ref_otp'])->where('otp', $input['otp'])->first();
                         if(is_null($detail)){
-                              $otp_sign =  SignCertificateOtp::create($input);
+                            $otp_sign =  SignCertificateOtp::create($input);
 
-                             SignCertificateOtp::where('Ref_otp',$request->ref_otp)->update(['state'=> 3]);
+                            SignCertificateOtp::where('Ref_otp',$request->ref_otp)->update(['state'=> 3]);
                             
                             $mail = auth()->user()->reg_email;
                             $app = $send->app_cert_to;
                             
                             if($mail !== null){
-
                                 $config = HP::getConfig();
                                 $url  =   !empty($config->url_acc) ? $config->url_acc : url('');
                                 $dataMail = ['1804'=> 'lab1@tisi.mail.go.th','1805'=> 'lab2@tisi.mail.go.th','1806'=> 'lab3@tisi.mail.go.th'];
                                 $EMail =  array_key_exists($app->subgroup,$dataMail)  ? $dataMail[$app->subgroup] :'admin@admin.com';
                     
-                                $data_app =    [
+                                $data_app = [
                                                 'certi_lab'     => $app,
                                                 'otp'           => $otp_sign->otp,
                                                 'ref_otp'       => $otp_sign->Ref_otp,
                                                 'email'         =>  !empty($app->DataEmailCertifyCenter) ? $app->DataEmailCertifyCenter : $EMail,
                                             ];                            
-                                 $user = User::find($sign->user_register_id);
+                                $user = User::find($sign->user_register_id);
                 
-                                 $mail = $user->reg_email;
+                                $mail = $user->reg_email;
 
-                                  $html = new  OtpNofitication($data_app);
-                                  $mail = Mail::to($mail)->send($html);
+                                $html = new  OtpNofitication($data_app);
+                                $mail = Mail::to($mail)->send($html);
                               }
 
                             return response()->json([

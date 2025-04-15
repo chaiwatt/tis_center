@@ -43,7 +43,6 @@
                            <a href="{{url('certify/check/file_client/'.$item1->attachs.'/'.( !empty($item1->attachs_client_name) ? $item1->attachs_client_name : basename($item1->attachs)  ))}}" 
                                     title="{{  !empty($item1->attachs_client_name) ? $item1->attachs_client_name :  basename($item1->attachs)}}"  target="_blank">
                                 {!! HP::FileExtension($item1->attachs)  ?? '' !!}
-                                {{-- {{basename($item2->attachs)}} --}}
                             </a>
                         </p>
                     @endforeach

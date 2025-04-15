@@ -748,7 +748,7 @@
                                                            
                                                      </button>
 
-                                                                @include ('certify/check_certificate_lab.history_detail',['history' => $item])
+                                                                @include ('certify.check_certificate_lab.history_detail',['history' => $item])
                                                   @else 
                                                   <span  class="btn-link" style="margin-left:12px;line-height: 16px;text-align: left;font-size:18px;text-decoration:none">{!! trim($item->details ?? '') !!}</span>
                                                   

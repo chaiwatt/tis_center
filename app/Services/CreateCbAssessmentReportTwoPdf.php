@@ -15,9 +15,10 @@ use Carbon\Carbon;
 use Mpdf\Merger\PdfMerger;
 use Illuminate\Http\Request;
 use Smalot\PdfParser\Parser;
-use App\Certify\CbReportInfo;
+
 use App\Helpers\EpaymentDemo;
 use App\Models\Besurv\Signer;
+use App\Certify\CbReportTwoInfo;
 use Illuminate\Support\Facades\Log;
 use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\File;
@@ -46,7 +47,7 @@ use App\Models\Certify\SignAssessmentReportTransaction;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
 use App\Models\Certify\ApplicantCB\CertiCBSaveAssessment;
 
-class CreateCbAssessmentReportPdf
+class CreateCbAssessmentReportTwoPdf
 {
     protected $cbReportInfoId;
     protected $type;
@@ -57,7 +58,7 @@ class CreateCbAssessmentReportPdf
         $this->type = $type;
     }
 
-    public function generateCbAssessmentReportPdf()
+    public function generateCbAssessmentReportTwoPdf()
     {
 
         $type = 'I';
@@ -100,7 +101,7 @@ class CreateCbAssessmentReportPdf
 
     public function ia($mpdf)
     {
-        $cbReportInfo = CbReportInfo::find($this->cbReportInfoId);
+        $cbReportInfo = CbReportTwoInfo::find($this->cbReportInfoId);
         
         $assessment = $cbReportInfo->certiCBSaveAssessment;
         $certi_cb = $assessment->CertiCBCostTo;
@@ -114,7 +115,7 @@ class CreateCbAssessmentReportPdf
                 
         $cbReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
                                 ->where('certificate_type',0)
-                                ->where('report_type',1)
+                                ->where('report_type',2)
                                 ->get();
 
               
@@ -135,7 +136,7 @@ class CreateCbAssessmentReportPdf
         
         $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
                                             ->where('certificate_type',0)
-                                            ->where('report_type',1)
+                                            ->where('report_type',2)
                                             ->get();
 
 
@@ -144,17 +145,17 @@ class CreateCbAssessmentReportPdf
 
         $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','1')
                                                         ->where('certificate_type',0)
-                                                        ->where('report_type',1)
+                                                        ->where('report_type',2)
                                                         ->first();
 
         
         $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','2')
                                                         ->where('certificate_type',0)
-                                                        ->where('report_type',1)
+                                                        ->where('report_type',2)
                                                         ->first();
         $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','3')
                                                         ->where('certificate_type',0)
-                                                        ->where('report_type',1)
+                                                        ->where('report_type',2)
                                                         ->first();
        
         
@@ -181,7 +182,7 @@ class CreateCbAssessmentReportPdf
                     ->where('file_section','123')
                     ->get();
       
-        $body = view('certify.cb.save_assessment_cb.report-pdf.ia.body', [
+        $body = view('certify.cb.save_assessment_cb.report-two-pdf.ia.body', [
             'cbReportInfo' => $cbReportInfo,
             'data' => $data,
             'assessment' => $assessment,
@@ -191,8 +192,8 @@ class CreateCbAssessmentReportPdf
             'referenceDocuments' => $referenceDocuments
         ]);
 
-        $footer = view('certify.cb.save_assessment_cb.report-pdf.ia.footer', []);
-        $header = view('certify.cb.save_assessment_cb.report-pdf.ia.header', [
+        $footer = view('certify.cb.save_assessment_cb.report-two-pdf.ia.footer', []);
+        $header = view('certify.cb.save_assessment_cb.report-two-pdf.ia.header', [
             'certi_cb' => $certi_cb
         ]);
 
@@ -208,6 +209,8 @@ class CreateCbAssessmentReportPdf
         // $title = "message_record.pdf";
 
         // $mpdf->Output($title, 'I');
+
+        // return
 
 
         $no = str_replace("RQ-", "", $certi_cb->app_no);
@@ -245,7 +248,7 @@ class CreateCbAssessmentReportPdf
             $certi_cb_attach_more->app_certi_cb_id      = $assessment->app_certi_cb_id ?? null;
             $certi_cb_attach_more->ref_id               = $assessment->id;
             $certi_cb_attach_more->table_name           = $tb->getTable();
-            $certi_cb_attach_more->file_section         = '1';
+            $certi_cb_attach_more->file_section         = '5';
             $certi_cb_attach_more->file                 = $storePath;
             $certi_cb_attach_more->file_client_name     = 'report' . '_' . $no . '.pdf';
             $certi_cb_attach_more->token                = str_random(16);

@@ -260,6 +260,16 @@
                                             รายงานที่1
                                         </a>
                                 @endif 
+
+                                @if(!is_null($find_notice) && !is_null($find_notice->file) )
+                                   
+                                        <a href="{{url('certify/check/file_client/'.$find_notice->file.'/'.( !empty($find_notice->file_client_name) ? $find_notice->file_client_name : 'null' ))}}" 
+                                            title=" {{ !empty($find_notice->file_client_name) ? $find_notice->file_client_name : basename($find_notice->file)}}"   target="_blank">
+                                            {!! HP::FileExtension($find_notice->file)  ?? '' !!} 
+                                        </a>
+                                        {{-- <button id="button_audit_report" type="button" class="btn btn-danger btn-xs {{ ($find_notice->report_status == 2) ? 'hide' : '' }}"><i class="fa fa-trash"></i></button> --}}
+                                    
+                                @endif
                                 {{-- รายงาน2 --}}
                                 {{-- @if ($find_notice->labReportInfo->status === "1")
                                         <a href="{{route('save_assessment.view_lab_info',['id' => $find_notice->id])}}"
@@ -306,6 +316,8 @@
                             title=" {{ !empty($notice->file_client_name) ? $notice->file_client_name : basename($notice->file)}}"   target="_blank">
                             {!! HP::FileExtension($notice->file)  ?? '' !!}
                         </a>
+
+                        
                     {{-- @else 
                         <div class="fileinput fileinput-new input-group" data-provides="fileinput" >
                         <div class="form-control" data-trigger="fileinput">

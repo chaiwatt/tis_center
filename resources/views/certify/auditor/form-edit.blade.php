@@ -177,32 +177,33 @@
 
                     @if (!is_null($ba->file) &&  $ba->file != '')
 
-                    @php
-                        $allApproved = $messageRecordTransactions->every(function ($item) {
-                            return $item->approval == 1;
-                        });
-                    @endphp
+                        @php
+                            $allApproved = $messageRecordTransactions->every(function ($item) {
+                                return $item->approval == 1;
+                            });
+                        @endphp
 
-                    @if ($allApproved)
-                        <a href="{{url('certify/check/file_client/'.$ba->file.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($ba->file) ))}}" title="{{ !empty($ba->file_client_name) ? $ba->file_client_name :  basename($ba->file) }}" target="_blank">
-                            {!! HP::FileExtension($ba->file)  ?? '' !!}
-                        </a>
-                    @else  
-                        -  
-                    @endif
+                        @if ($allApproved)
+                            <a href="{{url('certify/check/file_client/'.$ba->file.'/'.( !empty($ba->file_client_name) ? $ba->file_client_name : basename($ba->file) ))}}" title="{{ !empty($ba->file_client_name) ? $ba->file_client_name :  basename($ba->file) }}" target="_blank">
+                                {!! HP::FileExtension($ba->file)  ?? '' !!}
+                            </a>
+                        @else  
+                            -  
+                        @endif
+
                     @else
-                    <div class="fileinput fileinput-new input-group" data-provides="fileinput">
-                        <div class="form-control" data-trigger="fileinput">
-                            <i class="glyphicon glyphicon-file fileinput-exists"></i>
-                            <span class="fileinput-filename"></span>
+                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                            <div class="form-control" data-trigger="fileinput">
+                                <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                <span class="fileinput-filename"></span>
+                            </div>
+                            <span class="input-group-addon btn btn-default btn-file">
+                                <span class="fileinput-new">เลือกไฟล์</span>
+                                <span class="fileinput-exists">เปลี่ยน</span>
+                                <input type="file" name="other_attach" required class="check_max_size_file">
+                            </span>
+                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
                         </div>
-                        <span class="input-group-addon btn btn-default btn-file">
-                            <span class="fileinput-new">เลือกไฟล์</span>
-                            <span class="fileinput-exists">เปลี่ยน</span>
-                            <input type="file" name="other_attach" required class="check_max_size_file">
-                        </span>
-                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
-                    </div>
                     @endif
 
                     @if ($messageRecordTransactions->count() != 0)

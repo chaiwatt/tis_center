@@ -46,7 +46,6 @@
                                     title="<?php echo e(!empty($item1->attachs_client_name) ? $item1->attachs_client_name :  basename($item1->attachs)); ?>"  target="_blank">
                                 <?php echo HP::FileExtension($item1->attachs)  ?? ''; ?>
 
-                                
                             </a>
                         </p>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

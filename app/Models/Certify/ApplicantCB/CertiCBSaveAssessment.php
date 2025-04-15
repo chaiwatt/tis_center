@@ -8,6 +8,7 @@ use HP;
 use App\User;
 use App\Certify\CbReportInfo;
 
+use App\Certify\CbReportTwoInfo;
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Certify\ApplicantCB\AuditorRepresentative;
@@ -135,6 +136,10 @@ class CertiCBSaveAssessment extends Model
 
     public function cbReportInfo() {
       return $this->hasOne(CbReportInfo::class, 'cb_assessment_id','id');
+    }
+
+    public function cbReportTwoInfo() {
+      return $this->hasOne(CbReportTwoInfo::class, 'cb_assessment_id','id');
     }
 
 }

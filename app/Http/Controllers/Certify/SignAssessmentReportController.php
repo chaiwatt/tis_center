@@ -32,6 +32,8 @@ use App\Models\Certify\SendCertificateHistory;
 use App\Services\CreateLabAssessmentReportPdf;
 use App\Models\Certify\SignCertificateConfirms;
 use App\Models\Certify\MessageRecordTransaction;
+use App\Services\CreateCbAssessmentReportTwoPdf;
+use App\Services\CreateIbAssessmentReportTwoPdf;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Services\CreateLabAssessmentReportTwoPdf;
@@ -77,67 +79,83 @@ class SignAssessmentReportController extends Controller
         
             $query = SignAssessmentReportTransaction::query();
             $query->where('signer_id',$signer->id);
-
-           
         
-            if ($filter_approval) {
-                $query->where('approval', $filter_approval);
-            }else{
-                $query->where('approval', 0);
-            }
+            // if ($filter_approval) {
+            //     $query->where('approval', $filter_approval);
+            // }else{
+            //     $query->where('approval', 0);
+            // }
 
-           
-        
-            if ($filter_certificate_type !== null) {
+            // if ($filter_certificate_type !== null) {
                 
-                $query->where('certificate_type', $filter_certificate_type);
-            }
+            //     $query->where('certificate_type', $filter_certificate_type);
+            // }
 
-
-            // $query->where(function ($q) {
-            //     $q->where('certificate_type', 2)
-            //       ->whereHas('labReportInfo', function ($query) {
-            //           $query->where('status', 2);
-            //       })
-            //       ->orWhere(function ($subQuery) {
-            //           $subQuery->where('certificate_type', 0)
-            //                    ->whereHas('cbReportInfo', function ($query) {
-            //                        $query->where('status', 2);
-            //                    });
-            //       });
-            // });
-
-            $query->where(function ($q) {
+            
+            $query->where(function ($q) use ($signer) {
+                $q->where('certificate_type', 0)
+                //   ->where('signer_id', $signer->id)
+                  ->where('approval', 0)
+                  ->where(function ($subQ) {
+                      $subQ->whereHas('cbReportInfo', function ($query) {
+                          $query->where('status', 2);
+                      })
+                      ->orWhereHas('cbReportTwoInfo', function ($query) {
+                          $query->where('status', 2);
+                      });
+                  });
+            })
+            ->orWhere(function ($q) use ($signer) {
+                $q->where('certificate_type', 1)
+                //   ->where('signer_id', $signer->id)
+                  ->where('approval', 0)
+                  ->where(function ($subQ) {
+                      $subQ->whereHas('ibReportInfo', function ($query) {
+                          $query->where('status', 2);
+                      })
+                      ->orWhereHas('ibReportTwoInfo', function ($query) {
+                          $query->where('status', 2);
+                      });
+                  });
+            })
+            ->orWhere(function ($q) use ($signer) {
                 $q->where('certificate_type', 2)
-                  ->where(function ($subQ) {  // เพิ่ม where เพื่อรวม whereHas และ orWhereHas
+                //   ->where('signer_id', $signer->id)
+                  ->where('approval', 0)
+                  ->where(function ($subQ) {
                       $subQ->whereHas('labReportInfo', function ($query) {
                           $query->where('status', 2);
                       })
-                      ->orWhereHas('labReportTwoiInfo', function ($query) {  // เพิ่ม orWhereHas
+                      ->orWhereHas('labReportTwoiInfo', function ($query) {
                           $query->where('status', 2);
                       });
-                  })
-                  ->orWhere(function ($q2) {
-                      $q2->where('certificate_type', 0)
-                               ->whereHas('cbReportInfo', function ($query) {
-                                   $query->where('status', 2);
-                               })
-                               ->orWhereHas('cbReportTwoInfo', function ($query) {  // เพิ่ม orWhereHas
-                                    $query->where('status', 2);
-                                });
-                  })
-                  ->orWhere(function ($q3) {
-                    $q3->where('certificate_type', 1)
-                             ->whereHas('ibReportInfo', function ($query) {
-                                 $query->where('status', 2);
-                             })
-                             ->whereHas('ibReportTwoInfo', function ($query) {
-                                $query->where('status', 2);
-                            });
-                });
+                  });
             });
+            
         
-            // dd($query->get());
+        //     $query->where('certificate_type', 1)
+        //     ->whereHas('ibReportInfo', function ($query) {
+        //         $query->where('status', 2);
+        //     })
+        //     ->orWhereHas('ibReportTwoInfo', function ($query) {
+        //         $query->where('status', 2);
+        //     })
+        // ->orWhere('certificate_type', 0)
+        //     ->whereHas('cbReportInfo', function ($query) {
+        //         $query->where('status', 2);
+        //     })
+        //     ->orWhereHas('cbReportTwoInfo', function ($query) {
+        //         $query->where('status', 2);
+        //     })
+        // ->orWhere('certificate_type', 2)
+        //     ->whereHas('labReportInfo', function ($query) {
+        //         $query->where('status', 2);
+        //     })
+        //     ->orWhereHas('labReportTwoiInfo', function ($query) {
+        //         $query->where('status', 2);
+        //     });
+
+            
             $data = $query->get();
 
             // dd($data);
@@ -244,7 +262,7 @@ class SignAssessmentReportController extends Controller
 
     public function signDocument(Request $request)
     {
-        // dd('ok');
+        // certificate_type 0=CB, 1=IB, 2=LAB
         $signAssessmentReportTransaction = SignAssessmentReportTransaction::find($request->id);
 
         SignAssessmentReportTransaction::find($request->id)->update([
@@ -287,21 +305,41 @@ class SignAssessmentReportController extends Controller
         }
         else if($signAssessmentReportTransaction->certificate_type == 0)
         {
-            // CB
-            $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
-                        ->whereNotNull('signer_id')
-                        ->where('certificate_type',0)
-                        ->where('report_type',1)
-                        ->where('approval',0)
-                        ->get();           
-            
-            if($signAssessmentReportTransactions->count() == 0){
-                $pdfService = new CreateCbAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
-                $pdfContent = $pdfService->generateCbAssessmentReportPdf();
-            } 
+            if($signAssessmentReportTransaction->report_type == 1){
+                // CB
+                $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+                            ->whereNotNull('signer_id')
+                            ->where('certificate_type',0)
+                            ->where('report_type',1)
+                            ->where('approval',0)
+                            ->get();           
+                
+                if($signAssessmentReportTransactions->count() == 0){
+                    $pdfService = new CreateCbAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                    $pdfContent = $pdfService->generateCbAssessmentReportPdf();
+                } 
+            }
+            else if($signAssessmentReportTransaction->report_type == 2)
+            {
+               // CB
+               $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+               ->whereNotNull('signer_id')
+               ->where('certificate_type',0)
+               ->where('report_type',2)
+               ->where('approval',0)
+               ->get();           
+   
+                if($signAssessmentReportTransactions->count() == 0){
+                    $pdfService = new CreateCbAssessmentReportTwoPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                    $pdfContent = $pdfService->generateCbAssessmentReportTwoPdf();
+                } 
+            }
+
         }
         else if($signAssessmentReportTransaction->certificate_type == 1)
         {
+            if($signAssessmentReportTransaction->report_type == 1)
+            {
                   // IB
                   $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
                   ->whereNotNull('signer_id')
@@ -314,6 +352,23 @@ class SignAssessmentReportController extends Controller
                     $pdfService = new CreateIbAssessmentReportPdf($signAssessmentReportTransaction->report_info_id,"ia");
                     $pdfContent = $pdfService->generateIbAssessmentReportPdf();
                 } 
+            }
+            else if($signAssessmentReportTransaction->report_type == 2)
+            {
+                  // IB
+                  $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$signAssessmentReportTransaction->report_info_id)
+                  ->whereNotNull('signer_id')
+                  ->where('certificate_type',1)
+                  ->where('report_type',2)
+                  ->where('approval',0)
+                  ->get();           
+      
+                if($signAssessmentReportTransactions->count() == 0){
+                    $pdfService = new CreateIbAssessmentReportTwoPdf($signAssessmentReportTransaction->report_info_id,"ia");
+                    $pdfContent = $pdfService->generateIbAssessmentReportTwoPdf();
+                } 
+            }
+
         }
 
                      

@@ -133,13 +133,13 @@ class ExternalIBExpertActionController extends Controller
 
     public function storeByIbExpert(Request $request)
     {
-        // dd('ok');
+        // dd($request->all());
         $assessment = CertiIBSaveAssessment::find($request->assessment_id);
 
         $report = $request->detail['report'];
         $no = $request->detail['no'];
         $type = $request->detail['type'];
-        // $found = $request->detail['found'];
+        $notice = $request->detail['notice'];
 
         // dd($report);
           
@@ -150,7 +150,7 @@ class ExternalIBExpertActionController extends Controller
         foreach ($report as $key => $item) {
             $bug = new CertiIBSaveAssessmentBug;
             $bug->assessment_id = $request->assessment_id;
-            $bug->remark        = $item;
+            $bug->remark        = $notice[$key];
             $bug->report        = $report[$key];
             $bug->no            = $no[$key];
             $bug->type          = $type[$key];

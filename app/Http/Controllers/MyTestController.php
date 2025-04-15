@@ -19,6 +19,8 @@ use App\Certify\CbReportInfo;
 use App\Certify\IbReportInfo;
 use App\Helpers\EpaymentDemo;
 use App\Models\Besurv\Signer;
+use App\Certify\CbReportTwoInfo;
+use App\Certify\IbReportTwoInfo;
 use Yajra\Datatables\Datatables;
 use App\Mail\Lab\OtpNofitication;
 use Illuminate\Support\Facades\DB;
@@ -68,6 +70,8 @@ use App\Models\Certificate\TrackingAuditorsDate;
 use App\Models\Certify\Applicant\CertiLabExport;
 use App\Models\Certify\Applicant\CostAssessment;
 use App\Models\Certify\MessageRecordTransaction;
+use App\Services\CreateCbAssessmentReportTwoPdf;
+use App\Services\CreateIbAssessmentReportTwoPdf;
 use App\Models\Certify\Applicant\CertLabsFileAll;
 use App\Models\Certify\Applicant\CostCertificate;
 use App\Services\CreateLabAssessmentReportTwoPdf;
@@ -1788,34 +1792,33 @@ public function create_bill()
     }
     
 
-    public function getOtp(Request $request)
+    public function demoEmailOtp(Request $request)
     {
-      
-        $send  =  SendCertificateLists::find(356);
+        $_refTop = '1iVXCA';
+        $_otp = '915175';
+        $send  =  SendCertificateLists::find(399);
+       
         if(!is_null($send)){
             if( !empty($send->send_certificates_to->signer_to)){
+              
                 
                     $sign                       =  $send->send_certificates_to->signer_to;
-                    // for ($x = 0; $x <= 100; $x++) {
                         $input                  = [];
-                        $input['Ref_otp']       =   $this->quickRandom(6);
-                        $input['otp']           =   rand(100000,999999);  
+                        $input['Ref_otp']       =   $_refTop;
+                        $input['otp']           =   $_otp;  
                         $input['Req_date']      =    date('Y-m-d H:i:s'); 
                         $input['Req_by']        =   auth()->user()->getKey(); 
                         $input['state']         =  1; 
                         $detail =  SignCertificateOtp::where('Ref_otp',$input['Ref_otp'])->where('otp', $input['otp'])->first();
-                        
+
                         if(is_null($detail)){
                             $otp_sign =  SignCertificateOtp::create($input);
                             
                              SignCertificateOtp::where('Ref_otp',$request->ref_otp)->update(['state'=> 3]);
-                            //  dd($otp_sign->Ref_otp, $otp_sign->otp);
-                            // dd($otp_sign);
-                            // self::get_line_otp($otp_sign->Ref_otp, $otp_sign->otp,$sign->line_token);
                             
                             $mail = 'joerocknpc@mail.com';
                             $app = $send->app_cert_to;
-                            
+                           
                             if($mail !== null){
 
                                 $config = HP::getConfig();
@@ -1847,7 +1850,6 @@ public function create_bill()
                                                                             !empty($app->DataEmailDirectorLABReply) ?implode(',',(array)$app->DataEmailDirectorLABReply)   :  $EMail,
                                                                             null
                                                                             );
-                    
                                   $html = new  OtpNofitication($data_app);
                                   $mail = Mail::to($app->email)->send($html);
                     
@@ -1864,7 +1866,6 @@ public function create_bill()
                                                 ]);
                             exit;
                         }
-                    // }
                 }else{
                     return response()->json([
                                              'message' =>  false 
@@ -2873,6 +2874,13 @@ public function create_bill()
         $pdfContent = $pdfService->generateCbAssessmentReportPdf();
     }
 
+    public function createCbAssessmentReportTwoPdf()
+    {
+        $lastRecord = CbReportTwoInfo::orderBy('id', 'desc')->first();
+        $pdfService = new CreateCbAssessmentReportTwoPdf($lastRecord->id,"ia");
+        $pdfContent = $pdfService->generateCbAssessmentReportTwoPdf();
+    }
+
     public function createCbMessageRecordPdf()
     {
         $id = 365;
@@ -3039,6 +3047,13 @@ public function create_bill()
         // dd($lastRecord->id);
         $pdfService = new CreateIbAssessmentReportPdf($lastRecord->id,"ia");
         $pdfContent = $pdfService->generateIbAssessmentReportPdf();
+    }
+
+    public function createIbAssessmentReportTwoPdf()
+    {
+        $lastRecord = IbReportTwoInfo::orderBy('id', 'desc')->first();
+        $pdfService = new CreateIbAssessmentReportTwoPdf($lastRecord->id,"ia");
+        $pdfContent = $pdfService->generateIbAssessmentReportTwoPdf();
     }
     
 }

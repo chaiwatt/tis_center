@@ -346,16 +346,21 @@
                 <div style="margin-top:15px">
                     @php
                         $index = 0;
+                        // dd($data->statusAuditorMap);
                     @endphp
                     <table style="margin-left: 110px">
+
                         @foreach ($data->statusAuditorMap as $statusId => $auditorIds)
-                        
+                           
                             @php
                                 $index++;
+
+                                
                             @endphp
     
                             @foreach ($auditorIds as $auditorId)
                                 @php
+   
                                     $info = HP::getExpertInfo($statusId, $auditorId);
                                     
                                 @endphp

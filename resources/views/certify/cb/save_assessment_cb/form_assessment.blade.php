@@ -230,6 +230,7 @@
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-6">
+                                            {{-- {{$assessment->cbReportTwoInfo->status}} --}}
                                             <label class="col-md-4 text-right"><span class="text-danger">*</span>รายงานการตรวจประเมิน (ปิดcar): </label>
                                             <div class="col-md-8">
                                                 @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment5To)) 
@@ -238,10 +239,19 @@
                                                             {!! HP::FileExtension($assessment->FileAttachAssessment5To->file)  ?? '' !!} {{$assessment->FileAttachAssessment5To->file_client_name}}
                                                         </a> 
                                                  @else
+                                                    @if ($assessment->cbReportTwoInfo->status === "1")
                                                     <a href="{{route('save_assessment.cb_report_two_create',['id' => $assessment->id])}}"
                                                         title="จัดทำรายงาน2" class="btn btn-warning">
                                                         รายงานที่2
                                                     </a>
+                                                     @else
+                                                     <a href="{{route('save_assessment.cb_report_two_create',['id' => $assessment->id])}}"
+                                                        title="จัดทำรายงาน2" class="btn btn-info">
+                                                        รายงานที่2
+                                                    </a>
+                                                    @endif
+
+                                                   
                                                 @endif
                                             </div>
                                         </div>

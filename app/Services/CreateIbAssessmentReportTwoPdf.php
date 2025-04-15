@@ -15,14 +15,16 @@ use Carbon\Carbon;
 use Mpdf\Merger\PdfMerger;
 use Illuminate\Http\Request;
 use Smalot\PdfParser\Parser;
-use App\Certify\CbReportInfo;
+
+
 use App\Helpers\EpaymentDemo;
 use App\Models\Besurv\Signer;
+use App\Certify\IbReportTwoInfo;
 use Illuminate\Support\Facades\Log;
 use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\File;
+
 use Illuminate\Support\Facades\Http;
-use App\Models\Certify\LabReportInfo;
 use App\Models\Bcertify\LabCalRequest;
 use App\Models\Bcertify\LabTestRequest;
 use App\Models\Certify\Applicant\Notice;
@@ -32,32 +34,34 @@ use App\Models\Bcertify\BoardAuditoExpert;
 use App\Models\Bcertify\CalibrationBranch;
 use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Bcertify\AuditorInformation;
-use App\Models\Certify\ApplicantCB\CertiCb;
+use App\Models\Certify\ApplicantIB\CertiIb;
 use App\Models\Certify\CertiSettingPayment;
 use App\Services\CreateLabMessageRecordPdf;
 use App\Models\Certify\Applicant\CostAssessment;
 use App\Models\Certify\MessageRecordTransaction;
 use App\Http\Controllers\API\Checkbill2Controller;
+
 use App\Models\Certify\Applicant\CertiLabAttachAll;
 use App\Models\Bcertify\CalibrationBranchInstrument;
 use App\Models\Bcertify\HtmlLabMemorandumPdfRequest;
-use App\Models\Certify\ApplicantCB\CertiCBAttachAll;
+use App\Models\Certify\ApplicantIB\CertiIBAttachAll;
 use App\Models\Certify\SignAssessmentReportTransaction;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
-use App\Models\Certify\ApplicantCB\CertiCBSaveAssessment;
+use App\Models\Certify\ApplicantIB\CertiIBSaveAssessment;
 
-class CreateCbAssessmentReportPdf
+
+class CreateIbAssessmentReportTwoPdf
 {
-    protected $cbReportInfoId;
+    protected $ibReportInfoId;
     protected $type;
 
-    public function __construct($cbReportInfoId,$type)
+    public function __construct($ibReportInfoId,$type)
     {
-        $this->cbReportInfoId = $cbReportInfoId;
+        $this->ibReportInfoId = $ibReportInfoId;
         $this->type = $type;
     }
 
-    public function generateCbAssessmentReportPdf()
+    public function generateIbAssessmentReportTwoPdf()
     {
 
         $type = 'I';
@@ -100,61 +104,59 @@ class CreateCbAssessmentReportPdf
 
     public function ia($mpdf)
     {
-        $cbReportInfo = CbReportInfo::find($this->cbReportInfoId);
+        $ibReportInfo = IbReportTwoInfo::find($this->ibReportInfoId);
         
-        $assessment = $cbReportInfo->certiCBSaveAssessment;
-        $certi_cb = $assessment->CertiCBCostTo;
-
-        
-
-        $referenceDocuments = CertiCBAttachAll::where('app_certi_cb_id',$assessment->app_certi_cb_id)
-                ->where('ref_id',$assessment->id)
-                ->where('file_section','123')
-                ->get();
+        $assessment = $ibReportInfo->CertiIBSaveAssessment;
+        $certi_ib = $assessment->CertiIBCostTo;
+      
+        // $referenceDocuments = CertiIBAttachAll::where('app_certi_ib_id',$assessment->app_certi_ib_id)
+        //         ->where('ref_id',$assessment->id)
+        //         ->where('file_section','123')
+        //         ->get();
                 
-        $cbReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
-                                ->where('certificate_type',0)
-                                ->where('report_type',1)
-                                ->get();
+        // $ibReportInfoSigners = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)
+        //                         ->where('certificate_type',1)
+        //                         ->where('report_type',2)
+        //                         ->get();
 
-              
+            
         $data = new stdClass();
 
         $data->header_text1 = '';
         $data->header_text2 = '';
         $data->header_text3 = '';
-        $data->header_text4 = $certi_cb->app_no;
-        $data->lab_type = $certi_cb->lab_type == 3 ? 'ทดสอบ' : ($certi_cb->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
-        $data->lab_name = $certi_cb->lab_name;
+        $data->header_text4 = $certi_ib->app_no;
+        $data->lab_type = $certi_ib->lab_type == 3 ? 'ทดสอบ' : ($certi_ib->lab_type == 4 ? 'สอบเทียบ' : 'ไม่ทราบประเภท');
+        $data->lab_name = $certi_ib->lab_name;
 
-        $data->register_date = HP::formatDateThaiFullNumThai($certi_cb->created_at);
-        $data->get_date = HP::formatDateThaiFullNumThai($certi_cb->get_date);
+        $data->register_date = HP::formatDateThaiFullNumThai($certi_ib->created_at);
+        $data->get_date = HP::formatDateThaiFullNumThai($certi_ib->get_date);
 
       
         
         
-        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)
-                                            ->where('certificate_type',0)
-                                            ->where('report_type',1)
+        $signAssessmentReportTransactions = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)
+                                            ->where('certificate_type',1)
+                                            ->where('report_type',2)
                                             ->get();
 
 
         // dd($signAssessmentReportTransactions);
         $signer = new stdClass();
 
-        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','1')
-                                                        ->where('certificate_type',0)
-                                                        ->where('report_type',1)
+        $signer->signer_1 = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)->where('signer_order','1')
+                                                        ->where('certificate_type',1)
+                                                        ->where('report_type',2)
                                                         ->first();
 
         
-        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','2')
-                                                        ->where('certificate_type',0)
-                                                        ->where('report_type',1)
+        $signer->signer_2 = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)->where('signer_order','2')
+                                                        ->where('certificate_type',1)
+                                                        ->where('report_type',2)
                                                         ->first();
-        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$cbReportInfo->id)->where('signer_order','3')
-                                                        ->where('certificate_type',0)
-                                                        ->where('report_type',1)
+        $signer->signer_3 = SignAssessmentReportTransaction::where('report_info_id',$ibReportInfo->id)->where('signer_order','3')
+                                                        ->where('certificate_type',1)
+                                                        ->where('report_type',2)
                                                         ->first();
        
         
@@ -174,29 +176,28 @@ class CreateCbAssessmentReportPdf
         $signer->signer_url2 = $sign_url2;
         $signer->signer_url3 = $sign_url3;
 
-        // dd($cbReportInfo);
-
-        $referenceDocuments = CertiCBAttachAll::where('app_certi_cb_id',$assessment->app_certi_cb_id)
+        $referenceDocuments = CertiIBAttachAll::where('app_certi_ib_id',$assessment->app_certi_ib_id)
                     ->where('ref_id',$assessment->id)
                     ->where('file_section','123')
                     ->get();
       
-        $body = view('certify.cb.save_assessment_cb.report-pdf.ia.body', [
-            'cbReportInfo' => $cbReportInfo,
+        // dd($signer)     ;       
+        $body = view('certify.ib.save_assessment_ib.report-two-pdf.ia.body', [
+            'ibReportInfo' => $ibReportInfo,
             'data' => $data,
             'assessment' => $assessment,
-            'certi_cb' => $certi_cb,
+            'certi_ib' => $certi_ib,
             'signAssessmentReportTransactions' => $signAssessmentReportTransactions,
             'signer' => $signer,
             'referenceDocuments' => $referenceDocuments
         ]);
 
-        $footer = view('certify.cb.save_assessment_cb.report-pdf.ia.footer', []);
-        $header = view('certify.cb.save_assessment_cb.report-pdf.ia.header', [
-            'certi_cb' => $certi_cb
+        $footer = view('certify.ib.save_assessment_ib.report-two-pdf.ia.footer', []);
+        $header = view('certify.ib.save_assessment_ib.report-two-pdf.ia.header', [
+            'certi_ib' => $certi_ib
         ]);
 
-        $stylesheet = file_get_contents(public_path('css/report/cb-report.css'));
+        $stylesheet = file_get_contents(public_path('css/report/ib-report.css'));
         $mpdf->WriteHTML($stylesheet, 1);
        
         $mpdf->SetHTMLHeader($header,2);
@@ -205,15 +206,17 @@ class CreateCbAssessmentReportPdf
         // $mpdf->SetHTMLFooter($footer,2);
 
 
-        // $title = "message_record.pdf";
+        // $title = "report.pdf";
 
         // $mpdf->Output($title, 'I');
 
+        // return;
 
-        $no = str_replace("RQ-", "", $certi_cb->app_no);
+
+        $no = str_replace("RQ-", "", $certi_ib->app_no);
         $no = str_replace("-", "_", $no);
     
-        $attachPath = '/files/applicants/check_files_cb/' . $no . '/';
+        $attachPath = '/files/applicants/check_files_ib/' . $no . '/';
 
         $fullFileName = uniqid() . '_' . now()->format('Ymd_His') . '.pdf';
     
@@ -230,44 +233,44 @@ class CreateCbAssessmentReportPdf
         if (Storage::disk('ftp')->exists($filePath)) {
             $storePath = $no  . '/' . $fullFileName;
 
-            $tb = new CertiCBSaveAssessment;
-            $certi_cb_attach_more                       = new CertiCBAttachAll();
-            $certi_cb_attach_more->app_certi_cb_id      = $assessment->app_certi_cb_id ?? null;
-            $certi_cb_attach_more->ref_id               = $assessment->id;
-            $certi_cb_attach_more->table_name           = $tb->getTable();
-            $certi_cb_attach_more->file_section         = '3';
-            $certi_cb_attach_more->file                 = $storePath;
-            $certi_cb_attach_more->file_client_name     = 'report' . '_' . $no . '.pdf';
-            $certi_cb_attach_more->token                = str_random(16);
-            $certi_cb_attach_more->save();
+            $tb = new CertiIBSaveAssessment;
+            $certi_ib_attach_more                       = new CertiIBAttachAll();
+            $certi_ib_attach_more->app_certi_ib_id      = $assessment->app_certi_ib_id ?? null;
+            $certi_ib_attach_more->ref_id               = $assessment->id;
+            $certi_ib_attach_more->table_name           = $tb->getTable();
+            $certi_ib_attach_more->file_section         = '3';
+            $certi_ib_attach_more->file                 = $storePath;
+            $certi_ib_attach_more->file_client_name     = 'report' . '_' . $no . '.pdf';
+            $certi_ib_attach_more->token                = str_random(16);
+            $certi_ib_attach_more->save();
 
-            $certi_cb_attach_more                       = new CertiCBAttachAll();
-            $certi_cb_attach_more->app_certi_cb_id      = $assessment->app_certi_cb_id ?? null;
-            $certi_cb_attach_more->ref_id               = $assessment->id;
-            $certi_cb_attach_more->table_name           = $tb->getTable();
-            $certi_cb_attach_more->file_section         = '1';
-            $certi_cb_attach_more->file                 = $storePath;
-            $certi_cb_attach_more->file_client_name     = 'report' . '_' . $no . '.pdf';
-            $certi_cb_attach_more->token                = str_random(16);
-            $certi_cb_attach_more->save();
+            $certi_ib_attach_more                       = new CertiIBAttachAll();
+            $certi_ib_attach_more->app_certi_ib_id      = $assessment->app_certi_ib_id ?? null;
+            $certi_ib_attach_more->ref_id               = $assessment->id;
+            $certi_ib_attach_more->table_name           = $tb->getTable();
+            $certi_ib_attach_more->file_section         = '5';
+            $certi_ib_attach_more->file                 = $storePath;
+            $certi_ib_attach_more->file_client_name     = 'report' . '_' . $no . '.pdf';
+            $certi_ib_attach_more->token                = str_random(16);
+            $certi_ib_attach_more->save();
         }      
     
     }
 
-    public function copyScopeCbFromAttachement($certiCbId)
+    public function copyScopeIbFromAttachement($certiIbId)
 {
     $copiedScoped = null;
     $fileSection = null;
 
-    $app = CertiCb::find($certiCbId);
+    $app = CertiIb::find($certiIbId);
 
-    $latestRecord = CertiCBAttachAll::where('app_certi_cb_id', $certiCbId)
+    $latestRecord = CertiIBAttachAll::where('app_certi_ib_id', $certiIbId)
     ->where('file_section', 3)
-    ->where('table_name', 'app_certi_cb')
+    ->where('table_name', 'app_certi_ib')
     ->orderBy('created_at', 'desc') // เรียงลำดับจากใหม่ไปเก่า
     ->first();
 
-    $existingFilePath = 'files/applicants/check_files_cb/' . $latestRecord->file ;
+    $existingFilePath = 'files/applicants/check_files_ib/' . $latestRecord->file ;
 
     // ตรวจสอบว่าไฟล์มีอยู่ใน FTP และดาวน์โหลดลงมา
     if (HP::checkFileStorage($existingFilePath)) {
@@ -275,7 +278,7 @@ class CreateCbAssessmentReportPdf
         $no  = str_replace("RQ-","",$app->app_no);
         $no  = str_replace("-","_",$no);
         $dlName = 'scope_'.basename($existingFilePath);
-        $attach_path  =  'files/applicants/check_files_cb/'.$no.'/';
+        $attach_path  =  'files/applicants/check_files_ib/'.$no.'/';
 
         if (file_exists($localFilePath)) {
             $storagePath = Storage::putFileAs($attach_path, new \Illuminate\Http\File($localFilePath),  $dlName );

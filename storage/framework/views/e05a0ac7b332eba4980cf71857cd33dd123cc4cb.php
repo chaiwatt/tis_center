@@ -688,7 +688,7 @@
                                                            
                                                      </button>
 
-                                                                <?php echo $__env->make('certify/check_certificate_lab.history_detail',['history' => $item], array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+                                                                <?php echo $__env->make('certify.check_certificate_lab.history_detail',['history' => $item], array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
                                                   <?php else: ?> 
                                                   <span  class="btn-link" style="margin-left:12px;line-height: 16px;text-align: left;font-size:18px;text-decoration:none"><?php echo trim($item->details ?? ''); ?></span>
                                                   

@@ -66,6 +66,9 @@ Route::get('/cb-scope','MyTestController@copyScopeCbFromAttachement');
 Route::get('/demo_html_pdf_editor','MyTestController@demo_html_pdf_editor');
 
 Route::get('/create-cb-assessment-report-pdf','MyTestController@createCbAssessmentReportPdf');
+
+Route::get('/create-cb-assessment-report-two-pdf','MyTestController@createCbAssessmentReportTwoPdf');
+
 Route::get('/create-cb-message-record-pdf','MyTestController@createCbMessageRecordPdf');
 
 Route::get('/run-all-schedule','MyTestController@runAllSchedules');
@@ -78,8 +81,10 @@ Route::get('/check-ib-payin','MyTestController@check_ib_payin');
 
 Route::get('/create-ib-assessment-report-pdf','MyTestController@createIbAssessmentReportPdf');
 
+Route::get('/demo-email-otp','MyTestController@demoEmailOtp');
 
 
+Route::get('/create-ib-assessment-report-two-pdf','MyTestController@createIbAssessmentReportTwoPdf');
 
 
 

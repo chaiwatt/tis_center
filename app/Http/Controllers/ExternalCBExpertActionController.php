@@ -135,9 +135,8 @@ class ExternalCBExpertActionController extends Controller
         $report = $request->detail['report'];
         $no = $request->detail['no'];
         $type = $request->detail['type'];
+        $notice = $request->detail['notice'];
         // $found = $request->detail['found'];
-
-        // dd($report);
           
         CertiCBSaveAssessmentBug::where('assessment_id',$assessment->id)
         ->whereNull('owner_id')
@@ -146,7 +145,7 @@ class ExternalCBExpertActionController extends Controller
         foreach ($report as $key => $item) {
             $bug = new CertiCBSaveAssessmentBug;
             $bug->assessment_id = $request->assessment_id;
-            $bug->remark        = $item;
+            $bug->remark        = $notice[$key];
             $bug->report        = $report[$key];
             $bug->no            = $no[$key];
             $bug->type          = $type[$key];

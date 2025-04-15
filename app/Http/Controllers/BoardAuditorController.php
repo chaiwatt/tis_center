@@ -1283,6 +1283,8 @@ class BoardAuditorController extends Controller
         
         }
 
+        // dd($boardAuditorExpert);
+
         $scope_branch = "";
         if ($certi_lab->lab_type == 3){
             $scope_branch = $certi_lab->BranchTitle;

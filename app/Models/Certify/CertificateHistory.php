@@ -1,9 +1,13 @@
 <?php
 
 namespace App\Models\Certify;
-use Illuminate\Database\Eloquent\Model;
-use App\User;
+
 use HP;
+use App\User;
+use App\Models\Tis\BoardBoardType;
+use Illuminate\Support\Facades\DB;
+use App\Models\Certify\BoardAuditor;
+use Illuminate\Database\Eloquent\Model;
 
 
 class CertificateHistory extends Model
@@ -98,4 +102,11 @@ class CertificateHistory extends Model
                   ];
         return  array_key_exists($this->system,$details) ?  $details[$this->system] : '-';
     }
+
+    public function getBoardAuditorAttribute() {
+        $boardAuditor = BoardAuditor::find($this->ref_id);
+        return $boardAuditor;
+    }
+
+    // $ref_id = DB::table('board_auditors')->where('ref_id', $value)->first();
 }
