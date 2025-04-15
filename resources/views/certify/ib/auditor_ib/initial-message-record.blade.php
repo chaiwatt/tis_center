@@ -308,11 +308,11 @@
                     เพื่อดำเนินการตรวจประเมินสถานประกอบการ ของ {{$data->name_standard}} ในวันที่ {{$data->date_range}} ดังนี้
                 </div>
                 <div style="margin-top:15px">
-
+                    <table style="margin-left:100px">
                         @foreach ($boardAuditor->CertiIBAuditorsLists  as $key => $auditor)
                             <tr>
-                                <td style="width: 180px">({{$key+1}}). {{$auditor->temp_users}}</td>
-                                <td style="width: 100px">{{$auditor->StatusAuditorTo->title}}</td>
+                                <td style="width: 300px">({{$key+1}}). {{$auditor->temp_users}}</td>
+                                <td style="width: 300px">{{$auditor->StatusAuditorTo->title}}</td>
                             </tr>
                         @endforeach
                     </table>
