@@ -787,7 +787,7 @@
                                           </div>
                                         @endif
 
-                                        @if(!is_null($item1->file))
+                                        {{-- @if(!is_null($item1->file))
                                         <div class="row">
                                           <div class="col-md-4 text-right">
                                              <p class="text-nowrap">บันทึก ลมอ.  แต่งตั้งคณะผู้ตรวจประเมิน</p>
@@ -801,9 +801,9 @@
                                            </span>
                                           </div>
                                          </div>
-                                       @endif
+                                       @endif --}}
 
-                                       @if(!is_null($item1->attachs))
+                                       {{-- @if(!is_null($item1->attachs))
                                        <div class="row">
                                          <div class="col-md-4 text-right">
                                             <p class="text-nowrap">กำหนดการตรวจประเมิน</p>
@@ -817,7 +817,7 @@
                                            </span>
                                          </div>
                                         </div>
-                                      @endif
+                                      @endif --}}
                                       <div class="col-md-12">
                                         <label>โดยคณะผู้ตรวจประเมิน มีรายนามดังต่อไปนี้</label>
                                      </div>

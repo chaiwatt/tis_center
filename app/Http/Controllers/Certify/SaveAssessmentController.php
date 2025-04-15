@@ -61,6 +61,7 @@ class SaveAssessmentController extends Controller
 
     public function index(Request $request)
     {
+        // dd('ok');
         $keyword = $request->get('search');
         $filter = [];
         $filter['at'] = $request->get('at', '');
@@ -74,6 +75,7 @@ class SaveAssessmentController extends Controller
         $filter['sort'] = $request->get('sort', '');
         $filter['direction'] = $request->get('direction', '');
 
+        
 
         $ao = new CertiLab;
  
@@ -140,10 +142,12 @@ class SaveAssessmentController extends Controller
         foreach ($users as $user) {
             $select_users[$user->runrecno] = $user->reg_fname . ' ' . $user->reg_lname;
         }
-
-
         
-        $notices = $Query ->orderby('id','desc')->sortable()->paginate($filter['perPage']);
+        // $notices = $Query->orderby('id','desc')->sortable()->paginate($filter['perPage']);
+        $notices = $Query->whereHas('applicant')
+                 ->orderBy('id', 'desc')
+                 ->sortable()
+                 ->paginate($filter['perPage']);
         // dd($notices);
         return view('certify.save_assessment.index', compact(
             'notices', 'app','select_users','arrStatus','filter','branches'

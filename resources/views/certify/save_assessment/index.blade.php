@@ -114,7 +114,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ระบบบันทึกผลการตรวจประเมิน</h3>
+                    <h3 class="box-title pull-left">ระบบบันทึกผลการตรวจประเมิน check</h3>
 
                     <div class="pull-right">
                         {{-- <a  href="{{ route('save_assessment.create', ['app' => $app ? $app->id : '']) }}" class="btn btn-success btn-sm"><i class="icon-plus"></i> เพิ่ม</a> --}}
@@ -232,6 +232,7 @@
                                         @php
                                                 $app =  $notice->applicant;
                                         @endphp
+
                                     <tr>
                                         <td>{{ $loop->iteration + ( ((request()->query('page') ?? 1) - 1) * $notices->perPage() ) }}</td>
                                         <td>
