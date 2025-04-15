@@ -420,21 +420,22 @@
             </label>
             <label>
                 <input type="checkbox" 
+                    @if ($certi_lab->purpose_type == 3)
+                        checked
+                    @endif
+                    disabled
+                >
+                
+                การขยาย/ปรับขอบข่ายใบรับรอง
+            </label>
+            <label>
+                <input type="checkbox" 
                     @if ($certi_lab->purpose_type == 2)
                         checked
                     @endif
                     disabled
                 >
                 ต่ออายุใบรับรอง
-            </label>
-            <label>
-                <input type="checkbox" 
-                    @if ($certi_lab->purpose_type == 3)
-                        checked
-                    @endif
-                    disabled
-                >
-                การขยาย/ปรับขอบข่ายใบรับรอง
                 
             </label>
         
