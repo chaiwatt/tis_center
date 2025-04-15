@@ -19,7 +19,7 @@
         
         <div class="report_objective">
             <div style="text-align: left; margin-left:100px">
-                สำหรับ <input type="checkbox" {{ $certi_lab->purpose_type == 1 ? 'checked="checked"' : '' }}> การขอรับใบรับรองใหม่  <input type="checkbox" {{ $certi_lab->purpose_type == 2 ? 'checked="checked"' : '' }}> การขยาย/ปรับขอบข่ายใบรับรอง <input type="checkbox" {{ $certi_lab->purpose_type == 3 ? 'checked="checked"' : '' }}> ต่ออายุใบรับรอง
+                สำหรับ <input type="checkbox" {{ $certi_lab->purpose_type == 1 ? 'checked="checked"' : '' }}> การขอรับใบรับรองใหม่  <input type="checkbox" {{ $certi_lab->purpose_type == 3 ? 'checked="checked"' : '' }}> การขยาย/ปรับขอบข่ายใบรับรอง <input type="checkbox" {{ $certi_lab->purpose_type == 2 ? 'checked="checked"' : '' }}> ต่ออายุใบรับรอง
             </div>
             <div style="text-align: left; margin-left:148px;margin-top:6px">
                 <input type="checkbox"  {{ !in_array($certi_lab->purpose_type, [1, 2, 3]) ? 'checked="checked"' : '' }}> ....................................................................................................................
@@ -88,7 +88,9 @@
         </div>
 
         <div style="margin-left: 15px">
-            <div><span>2.3 วันที่ตรวจประเมิน : {{HP::formatDateThaiFullPoint($notice->assessment_date)}}</span> </div>
+            {{-- <div><span>2.3 วันที่ตรวจประเมิน : {{HP::formatDateThaiFullPoint($notice->assessment_date)}}</span> </div> --}}
+            <div><span>2.3 วันที่ตรวจประเมิน : {{HP::formatDateThaiFullPoint($boardAuditor->board_auditors_date->start_date)}}</span> </div>
+            
         </div>
 
         {{-- <div style="margin-left: 15px"> --}}
@@ -1470,12 +1472,7 @@
                 @else   
                 .....
                 @endif
-                 พบข้อบกพร่อง จำนวน
-                
-                @if ($labReportInfo->inp_3_0_deficiencies_details != "")
-                {{$labReportInfo->inp_3_0_deficiencies_details}} 
-                @else   
-                .....
+                 
                 @endif
                 รายการ ดังสำเนา รายงานข้อบกพร่องที่แนบ
                 ห้องปฏิบัติการต้องส่งแนวทางและแผนการดำเนินการปฏิบัติการ แก้ไขข้อบกพร่อง ให้สำนักงานพิจารณาภายใน 30 วันนับแต่วันที่ออกรายงานข้อบกพร่องและต้องส่ง หลักฐานการแก้ไขข้อบกพร่องอย่างมีประสิทธิผลและเป็นที่ยอมรับของคณะผู้ตรวจประเมิน ภายในวันที่ 
