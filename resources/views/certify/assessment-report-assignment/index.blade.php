@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ระบบลงนามรายงานการตรวจประเมิน</h3>
+                    <h3 class="box-title pull-left">ระบบลงนามรายงานการตรวจประเมิน check</h3>
 
                     <div class="pull-right">
 
@@ -331,27 +331,62 @@
  
  
         // jQuery คลิกที่ปุ่มและทำการดึงข้อมูลผ่าน AJAX
+        // $(document).on('click', '.btn-warning', function() {
+        //     var signer_id = $(this).data('id'); // ดึง data-id จากปุ่ม
+            
+        //     $.ajax({
+        //         url: "{{ route('assessment_report_assignment.get_signer') }}", // URL ของ route
+        //         type: 'GET',
+        //         data: { signer_id: signer_id },
+        //         success: function(response) {
+        //             console.log(response)
+        //             $('#signerInfo').html(response.data); // สมมติว่า response มีข้อมูลใน response.data
+        //             $('#signerModal').modal('show'); // แสดงโมดัล
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.log(error); // แสดง error ใน console (ถ้ามี)
+        //             $('#signerInfo').html("เกิดข้อผิดพลาดในการดึงข้อมูล");
+        //             $('#signerModal').modal('show');
+        //         }
+        //     });
+        // });
+
+        if ($('#loadingOverlay').length === 0) {
+            $('body').append(`
+                <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                    <div style="color: white; font-size: 24px; font-family: Arial, sans-serif; text-align: center;">Loading ...</div>
+                </div>
+            `);
+            // ยืนยันว่า overlay ซ่อนตั้งแต่เริ่มต้น
+            $('#loadingOverlay').hide();
+        }
         $(document).on('click', '.btn-warning', function() {
             var signer_id = $(this).data('id'); // ดึง data-id จากปุ่ม
-            $('#signerModal').modal('show');
-            
+            // แสดง overlay
+            $('#loadingOverlay').show();
+
             $.ajax({
                 url: "{{ route('assessment_report_assignment.get_signer') }}", // URL ของ route
                 type: 'GET',
                 data: { signer_id: signer_id },
                 success: function(response) {
-                    // console.log(response.data);
-                    // แสดงข้อมูลในโมดัล
-                    $('#signerInfo').html(response.data); // สมมติว่า response มีข้อมูลใน response.data
-                    $('#signerModal').modal('show'); // แสดงโมดัล
+                    console.log(response);
+                    $('#signerInfo').html(response.data); // แสดงผลใน #signerInfo
+                    $('#signerModal').modal('show'); // แสดง modal
                 },
                 error: function(xhr, status, error) {
-                    console.log(error); // แสดง error ใน console (ถ้ามี)
+                    console.log(error);
                     $('#signerInfo').html("เกิดข้อผิดพลาดในการดึงข้อมูล");
                     $('#signerModal').modal('show');
+                },
+                complete: function() {
+                    // ซ่อน overlay เมื่อ AJAX เสร็จสิ้น
+                    $('#loadingOverlay').hide();
                 }
             });
         });
+            
+        
 
 
         $(document).on('click', '#signDocument', function() {

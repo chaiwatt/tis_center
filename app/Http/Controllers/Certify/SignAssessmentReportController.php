@@ -78,7 +78,7 @@ class SignAssessmentReportController extends Controller
             $filter_certificate_type = $request->input('filter_certificate_type');
         
             $query = SignAssessmentReportTransaction::query();
-            $query->where('signer_id',$signer->id);
+            // $query->where('signer_id',$signer->id);
         
             // if ($filter_approval) {
             //     $query->where('approval', $filter_approval);
@@ -94,7 +94,7 @@ class SignAssessmentReportController extends Controller
             
             $query->where(function ($q) use ($signer) {
                 $q->where('certificate_type', 0)
-                //   ->where('signer_id', $signer->id)
+                  ->where('signer_id', $signer->id)
                   ->where('approval', 0)
                   ->where(function ($subQ) {
                       $subQ->whereHas('cbReportInfo', function ($query) {
@@ -107,7 +107,7 @@ class SignAssessmentReportController extends Controller
             })
             ->orWhere(function ($q) use ($signer) {
                 $q->where('certificate_type', 1)
-                //   ->where('signer_id', $signer->id)
+                  ->where('signer_id', $signer->id)
                   ->where('approval', 0)
                   ->where(function ($subQ) {
                       $subQ->whereHas('ibReportInfo', function ($query) {
@@ -120,7 +120,7 @@ class SignAssessmentReportController extends Controller
             })
             ->orWhere(function ($q) use ($signer) {
                 $q->where('certificate_type', 2)
-                //   ->where('signer_id', $signer->id)
+                  ->where('signer_id', $signer->id)
                   ->where('approval', 0)
                   ->where(function ($subQ) {
                       $subQ->whereHas('labReportInfo', function ($query) {

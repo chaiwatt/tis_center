@@ -596,7 +596,8 @@ class SaveAssessmentController extends Controller
                 if($signAssessmentReportTransactions->count() == 0){
                     return redirect()->back();
                 }else{
-                    return redirect('/certify/save_assessment/' . $n->id . '/assess_edit/' . $app->id)->with('flash_message', 'สร้างเรียบร้อยแล้ว');
+                    // return redirect('/certify/save_assessment/' . $n->id . '/assess_edit/' . $app->id)->with('flash_message', 'สร้างเรียบร้อยแล้ว');
+                    return redirect('/certify/check_certificate/' . $app->check->id . '/show')->with('flash_message', 'สร้างเรียบร้อยแล้ว');
                 }
 
             }else if($n->report_status == 2){
@@ -1316,13 +1317,15 @@ class SaveAssessmentController extends Controller
 
     public function apiGetApp($id) {
        
-
+       
         $board_auditor = BoardAuditor::where('id', $id)->groupBy('no')->orderby('id','desc')->first();
 
         if(!is_null($board_auditor)){
+            // dd($board_auditor->applicant->check->id);
             return response()->json([
                                 'group_id' => $board_auditor->assessment_to->id ?? '',
                                 'app'   => $board_auditor->applicant,
+                                'check'   => $board_auditor->applicant->check,
                                 'created_at' => !empty($board_auditor->created_at) ?  HP::revertDate($board_auditor->created_at->format('Y-m-d'),true) : null  ?? '',
                                 'message' =>true
                           ], 200); 

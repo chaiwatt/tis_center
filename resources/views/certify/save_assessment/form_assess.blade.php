@@ -214,6 +214,10 @@
                                                                 title="จัดทำรายงาน2" class="btn btn-warning">
                                                                 รายงานที่2
                                                             </a>
+                                                            {{-- <a href="{{ url('save-assessment/view-lab-report2-info/' . $find_notice->id) }}"
+                                                                title="จัดทำรายงาน2" class="btn btn-warning">
+                                                                รายงานที่2
+                                                             </a> --}}
                                                         @else
                                                             <a href="{{route('save_assessment.view_lab_report2_info',['id' => $find_notice->id])}}"
                                                                 title="จัดทำรายงาน2" class="btn btn-info">

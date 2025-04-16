@@ -196,6 +196,11 @@
                 </div>
             </div>
             <div class="col-md-6">
+                {{-- @if ($notice !== null)
+                
+                @endif --}}
+{{-- {{$notice}} --}}
+                <input type="hidden" id="app_id" value="">
                 <label class="col-md-4 text-right">ชื่อห้องปฏิบัติการ : </label>
                 <div class="col-md-8">
                     {!! Form::text('lab_name',   $notice->applicant->lab_name ??  null,  ['class' => 'form-control', 'id'=>'appLabName','disabled'=>true])!!}
@@ -641,7 +646,8 @@
                                                         if (!notice_id) {
                                                             window.location.href = window.location.origin + '/certify/save_assessment/create/' + id;
                                                         }else{
-                                                            window.location.href = window.location.origin + '/certify/save_assessment/view-lab-info/' + notice_id;
+                                                            // $notice->applicant->
+                                                            window.location.href = window.location.origin + '/certify/check_certificate/'+$('#app_id').val()+'/show';
                                                         }
                                                     }else{
                                                         alert('อยู่ระหว่างการลงนามรายงานการตรวจประเมิน(รายงานที่1)');
@@ -689,14 +695,17 @@
                         url:'{{ route('save_assessment.api.get.app') }}/' + id
                     }).done(function( object ) {
                         if (object.message === true) {
+                            console.log(object.app.check)
                             const app = object.app;
                             var appDepart = app ? app.name : '';
                             var appLabName = app ? app.lab_name : '';
+                            var appid = app.check.id ;
                             $('#appDepart').val(appDepart);
                             $('#appLabName').val(appLabName);
-
+                            $('#appLabName').val(appLabName);
                             $('#SaveDate').val(object.created_at);
                             $('#appGroupId').val(object.group_id);
+                            $('#app_id').val(appid);
 
                         }else{
                   
@@ -705,6 +714,7 @@
                              $('#auditor_id').val('').select2();
                              $('#SaveDate').val('');
                              $('#appGroupId').val('');
+                             $('#app_id').val('');
 
                         }
 
